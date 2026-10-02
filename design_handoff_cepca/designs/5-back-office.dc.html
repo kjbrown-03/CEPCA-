@@ -1,0 +1,705 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&family=Manrope:wght@400;500;600;700&display=swap" rel="stylesheet">
+<script src="https://unpkg.com/@phosphor-icons/web@2.1.1"></script>
+<style>body{margin:0;background:#f4efe6;font-family:Manrope,system-ui,sans-serif;color:#1c2a21}a{color:#1f5a36;text-decoration:none}a:hover{color:#164429}button{font:inherit;color:inherit;background:none;border:0;padding:0;cursor:pointer;text-align:inherit}select,input{font:inherit;color:inherit}:focus-visible{outline:2px solid #e0a043;outline-offset:2px}</style>
+</helmet>
+<div data-screen-label="Back-office" style="min-height:100vh;display:grid;grid-template-columns:272px minmax(0,1fr);background:#f4efe6">
+
+<aside style="position:sticky;top:0;height:100vh;box-sizing:border-box;background:#133524;color:#dcebe1;display:flex;flex-direction:column;padding:22px 16px;gap:22px">
+<div style="display:flex;align-items:center;gap:12px;padding:0 8px"><span style="width:36px;height:36px;border-radius:10px;background:#1f5a36;color:#f4efe6;display:grid;place-items:center;font-size:17px"><i class="ph ph-cross"></i></span><div><div style="font:26px/1 'Instrument Serif',serif;color:#f4efe6">CEPCA</div><div style="font-size:11px;letter-spacing:.12em;text-transform:uppercase;color:#e0a043;margin-top:3px">Back-office</div></div></div>
+<div style="padding:14px;border-radius:14px;background:#1d4a33;display:flex;gap:12px;align-items:center"><span style="width:40px;height:40px;flex:none;border-radius:12px;background:#e0a043;color:#133524;display:grid;place-items:center;font-size:20px"><i class="{{ roleIcon }}"></i></span><div style="min-width:0"><div style="font-size:11px;font-weight:600;letter-spacing:.1em;text-transform:uppercase;color:#a9c4b2">Mon rôle</div><div style="font-size:14px;font-weight:700;color:#f4efe6;line-height:1.3">{{ roleLabel }}</div><div style="font-size:12px;color:#a9c4b2;margin-top:2px">{{ structName }}</div></div></div>
+<nav style="display:flex;flex-direction:column;gap:2px;flex:1;overflow:auto">
+<sc-for list="{{ nav }}" as="n" hint-placeholder-count="7"><button onClick="{{ n.onClick }}" style="height:42px;padding:0 12px;border-radius:10px;display:flex;align-items:center;gap:12px;font-size:14px;font-weight:{{ n.fw }};background:{{ n.bg }};color:{{ n.fg }}" style-hover="background:#1d4a33"><i class="{{ n.icon }}" style="font-size:19px"></i><span style="flex:1">{{ n.label }}</span><sc-if value="{{ n.hasBadge }}" hint-placeholder-val="{{ false }}"><span style="min-width:22px;height:22px;padding:0 6px;box-sizing:border-box;border-radius:11px;background:#e0a043;color:#1c2a21;font-size:11px;font-weight:700;display:grid;place-items:center">{{ n.badge }}</span></sc-if></button></sc-for>
+</nav>
+<div style="display:flex;align-items:center;gap:12px;padding:12px;border-radius:14px;background:#1d4a33"><span style="width:38px;height:38px;border-radius:50%;background:#f4efe6;color:#133524;display:grid;place-items:center;font-size:14px;font-weight:700">{{ initials }}</span><div style="min-width:0"><div style="font-size:14px;font-weight:600;color:#f4efe6;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">{{ userName }}</div><div style="font-size:12px;color:#a9c4b2">{{ levelLabel }}</div></div></div>
+</aside>
+
+<main style="min-width:0;display:flex;flex-direction:column">
+<div style="background:#e3eee5;padding:14px 36px;display:flex;flex-direction:column;gap:10px">
+<div style="display:flex;align-items:center;gap:10px;flex-wrap:wrap;font-size:13px"><span style="padding:3px 10px;border-radius:999px;background:#1f5a36;color:#f4efe6;font-weight:700;font-size:11px;letter-spacing:.08em;text-transform:uppercase">Démo</span><span style="color:#2a3a2f">Cliquez sur un rôle pour voir son tableau de bord. Dans la vraie application, chaque responsable se connecte avec son compte et ne voit que le sien.</span></div>
+<div style="display:flex;gap:8px;flex-wrap:wrap"><sc-for list="{{ roleChips }}" as="o" hint-placeholder-count="9"><button onClick="{{ o.onClick }}" style="height:38px;padding:0 14px;border-radius:999px;display:flex;align-items:center;gap:8px;font-size:13px;font-weight:600;background:{{ o.bg }};color:{{ o.fg }};box-shadow:inset 0 0 0 1px {{ o.bc }}"><i class="{{ o.icon }}" style="font-size:16px"></i>{{ o.label }}</button></sc-for></div>
+</div>
+<header style="height:72px;flex:none;display:flex;align-items:center;gap:20px;padding:0 36px;box-shadow:0 1px 0 #d9d2c2;background:#f4efe6;position:sticky;top:0;z-index:5">
+<div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap;font-size:13px;color:#55665a;flex:1;min-width:0"><sc-for list="{{ crumbs }}" as="c" hint-placeholder-count="3"><span style="display:flex;align-items:center;gap:8px"><i class="ph ph-caret-right" style="font-size:11px;opacity:{{ c.sepOp }}"></i><span style="font-weight:{{ c.fw }};color:{{ c.fg }}">{{ c.label }}</span></span></sc-for></div>
+<div style="position:relative;width:260px"><i class="ph ph-magnifying-glass" style="position:absolute;left:14px;top:13px;color:#55665a"></i><input placeholder="Rechercher dans mon périmètre" style="width:100%;box-sizing:border-box;height:42px;border-radius:999px;border:0;background:#fbf8f2;box-shadow:inset 0 0 0 1px #d9d2c2;padding:0 14px 0 40px;font-size:13px;outline:none"></div>
+<button aria-label="Notifications" style="width:42px;height:42px;border-radius:50%;display:grid;place-items:center;box-shadow:inset 0 0 0 1px #d9d2c2;font-size:18px;position:relative"><i class="ph ph-bell"></i><span style="position:absolute;top:9px;right:10px;width:8px;height:8px;border-radius:50%;background:#1f5a36"></span></button>
+</header>
+
+<div style="padding:36px;display:flex;flex-direction:column;gap:28px;max-width:1360px;box-sizing:border-box;width:100%">
+<div style="display:flex;align-items:flex-end;justify-content:space-between;gap:20px;flex-wrap:wrap">
+<div style="display:flex;flex-direction:column;gap:8px"><span style="font-size:12px;font-weight:700;letter-spacing:.14em;text-transform:uppercase;color:#9a6414">{{ roleLabel }} · {{ levelLabel }}</span><h1 style="margin:0;font:400 44px/1.05 'Instrument Serif',serif">{{ pageTitle }}</h1><span style="font-size:14px;color:#55665a">{{ scopeNote }}</span></div>
+<div style="display:flex;gap:10px;flex-wrap:wrap"><sc-if value="{{ isDash }}" hint-placeholder-val="{{ true }}"><button onClick="{{ onExport }}" style="height:44px;padding:0 18px;border-radius:999px;box-shadow:inset 0 0 0 1px #1c2a21;display:flex;align-items:center;gap:8px;font-size:14px;font-weight:600"><i class="ph ph-download-simple"></i>Exporter le rapport</button></sc-if><button onClick="{{ onPrimary }}" style="height:44px;padding:0 20px;border-radius:999px;background:#1f5a36;color:#f4efe6;display:flex;align-items:center;gap:8px;font-size:14px;font-weight:700" style-hover="background:#164429"><i class="{{ primaryIcon }}"></i>{{ primary }}</button></div>
+</div>
+
+<sc-if value="{{ isDash }}" hint-placeholder-val="{{ true }}"><div style="display:flex;flex-direction:column;gap:28px">
+<div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(165px,1fr));gap:14px">
+<sc-for list="{{ kpis }}" as="k" hint-placeholder-count="4"><div style="padding:20px 22px;border-radius:20px;background:#fbf8f2;box-shadow:inset 0 0 0 1px #e6dfd0;display:flex;flex-direction:column;gap:10px"><span style="font-size:13px;color:#55665a">{{ k.label }}</span><span style="font:400 38px/1 'Instrument Serif',serif">{{ k.value }}</span><span style="font-size:12px;font-weight:600;color:{{ k.noteColor }}">{{ k.note }}</span></div></sc-for>
+</div>
+
+<div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,420px),1fr));gap:20px">
+<section style="padding:24px 26px;border-radius:22px;background:#fbf8f2;box-shadow:inset 0 0 0 1px #e6dfd0;display:flex;flex-direction:column;gap:20px">
+<div style="display:flex;justify-content:space-between;align-items:baseline;gap:12px"><h2 style="margin:0;font:400 26px 'Instrument Serif',serif">{{ chartTitle }}</h2><span style="font-size:12px;color:#55665a">{{ chartUnit }}</span></div>
+<div style="height:200px;display:flex;align-items:flex-end;gap:10px;padding-top:10px">
+<sc-for list="{{ bars }}" as="b" hint-placeholder-count="6"><div style="flex:1;height:100%;display:flex;flex-direction:column;justify-content:flex-end;align-items:center;gap:8px"><span style="font-size:11px;font-weight:600;color:#55665a">{{ b.v }}</span><div style="width:100%;max-width:48px;height:{{ b.h }};border-radius:10px 10px 4px 4px;background:{{ b.c }}"></div><span style="font-size:12px;color:#55665a">{{ b.m }}</span></div></sc-for>
+</div>
+</section>
+<section style="padding:24px 26px;border-radius:22px;background:#fbf8f2;box-shadow:inset 0 0 0 1px #e6dfd0;display:flex;flex-direction:column;gap:14px">
+<div style="display:flex;justify-content:space-between;align-items:baseline"><h2 style="margin:0;font:400 26px 'Instrument Serif',serif">À valider</h2><span style="font-size:12px;font-weight:700;color:#1f5a36">{{ pendingCount }} en attente</span></div>
+<sc-for list="{{ queue }}" as="q" hint-placeholder-count="3"><div style="display:flex;align-items:center;gap:14px;padding:12px 0;box-shadow:0 1px 0 #e6dfd0">
+<span style="width:40px;height:40px;flex:none;border-radius:12px;background:#e3eee5;color:#1f5a36;display:grid;place-items:center;font-size:18px"><i class="{{ q.icon }}"></i></span>
+<div style="flex:1;min-width:0"><div style="font-size:14px;font-weight:600;line-height:1.3">{{ q.title }}</div><div style="font-size:12px;color:#55665a;margin-top:2px">{{ q.meta }}</div></div>
+<sc-if value="{{ q.open }}" hint-placeholder-val="{{ true }}"><div style="display:flex;gap:6px"><button onClick="{{ q.reject }}" aria-label="Refuser" style="width:36px;height:36px;border-radius:50%;box-shadow:inset 0 0 0 1px #d9d2c2;display:grid;place-items:center"><i class="ph ph-x"></i></button><button onClick="{{ q.approve }}" style="height:36px;padding:0 14px;border-radius:999px;background:#1f5a36;color:#f4efe6;font-size:13px;font-weight:700">Valider</button></div></sc-if>
+<sc-if value="{{ q.done }}" hint-placeholder-val="{{ false }}"><span style="font-size:12px;font-weight:700;color:{{ q.doneColor }};display:flex;align-items:center;gap:6px"><i class="{{ q.doneIcon }}"></i>{{ q.doneLabel }}</span></sc-if>
+</div></sc-for>
+<sc-if value="{{ queueEmpty }}" hint-placeholder-val="{{ false }}"><div style="font-size:14px;color:#55665a;padding:12px 0">Rien à valider pour le moment.</div></sc-if>
+</section>
+</div>
+
+<section style="padding:24px 26px;border-radius:22px;background:#fbf8f2;box-shadow:inset 0 0 0 1px #e6dfd0;display:flex;flex-direction:column;gap:14px;overflow:auto">
+<h2 style="margin:0;font:400 26px 'Instrument Serif',serif">{{ tableTitle }}</h2>
+<div style="min-width:640px">
+<div style="display:grid;grid-template-columns:2.2fr 1.2fr 1fr 1fr;gap:16px;padding:10px 0;font-size:12px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;color:#55665a;box-shadow:0 1px 0 #d9d2c2"><sc-for list="{{ cols }}" as="c" hint-placeholder-count="4"><span>{{ c }}</span></sc-for></div>
+<sc-for list="{{ rows }}" as="r" hint-placeholder-count="5"><div style="display:grid;grid-template-columns:2.2fr 1.2fr 1fr 1fr;gap:16px;padding:14px 0;align-items:center;font-size:14px;box-shadow:0 1px 0 #ece6d9"><span style="font-weight:600">{{ r.a }}</span><span style="color:#55665a">{{ r.b }}</span><span style="font-variant-numeric:tabular-nums">{{ r.c }}</span><span><span style="padding:4px 10px;border-radius:999px;font-size:12px;font-weight:700;background:{{ r.sBg }};color:{{ r.sFg }}">{{ r.d }}</span></span></div></sc-for>
+</div>
+</section>
+
+<div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,420px),1fr));gap:20px">
+<section style="padding:24px 26px;border-radius:22px;background:#fbf8f2;box-shadow:inset 0 0 0 1px #e6dfd0;display:flex;flex-direction:column;gap:14px">
+<h2 style="margin:0;font:400 26px 'Instrument Serif',serif">Mes droits</h2>
+<span style="font-size:13px;color:#55665a">C consulter · R créer/modifier · V valider · niveau {{ levelLabel }}</span>
+<sc-for list="{{ perms }}" as="p" hint-placeholder-count="6"><div style="display:flex;align-items:center;gap:12px;padding:8px 0;box-shadow:0 1px 0 #ece6d9"><span style="flex:1;font-size:14px">{{ p.f }}</span><span style="font-size:13px;font-weight:700;color:{{ p.fg }}">{{ p.v }}</span></div></sc-for>
+</section>
+<section style="padding:24px 26px;border-radius:22px;background:#fbf8f2;box-shadow:inset 0 0 0 1px #e6dfd0;display:flex;flex-direction:column;gap:14px">
+<h2 style="margin:0;font:400 26px 'Instrument Serif',serif">Journal d'audit</h2>
+<sc-for list="{{ audit }}" as="a" hint-placeholder-count="5"><div style="display:grid;grid-template-columns:86px minmax(0,1fr);gap:12px;padding:8px 0;box-shadow:0 1px 0 #ece6d9;font-size:13px"><span style="color:#55665a;font-variant-numeric:tabular-nums">{{ a.t }}</span><span><strong style="font-weight:600">{{ a.who }}</strong> {{ a.what }}</span></div></sc-for>
+</section>
+</div>
+</div></sc-if>
+
+<sc-if value="{{ isStruct }}" hint-placeholder-val="{{ false }}"><div style="display:flex;flex-wrap:wrap;gap:20px;align-items:flex-start">
+<section style="padding:24px 26px;border-radius:22px;background:#fbf8f2;box-shadow:inset 0 0 0 1px #e6dfd0;flex:1 1 440px;min-width:0;display:flex;flex-direction:column;gap:2px">
+<div style="display:flex;justify-content:space-between;align-items:baseline;margin-bottom:12px"><h2 style="margin:0;font:400 26px 'Instrument Serif',serif">Arborescence</h2><span style="font-size:12px;color:#55665a">{{ structCount }} structures dans mon périmètre</span></div>
+<sc-for list="{{ tree }}" as="t" hint-placeholder-count="8"><div style="display:flex;align-items:center;gap:4px;padding-left:{{ t.indent }};border-radius:12px;background:{{ t.bg }}">
+<button onClick="{{ t.toggle }}" aria-label="Déplier" style="width:30px;height:30px;flex:none;display:grid;place-items:center;border-radius:8px;opacity:{{ t.caretOp }}"><i class="{{ t.caret }}"></i></button>
+<button onClick="{{ t.select }}" style="flex:1;min-width:0;display:flex;align-items:center;gap:10px;padding:9px 12px 9px 2px"><i class="{{ t.icon }}" style="font-size:18px;color:#1f5a36"></i><span style="flex:1;min-width:0;font-size:14px;font-weight:{{ t.fw }};white-space:nowrap;overflow:hidden;text-overflow:ellipsis">{{ t.name }}</span><span style="font-size:11px;font-weight:600;color:#55665a">{{ t.type }}</span></button>
+</div></sc-for>
+</section>
+<section style="padding:24px 26px;border-radius:22px;background:#fbf8f2;box-shadow:inset 0 0 0 1px #e6dfd0;flex:1 1 360px;min-width:0;display:flex;flex-direction:column;gap:16px;position:sticky;top:92px">
+<span style="align-self:flex-start;padding:4px 10px;border-radius:999px;background:#e3eee5;color:#1f5a36;font-size:12px;font-weight:700;display:flex;align-items:center;gap:6px"><i class="{{ sd.icon }}"></i>{{ sd.type }}</span>
+<h2 style="margin:0;font:400 32px/1.1 'Instrument Serif',serif">{{ sd.name }}</h2>
+<div style="display:grid;grid-template-columns:1fr 1fr;gap:10px"><sc-for list="{{ sdFacts }}" as="f" hint-placeholder-count="4"><div style="padding:12px 14px;border-radius:14px;background:#f4efe6"><div style="font-size:12px;color:#55665a">{{ f.k }}</div><div style="font-size:15px;font-weight:700;margin-top:2px">{{ f.v }}</div></div></sc-for></div>
+<div style="display:flex;gap:8px;flex-wrap:wrap"><sc-if value="{{ sd.canAdd }}" hint-placeholder-val="{{ true }}"><button onClick="{{ openAdd }}" style="height:44px;padding:0 20px;border-radius:999px;background:#1f5a36;color:#f4efe6;display:flex;align-items:center;justify-content:center;gap:8px;font-size:14px;font-weight:700"><i class="ph-bold ph-plus"></i>Ajouter : {{ sd.next }}</button></sc-if><button onClick="{{ editSel }}" style="height:44px;padding:0 18px;border-radius:999px;box-shadow:inset 0 0 0 1px #1c2a21;display:flex;align-items:center;justify-content:center;gap:8px;font-size:14px;font-weight:600"><i class="ph ph-pencil-simple"></i>Modifier</button></div>
+<sc-if value="{{ sd.noNext }}" hint-placeholder-val="{{ false }}"><span style="font-size:13px;color:#55665a">Une chapelle est le dernier niveau : elle n'a pas de sous-structure.</span></sc-if>
+<sc-if value="{{ addOpen }}" hint-placeholder-val="{{ false }}"><div style="padding:16px;border-radius:16px;background:#e3eee5;display:flex;flex-direction:column;gap:10px">
+<label style="display:flex;flex-direction:column;gap:6px;font-size:13px;font-weight:700">Nom ({{ sd.next }})<input value="{{ addName }}" onChange="{{ onAddName }}" placeholder="{{ addPh }}" style="height:44px;border-radius:12px;border:0;background:#f4efe6;box-shadow:inset 0 0 0 1px #d9d2c2;padding:0 14px;font-size:14px;outline:none;background:#fbf8f2"></label>
+<div style="display:flex;gap:8px"><button onClick="{{ confirmAdd }}" style="height:44px;padding:0 20px;border-radius:999px;background:#1f5a36;color:#f4efe6;display:flex;align-items:center;justify-content:center;gap:8px;font-size:14px;font-weight:700;opacity:{{ addOp }}">Créer</button><button onClick="{{ cancelAdd }}" style="height:44px;padding:0 18px;border-radius:999px;box-shadow:inset 0 0 0 1px #1c2a21;display:flex;align-items:center;justify-content:center;gap:8px;font-size:14px;font-weight:600">Annuler</button></div>
+<span style="font-size:12px;color:#33443a;line-height:1.5">Elle sera créée avec le statut « Configuration ». Nommez ensuite son responsable dans Utilisateurs.</span>
+</div></sc-if>
+<div style="display:flex;flex-direction:column"><span style="font:22px 'Instrument Serif',serif;margin-bottom:6px">Sous-structures</span>
+<sc-for list="{{ sdKids }}" as="k" hint-placeholder-count="3"><button onClick="{{ k.select }}" style="display:flex;align-items:center;gap:12px;padding:11px 0;box-shadow:0 1px 0 #ece6d9"><div style="flex:1;min-width:0"><div style="font-size:14px;font-weight:600">{{ k.name }}</div><div style="font-size:12px;color:#55665a">{{ k.resp }}</div></div><span style="padding:4px 10px;border-radius:999px;font-size:11px;font-weight:700;background:{{ k.sBg }};color:{{ k.sFg }}">{{ k.st }}</span><i class="ph ph-caret-right" style="color:#55665a"></i></button></sc-for>
+<sc-if value="{{ sdNoKids }}" hint-placeholder-val="{{ false }}"><span style="font-size:13px;color:#55665a;padding:8px 0">Aucune sous-structure.</span></sc-if></div>
+</section></div></sc-if>
+
+<sc-if value="{{ isUsers }}" hint-placeholder-val="{{ false }}"><div style="display:flex;flex-wrap:wrap;gap:20px;align-items:flex-start">
+<section style="padding:24px 26px;border-radius:22px;background:#fbf8f2;box-shadow:inset 0 0 0 1px #e6dfd0;flex:1 1 560px;min-width:0;display:flex;flex-direction:column;gap:14px">
+<div style="display:flex;gap:10px;flex-wrap:wrap;align-items:center"><div style="position:relative;flex:1 1 220px"><i class="ph ph-magnifying-glass" style="position:absolute;left:14px;top:14px;color:#55665a"></i><input value="{{ uq }}" onChange="{{ onUq }}" placeholder="Nom, téléphone, structure" style="height:44px;border-radius:12px;border:0;background:#f4efe6;box-shadow:inset 0 0 0 1px #d9d2c2;padding:0 14px;font-size:14px;outline:none;width:100%;box-sizing:border-box;padding-left:40px"></div><div style="display:flex;gap:6px;flex-wrap:wrap"><sc-for list="{{ uChips }}" as="c" hint-placeholder-count="4"><button onClick="{{ c.onClick }}" style="height:36px;padding:0 14px;border-radius:999px;font-size:13px;font-weight:600;background:{{ c.bg }};color:{{ c.fg }};box-shadow:inset 0 0 0 1px {{ c.bc }}">{{ c.l }}</button></sc-for></div></div>
+<div style="overflow:auto"><div style="min-width:600px">
+<div style="display:grid;grid-template-columns:1.6fr 1.4fr 1.6fr 110px;gap:14px;padding:10px 12px;font-size:12px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;color:#55665a;box-shadow:0 1px 0 #d9d2c2"><span>Nom</span><span>Rôle</span><span>Structure</span><span>Statut</span></div>
+<sc-for list="{{ users }}" as="u" hint-placeholder-count="6"><button onClick="{{ u.onClick }}" style="width:100%;display:grid;grid-template-columns:1.6fr 1.4fr 1.6fr 110px;gap:14px;padding:12px;align-items:center;font-size:14px;box-shadow:0 1px 0 #ece6d9;border-radius:10px;background:{{ u.bg }}" style-hover="background:#f4efe6"><span style="display:flex;align-items:center;gap:10px;min-width:0"><span style="width:32px;height:32px;flex:none;border-radius:50%;background:#e3eee5;color:#1f5a36;display:grid;place-items:center;font-size:12px;font-weight:700">{{ u.ini }}</span><span style="font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">{{ u.name }}</span></span><span style="color:#33443a">{{ u.role }}</span><span style="color:#55665a">{{ u.struct }}</span><span><span style="padding:4px 10px;border-radius:999px;font-size:12px;font-weight:700;background:{{ u.sBg }};color:{{ u.sFg }}">{{ u.st }}</span></span></button></sc-for>
+<sc-if value="{{ noUsers }}" hint-placeholder-val="{{ false }}"><div style="padding:24px 12px;font-size:14px;color:#55665a">Aucune personne ne correspond.</div></sc-if>
+</div></div>
+<span style="font-size:12px;color:#55665a">{{ usersCount }} personne(s) dans votre périmètre</span>
+</section>
+<section style="padding:24px 26px;border-radius:22px;background:#fbf8f2;box-shadow:inset 0 0 0 1px #e6dfd0;flex:1 1 320px;min-width:0;display:flex;flex-direction:column;gap:16px;position:sticky;top:92px">
+<sc-if value="{{ noUser }}" hint-placeholder-val="{{ true }}"><div style="padding:30px 0;display:flex;flex-direction:column;align-items:center;gap:10px;text-align:center;color:#55665a"><i class="ph ph-user-circle" style="font-size:40px;color:#1f5a36"></i><span style="font-size:14px">Sélectionnez une personne pour voir sa fiche et gérer ses rôles.</span></div></sc-if>
+<sc-if value="{{ hasUser }}" hint-placeholder-val="{{ false }}"><div style="display:flex;flex-direction:column;gap:16px">
+<div style="display:flex;align-items:center;gap:14px"><span style="width:56px;height:56px;border-radius:50%;background:#1f5a36;color:#f4efe6;display:grid;place-items:center;font-size:18px;font-weight:700">{{ us.ini }}</span><div style="min-width:0"><div style="font:400 26px/1.1 'Instrument Serif',serif">{{ us.name }}</div><div style="font-size:13px;color:#55665a">{{ us.phone }}</div></div></div>
+<span style="align-self:flex-start;padding:4px 10px;border-radius:999px;font-size:12px;font-weight:700;background:{{ us.sBg }};color:{{ us.sFg }}">{{ us.st }}</span>
+<div style="display:flex;flex-direction:column"><span style="font-size:12px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:#55665a;margin-bottom:4px">Rôles</span><sc-for list="{{ uRoles }}" as="x" hint-placeholder-count="1"><div style="display:flex;gap:10px;align-items:center;padding:10px 0;box-shadow:0 1px 0 #ece6d9"><i class="ph ph-shield-check" style="font-size:18px;color:#1f5a36"></i><div><div style="font-size:14px;font-weight:600">{{ x.r }}</div><div style="font-size:12px;color:#55665a">{{ x.s }}</div></div></div></sc-for></div>
+<div style="display:flex;gap:8px;flex-wrap:wrap"><sc-if value="{{ us.pending }}" hint-placeholder-val="{{ false }}"><button onClick="{{ validateUser }}" style="height:44px;padding:0 20px;border-radius:999px;background:#1f5a36;color:#f4efe6;display:flex;align-items:center;justify-content:center;gap:8px;font-size:14px;font-weight:700"><i class="ph-bold ph-check"></i>Valider l'inscription</button></sc-if><button onClick="{{ toggleSusp }}" style="height:44px;padding:0 18px;border-radius:999px;box-shadow:inset 0 0 0 1px #1c2a21;display:flex;align-items:center;justify-content:center;gap:8px;font-size:14px;font-weight:600"><i class="{{ suspIcon }}"></i>{{ suspL }}</button></div>
+<div style="padding:16px;border-radius:16px;background:#e3eee5;display:flex;flex-direction:column;gap:10px">
+<span style="font-size:14px;font-weight:700">Attribuer un rôle</span>
+<select value="{{ aRole }}" onChange="{{ onARole }}" style="height:44px;border-radius:12px;border:0;background:#f4efe6;box-shadow:inset 0 0 0 1px #d9d2c2;padding:0 14px;font-size:14px;outline:none;background:#fbf8f2"><sc-for list="{{ roleNames }}" as="o" hint-placeholder-count="9"><option value="{{ o }}">{{ o }}</option></sc-for></select>
+<select value="{{ aStruct }}" onChange="{{ onAStruct }}" style="height:44px;border-radius:12px;border:0;background:#f4efe6;box-shadow:inset 0 0 0 1px #d9d2c2;padding:0 14px;font-size:14px;outline:none;background:#fbf8f2"><sc-for list="{{ structOpts }}" as="o" hint-placeholder-count="6"><option value="{{ o.id }}">{{ o.l }}</option></sc-for></select>
+<button onClick="{{ assignNow }}" style="height:44px;padding:0 20px;border-radius:999px;background:#1f5a36;color:#f4efe6;display:flex;align-items:center;justify-content:center;gap:8px;font-size:14px;font-weight:700">Attribuer</button>
+<span style="font-size:12px;color:#33443a">Les droits suivent le rôle, limités à la structure choisie et à ses sous-structures.</span>
+</div>
+</div></sc-if>
+</section></div></sc-if>
+
+<sc-if value="{{ isRoles }}" hint-placeholder-val="{{ false }}"><section style="padding:24px 26px;border-radius:22px;background:#fbf8f2;box-shadow:inset 0 0 0 1px #e6dfd0;display:flex;flex-direction:column;gap:18px">
+<div style="display:flex;gap:6px;flex-wrap:wrap"><sc-for list="{{ mxRoles }}" as="c" hint-placeholder-count="9"><button onClick="{{ c.onClick }}" style="height:36px;padding:0 14px;border-radius:999px;font-size:13px;font-weight:600;background:{{ c.bg }};color:{{ c.fg }};box-shadow:inset 0 0 0 1px {{ c.bc }}">{{ c.l }}</button></sc-for></div>
+<div style="overflow:auto"><div style="min-width:620px">
+<div style="display:grid;grid-template-columns:2.2fr 1fr 1fr 1fr;gap:12px;padding:10px 0;font-size:12px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;color:#55665a;box-shadow:0 1px 0 #d9d2c2"><span>Module</span><span style="text-align:center">Consulter</span><span style="text-align:center">Créer / modifier</span><span style="text-align:center">Valider</span></div>
+<sc-for list="{{ mxRows }}" as="m" hint-placeholder-count="10"><div style="display:grid;grid-template-columns:2.2fr 1fr 1fr 1fr;gap:12px;padding:10px 0;align-items:center;box-shadow:0 1px 0 #ece6d9"><span style="font-size:14px;font-weight:600">{{ m.m }}</span><sc-for list="{{ m.cells }}" as="c" hint-placeholder-count="3"><span style="display:flex;justify-content:center"><button onClick="{{ c.onClick }}" aria-label="{{ c.aria }}" style="width:30px;height:30px;border-radius:9px;display:grid;place-items:center;font-size:15px;background:{{ c.bg }};color:#f4efe6;box-shadow:inset 0 0 0 1.5px {{ c.bc }}"><i class="{{ c.icon }}"></i></button></span></sc-for></div></sc-for>
+</div></div>
+<div style="display:flex;justify-content:space-between;align-items:center;gap:14px;flex-wrap:wrap"><span style="font-size:13px;color:#55665a;display:flex;gap:8px;align-items:center"><i class="ph ph-tree-structure" style="color:#1f5a36;font-size:18px"></i>Périmètre : {{ mxScope }}</span><span style="font-size:13px;font-weight:700;color:{{ mxStateFg }}">{{ mxState }}</span></div>
+</section></sc-if>
+
+<sc-if value="{{ isReports }}" hint-placeholder-val="{{ false }}"><div style="display:flex;flex-wrap:wrap;gap:20px;align-items:flex-start">
+<section style="padding:24px 26px;border-radius:22px;background:#fbf8f2;box-shadow:inset 0 0 0 1px #e6dfd0;flex:1 1 320px;min-width:0;display:flex;flex-direction:column;gap:18px">
+<h2 style="margin:0;font:400 26px 'Instrument Serif',serif">Paramètres</h2>
+<div style="display:flex;flex-direction:column;gap:6px"><span style="font-size:13px;font-weight:700">Type de rapport</span><sc-for list="{{ repTypes }}" as="t" hint-placeholder-count="4"><button onClick="{{ t.onClick }}" style="height:48px;padding:0 14px;border-radius:14px;background:#f4efe6;box-shadow:inset 0 0 0 {{ t.bw }} #1f5a36;display:flex;align-items:center;gap:12px;font-size:14px;font-weight:600"><i class="{{ t.icon }}" style="font-size:18px;color:#1f5a36"></i><span style="flex:1">{{ t.l }}</span><i class="{{ t.radio }}" style="font-size:20px;color:#1f5a36"></i></button></sc-for></div>
+<div style="display:flex;flex-direction:column;gap:6px"><span style="font-size:13px;font-weight:700">Période</span><div style="display:flex;gap:6px;flex-wrap:wrap"><sc-for list="{{ repPeriods }}" as="c" hint-placeholder-count="3"><button onClick="{{ c.onClick }}" style="height:36px;padding:0 14px;border-radius:999px;font-size:13px;font-weight:600;background:{{ c.bg }};color:{{ c.fg }};box-shadow:inset 0 0 0 1px {{ c.bc }}">{{ c.l }}</button></sc-for></div></div>
+<label style="display:flex;flex-direction:column;gap:6px;font-size:13px;font-weight:700">Périmètre<select value="{{ rScope }}" onChange="{{ onRScope }}" style="height:44px;border-radius:12px;border:0;background:#f4efe6;box-shadow:inset 0 0 0 1px #d9d2c2;padding:0 14px;font-size:14px;outline:none"><sc-for list="{{ repScopes }}" as="o" hint-placeholder-count="4"><option value="{{ o.id }}">{{ o.l }}</option></sc-for></select></label>
+<div style="display:flex;flex-direction:column;gap:6px"><span style="font-size:13px;font-weight:700">Format</span><div style="display:flex;gap:6px"><sc-for list="{{ repFmts }}" as="c" hint-placeholder-count="3"><button onClick="{{ c.onClick }}" style="height:36px;padding:0 14px;border-radius:999px;font-size:13px;font-weight:600;background:{{ c.bg }};color:{{ c.fg }};box-shadow:inset 0 0 0 1px {{ c.bc }}">{{ c.l }}</button></sc-for></div></div>
+<button onClick="{{ generate }}" style="height:44px;padding:0 20px;border-radius:999px;background:#1f5a36;color:#f4efe6;display:flex;align-items:center;justify-content:center;gap:8px;font-size:14px;font-weight:700"><i class="ph-bold ph-file-arrow-down"></i>Générer le rapport</button>
+</section>
+<section style="padding:24px 26px;border-radius:22px;background:#fbf8f2;box-shadow:inset 0 0 0 1px #e6dfd0;flex:2 1 480px;min-width:0;display:flex;flex-direction:column;gap:12px">
+<span style="font-size:12px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:#55665a">Aperçu</span>
+<div style="padding:28px 30px;border-radius:14px;background:#fffdf8;box-shadow:0 0 0 1px #e6dfd0,0 10px 30px rgba(16,42,28,.08);display:flex;flex-direction:column;gap:20px">
+<div style="display:flex;justify-content:space-between;align-items:flex-start;gap:12px"><div><div style="font-size:12px;font-weight:700;letter-spacing:.12em;text-transform:uppercase;color:#1f5a36">Rapport · {{ rep.l }}</div><div style="font:400 30px/1.1 'Instrument Serif',serif;margin-top:6px">{{ repScopeName }}</div><div style="font-size:13px;color:#55665a;margin-top:4px">{{ repPeriodL }}</div></div><span style="display:flex;align-items:center;gap:8px;font:22px 'Instrument Serif',serif"><span style="width:28px;height:28px;border-radius:8px;background:#1f5a36;color:#f4efe6;display:grid;place-items:center;font-size:14px"><i class="ph ph-cross"></i></span>CEPCA</span></div>
+<div style="display:grid;grid-template-columns:repeat(3,1fr);gap:10px"><sc-for list="{{ rep.kp }}" as="k" hint-placeholder-count="3"><div style="padding:12px 14px;border-radius:12px;background:#f4efe6"><div style="font-size:12px;color:#55665a">{{ k.l }}</div><div style="font:400 24px/1.1 'Instrument Serif',serif;margin-top:4px">{{ k.v }}</div></div></sc-for></div>
+<div><div style="display:grid;grid-template-columns:1.8fr 1fr 1fr 1fr;gap:10px;padding:8px 0;font-size:11px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;color:#55665a;box-shadow:0 1px 0 #d9d2c2"><sc-for list="{{ rep.cols }}" as="c" hint-placeholder-count="4"><span>{{ c }}</span></sc-for></div>
+<sc-for list="{{ rep.rw }}" as="x" hint-placeholder-count="4"><div style="display:grid;grid-template-columns:1.8fr 1fr 1fr 1fr;gap:10px;padding:10px 0;font-size:13px;box-shadow:0 1px 0 #ece6d9;font-variant-numeric:tabular-nums"><span style="font-weight:600">{{ x.a }}</span><span>{{ x.b }}</span><span>{{ x.c }}</span><span>{{ x.d }}</span></div></sc-for></div>
+<div style="font-size:11px;color:#55665a">Généré le 2 oct. 2026 par {{ userName }} · données arrêtées à la clôture de la période · format {{ rFmt }}</div>
+</div>
+</section>
+<section style="padding:24px 26px;border-radius:22px;background:#fbf8f2;box-shadow:inset 0 0 0 1px #e6dfd0;flex:1 1 100%;display:flex;flex-direction:column;gap:4px">
+<h2 style="margin:0;font:400 26px 'Instrument Serif',serif;margin-bottom:6px">Rapports récents</h2>
+<sc-for list="{{ recent }}" as="x" hint-placeholder-count="2"><div style="display:flex;align-items:center;gap:14px;padding:12px 0;box-shadow:0 1px 0 #ece6d9"><span style="width:40px;height:40px;flex:none;border-radius:12px;background:#e3eee5;color:#1f5a36;display:grid;place-items:center;font-size:18px"><i class="ph ph-file-text"></i></span><div style="flex:1;min-width:0"><div style="font-size:14px;font-weight:600">{{ x.t }}</div><div style="font-size:12px;color:#55665a">{{ x.m }}</div></div><span style="padding:4px 10px;border-radius:999px;background:#ece6d9;font-size:12px;font-weight:700">{{ x.f }}</span><button onClick="{{ x.onClick }}" aria-label="Télécharger" style="width:38px;height:38px;border-radius:50%;box-shadow:inset 0 0 0 1px #d9d2c2;display:grid;place-items:center"><i class="ph ph-download-simple"></i></button></div></sc-for>
+</section></div></sc-if>
+
+<sc-if value="{{ isAudit }}" hint-placeholder-val="{{ false }}"><section style="padding:24px 26px;border-radius:22px;background:#fbf8f2;box-shadow:inset 0 0 0 1px #e6dfd0;display:flex;flex-direction:column;gap:14px">
+<div style="display:flex;gap:10px;flex-wrap:wrap;align-items:center"><div style="position:relative;flex:1 1 220px"><i class="ph ph-magnifying-glass" style="position:absolute;left:14px;top:14px;color:#55665a"></i><input value="{{ aq }}" onChange="{{ onAq }}" placeholder="Utilisateur, action, structure" style="height:44px;border-radius:12px;border:0;background:#f4efe6;box-shadow:inset 0 0 0 1px #d9d2c2;padding:0 14px;font-size:14px;outline:none;width:100%;box-sizing:border-box;padding-left:40px"></div><div style="display:flex;gap:6px;flex-wrap:wrap"><sc-for list="{{ aChips }}" as="c" hint-placeholder-count="7"><button onClick="{{ c.onClick }}" style="height:36px;padding:0 14px;border-radius:999px;font-size:13px;font-weight:600;background:{{ c.bg }};color:{{ c.fg }};box-shadow:inset 0 0 0 1px {{ c.bc }}">{{ c.l }}</button></sc-for></div></div>
+<div style="overflow:auto"><div style="min-width:900px">
+<div style="display:grid;grid-template-columns:120px 1.3fr 110px 2.4fr 1.4fr 110px;gap:14px;padding:10px 0;font-size:12px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;color:#55665a;box-shadow:0 1px 0 #d9d2c2"><span>Date</span><span>Utilisateur</span><span>Action</span><span>Détail</span><span>Structure</span><span>Adresse IP</span></div>
+<sc-for list="{{ auditRows }}" as="a" hint-placeholder-count="8"><div style="display:grid;grid-template-columns:120px 1.3fr 110px 2.4fr 1.4fr 110px;gap:14px;padding:12px 0;align-items:center;font-size:13px;box-shadow:0 1px 0 #ece6d9"><span style="color:#55665a;font-variant-numeric:tabular-nums">{{ a.t }}</span><span style="font-weight:600">{{ a.u }}</span><span><span style="padding:3px 9px;border-radius:999px;font-size:11px;font-weight:700;background:{{ a.bg }};color:{{ a.fg }}">{{ a.k }}</span></span><span style="line-height:1.4">{{ a.d }}</span><span style="color:#55665a">{{ a.s }}</span><span style="color:#55665a;font-variant-numeric:tabular-nums">{{ a.ip }}</span></div></sc-for>
+<sc-if value="{{ noAudit }}" hint-placeholder-val="{{ false }}"><div style="padding:24px 0;font-size:14px;color:#55665a">Aucune entrée ne correspond.</div></sc-if>
+</div></div>
+<span style="font-size:12px;color:#55665a">{{ auditCount }} entrée(s) · conservation 5 ans · lecture seule, aucune entrée ne peut être modifiée ni supprimée</span>
+</section></sc-if>
+
+<sc-if value="{{ isNews }}" hint-placeholder-val="{{ false }}"><div style="display:flex;flex-wrap:wrap;gap:20px;align-items:flex-start">
+<section style="padding:24px 26px;border-radius:22px;background:#fbf8f2;box-shadow:inset 0 0 0 1px #e6dfd0;flex:1 1 540px;min-width:0;display:flex;flex-direction:column;gap:14px">
+<div style="display:flex;gap:6px;flex-wrap:wrap"><sc-for list="{{ pubChips }}" as="c" hint-placeholder-count="4"><button onClick="{{ c.onClick }}" style="height:36px;padding:0 14px;border-radius:999px;font-size:13px;font-weight:600;background:{{ c.bg }};color:{{ c.fg }};box-shadow:inset 0 0 0 1px {{ c.bc }}">{{ c.l }}</button></sc-for></div>
+<div style="overflow:auto"><div style="min-width:620px">
+<div style="display:grid;grid-template-columns:2.4fr 1.2fr .8fr .8fr 110px;gap:14px;padding:10px 12px;font-size:12px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;color:#55665a;box-shadow:0 1px 0 #d9d2c2"><span>Titre</span><span>Audience</span><span>Date</span><span>Lectures</span><span>Statut</span></div>
+<sc-for list="{{ pubRows }}" as="x" hint-placeholder-count="5"><button onClick="{{ x.onClick }}" style="width:100%;display:grid;grid-template-columns:2.4fr 1.2fr .8fr .8fr 110px;gap:14px;padding:13px 12px;align-items:center;font-size:14px;box-shadow:0 1px 0 #ece6d9;border-radius:10px;background:{{ x.bg }}" style-hover="background:#f4efe6"><span style="min-width:0"><span style="display:block;font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">{{ x.tt }}</span><span style="display:block;font-size:12px;color:#55665a">{{ x.k }}</span></span><span style="color:#33443a">{{ x.aud }}</span><span style="color:#55665a">{{ x.d }}</span><span style="font-variant-numeric:tabular-nums">{{ x.readsL }}</span><span><span style="padding:4px 10px;border-radius:999px;font-size:12px;font-weight:700;background:{{ x.sBg }};color:{{ x.sFg }}">{{ x.st }}</span></span></button></sc-for>
+<sc-if value="{{ noPubs }}" hint-placeholder-val="{{ false }}"><div style="padding:24px 12px;font-size:14px;color:#55665a">Aucune publication dans cette catégorie.</div></sc-if>
+</div></div>
+</section>
+<section style="padding:24px 26px;border-radius:22px;background:#fbf8f2;box-shadow:inset 0 0 0 1px #e6dfd0;flex:1 1 380px;min-width:0;display:flex;flex-direction:column;gap:14px;position:sticky;top:92px">
+<sc-if value="{{ noPub }}" hint-placeholder-val="{{ true }}"><div style="padding:30px 0;display:flex;flex-direction:column;align-items:center;gap:10px;text-align:center;color:#55665a"><i class="ph ph-newspaper" style="font-size:40px;color:#1f5a36"></i><span style="font-size:14px">Sélectionnez une publication ou créez-en une nouvelle.</span></div></sc-if>
+<sc-if value="{{ hasPub }}" hint-placeholder-val="{{ false }}"><div style="display:flex;flex-direction:column;gap:14px">
+<div style="display:flex;justify-content:space-between;align-items:center"><h2 style="margin:0;font:400 26px 'Instrument Serif',serif">{{ pubHead }}</h2><span style="padding:4px 10px;border-radius:999px;font-size:12px;font-weight:700;background:{{ pb.sBg }};color:{{ pb.sFg }}">{{ pb.st }}</span></div>
+<label style="display:flex;flex-direction:column;gap:6px;font-size:13px;font-weight:700">Titre<input value="{{ pb.t }}" onChange="{{ onPubT }}" placeholder="Ex. Culte d'union du 18 octobre" style="height:44px;border-radius:12px;border:0;background:#f4efe6;box-shadow:inset 0 0 0 1px #d9d2c2;padding:0 14px;font-size:14px;outline:none"></label>
+<div style="display:flex;flex-direction:column;gap:6px;font-size:13px;font-weight:700">Type<div style="display:flex;gap:6px;flex-wrap:wrap"><sc-for list="{{ pubKinds }}" as="c" hint-placeholder-count="3"><button onClick="{{ c.onClick }}" style="height:36px;padding:0 14px;border-radius:999px;font-size:13px;font-weight:600;background:{{ c.bg }};color:{{ c.fg }};box-shadow:inset 0 0 0 1px {{ c.bc }}">{{ c.l }}</button></sc-for></div></div>
+<div style="display:flex;flex-direction:column;gap:6px;font-size:13px;font-weight:700">Audience<div style="display:flex;gap:6px;flex-wrap:wrap"><sc-for list="{{ pubAuds }}" as="c" hint-placeholder-count="5"><button onClick="{{ c.onClick }}" style="height:36px;padding:0 14px;border-radius:999px;font-size:13px;font-weight:600;background:{{ c.bg }};color:{{ c.fg }};box-shadow:inset 0 0 0 1px {{ c.bc }}">{{ c.l }}</button></sc-for></div></div>
+<label style="display:flex;flex-direction:column;gap:6px;font-size:13px;font-weight:700">Texte<textarea value="{{ pb.body }}" onChange="{{ onPubB }}" rows="6" placeholder="Rédigez votre annonce…" style="border-radius:12px;border:0;background:#f4efe6;box-shadow:inset 0 0 0 1px #d9d2c2;padding:12px 14px;font:500 14px/1.55 Manrope,sans-serif;resize:vertical;outline:none"></textarea></label>
+<div style="display:flex;align-items:center;gap:12px;padding:10px 14px;border-radius:14px;background:#f4efe6"><div style="flex:1"><div style="font-size:14px;font-weight:600">Notifier les fidèles</div><div style="font-size:12px;color:#55665a">Notification push à la publication · {{ audCount }} destinataires</div></div><button onClick="{{ togglePubNotif }}" aria-label="Notifier les fidèles" style="width:48px;height:28px;flex:none;border-radius:14px;background:{{ pbNotifBg }};position:relative"><span style="position:absolute;top:3px;left:{{ pbNotifX }};width:22px;height:22px;border-radius:50%;background:#fbf8f2;transition:left .2s"></span></button></div>
+<div style="display:flex;gap:8px;flex-wrap:wrap"><button onClick="{{ pubAct }}" style="height:44px;padding:0 20px;border-radius:999px;background:#1f5a36;color:#f4efe6;display:flex;align-items:center;justify-content:center;gap:8px;font-size:14px;font-weight:700;opacity:{{ pubActOp }}"><i class="{{ pubActIcon }}"></i>{{ pubActL }}</button><button onClick="{{ pubDraft }}" style="height:44px;padding:0 18px;border-radius:999px;box-shadow:inset 0 0 0 1px #1c2a21;display:flex;align-items:center;justify-content:center;gap:8px;font-size:14px;font-weight:600">Enregistrer le brouillon</button><sc-if value="{{ pubCanReject }}" hint-placeholder-val="{{ false }}"><button onClick="{{ pubReject }}" style="height:44px;padding:0 18px;border-radius:999px;box-shadow:inset 0 0 0 1px #1c2a21;display:flex;align-items:center;justify-content:center;gap:8px;font-size:14px;font-weight:600;color:#8a2330;box-shadow:inset 0 0 0 1px #8a2330">Renvoyer à l'auteur</button></sc-if></div>
+<span style="font-size:12px;color:#55665a;line-height:1.5">{{ pubNote }}</span>
+</div></sc-if>
+</section></div></sc-if>
+
+<sc-if value="{{ isEvents }}" hint-placeholder-val="{{ false }}"><div style="display:flex;flex-wrap:wrap;gap:20px;align-items:flex-start">
+<section style="padding:24px 26px;border-radius:22px;background:#fbf8f2;box-shadow:inset 0 0 0 1px #e6dfd0;flex:1 1 480px;min-width:0;display:flex;flex-direction:column;gap:4px">
+<div style="display:flex;justify-content:space-between;align-items:baseline;margin-bottom:8px"><h2 style="margin:0;font:400 26px 'Instrument Serif',serif">Octobre 2026</h2><span style="font-size:12px;color:#55665a">Heures de Douala · Paris +1 h</span></div>
+<sc-for list="{{ evRows }}" as="e" hint-placeholder-count="5"><button onClick="{{ e.onClick }}" style="display:flex;gap:14px;align-items:center;padding:12px;border-radius:14px;background:{{ e.bg }};box-shadow:0 1px 0 #ece6d9" style-hover="background:#f4efe6">
+<div style="width:54px;flex:none;text-align:center;border-radius:12px;background:#e3eee5;color:#1f5a36;padding:7px 0"><div style="font-size:10px;font-weight:700;text-transform:uppercase">{{ e.wd }}</div><div style="font:26px/1 'Instrument Serif',serif">{{ e.day }}</div></div>
+<div style="flex:1;min-width:0"><div style="font-size:14px;font-weight:700;opacity:{{ e.op }}">{{ e.tt }}</div><div style="font-size:12px;color:#55665a;margin-top:2px">{{ e.h }} · {{ e.lieu }}</div><div style="display:flex;gap:6px;margin-top:6px;flex-wrap:wrap"><sc-if value="{{ e.live }}" hint-placeholder-val="{{ false }}"><span style="padding:2px 8px;border-radius:999px;background:#f6ead2;color:#8a5a10;font-size:11px;font-weight:700">Direct</span></sc-if><sc-if value="{{ e.insc }}" hint-placeholder-val="{{ false }}"><span style="padding:2px 8px;border-radius:999px;background:#e3eee5;color:#1f5a36;font-size:11px;font-weight:700">{{ e.n }} / {{ e.cap }} inscrits</span></sc-if></div></div>
+<span style="padding:4px 10px;border-radius:999px;font-size:12px;font-weight:700;background:{{ e.sBg }};color:{{ e.sFg }}">{{ e.st }}</span>
+</button></sc-for>
+</section>
+<section style="padding:24px 26px;border-radius:22px;background:#fbf8f2;box-shadow:inset 0 0 0 1px #e6dfd0;flex:1 1 380px;min-width:0;display:flex;flex-direction:column;gap:14px;position:sticky;top:92px">
+<div style="display:flex;justify-content:space-between;align-items:center"><h2 style="margin:0;font:400 26px 'Instrument Serif',serif">Fiche de l'événement</h2><span style="padding:4px 10px;border-radius:999px;font-size:12px;font-weight:700;background:{{ eb.sBg }};color:{{ eb.sFg }}">{{ eb.st }}</span></div>
+<label style="display:flex;flex-direction:column;gap:6px;font-size:13px;font-weight:700">Titre<input value="{{ eb.t }}" onChange="{{ onEvT }}" placeholder="Ex. Veillée de prière" style="height:44px;border-radius:12px;border:0;background:#f4efe6;box-shadow:inset 0 0 0 1px #d9d2c2;padding:0 14px;font-size:14px;outline:none"></label>
+<div style="display:grid;grid-template-columns:1fr 1fr;gap:10px"><label style="display:flex;flex-direction:column;gap:6px;font-size:13px;font-weight:700">Date<input type="date" value="{{ eb.date }}" onChange="{{ onEvD }}" style="height:44px;border-radius:12px;border:0;background:#f4efe6;box-shadow:inset 0 0 0 1px #d9d2c2;padding:0 14px;font-size:14px;outline:none"></label><label style="display:flex;flex-direction:column;gap:6px;font-size:13px;font-weight:700">Heure (Douala)<input type="time" value="{{ eb.h }}" onChange="{{ onEvH }}" style="height:44px;border-radius:12px;border:0;background:#f4efe6;box-shadow:inset 0 0 0 1px #d9d2c2;padding:0 14px;font-size:14px;outline:none"></label></div>
+<span style="font-size:12px;color:#55665a;margin-top:-6px">Affiché aux fidèles de la diaspora : {{ evParis }} à Paris</span>
+<label style="display:flex;flex-direction:column;gap:6px;font-size:13px;font-weight:700">Lieu<input value="{{ eb.lieu }}" onChange="{{ onEvL }}" style="height:44px;border-radius:12px;border:0;background:#f4efe6;box-shadow:inset 0 0 0 1px #d9d2c2;padding:0 14px;font-size:14px;outline:none"></label>
+<div style="display:flex;align-items:center;gap:12px;padding:10px 14px;border-radius:14px;background:#f4efe6"><div style="flex:1"><div style="font-size:14px;font-weight:600">Retransmission en direct</div><div style="font-size:12px;color:#55665a">Visible dans l'app à l'heure de l'événement</div></div><button onClick="{{ toggleEvLive }}" aria-label="Retransmission en direct" style="width:48px;height:28px;flex:none;border-radius:14px;background:{{ evLiveBg }};position:relative"><span style="position:absolute;top:3px;left:{{ evLiveX }};width:22px;height:22px;border-radius:50%;background:#fbf8f2;transition:left .2s"></span></button></div>
+<div style="display:flex;align-items:center;gap:12px;padding:10px 14px;border-radius:14px;background:#f4efe6"><div style="flex:1"><div style="font-size:14px;font-weight:600">Inscriptions</div><div style="font-size:12px;color:#55665a">Les fidèles s'inscrivent depuis l'agenda</div></div><button onClick="{{ toggleEvInsc }}" aria-label="Inscriptions" style="width:48px;height:28px;flex:none;border-radius:14px;background:{{ evInscBg }};position:relative"><span style="position:absolute;top:3px;left:{{ evInscX }};width:22px;height:22px;border-radius:50%;background:#fbf8f2;transition:left .2s"></span></button></div>
+<sc-if value="{{ eb.insc }}" hint-placeholder-val="{{ false }}"><div style="display:flex;flex-direction:column;gap:8px"><label style="display:flex;flex-direction:column;gap:6px;font-size:13px;font-weight:700">Places disponibles<input value="{{ eb.capS }}" onChange="{{ onEvCap }}" inputMode="numeric" style="height:44px;border-radius:12px;border:0;background:#f4efe6;box-shadow:inset 0 0 0 1px #d9d2c2;padding:0 14px;font-size:14px;outline:none"></label><div style="height:8px;border-radius:4px;background:#e3e8df"><div style="height:100%;border-radius:4px;background:#1f5a36;width:{{ evFill }}"></div></div><span style="font-size:12px;color:#55665a">{{ eb.n }} inscrits sur {{ eb.capS }}</span></div></sc-if>
+<div style="display:flex;gap:8px;flex-wrap:wrap"><button onClick="{{ evPublish }}" style="height:44px;padding:0 20px;border-radius:999px;background:#1f5a36;color:#f4efe6;display:flex;align-items:center;justify-content:center;gap:8px;font-size:14px;font-weight:700"><i class="ph-bold ph-check"></i>{{ evPubL }}</button><button onClick="{{ evCancel }}" style="height:44px;padding:0 18px;border-radius:999px;box-shadow:inset 0 0 0 1px #1c2a21;display:flex;align-items:center;justify-content:center;gap:8px;font-size:14px;font-weight:600;color:#8a2330;box-shadow:inset 0 0 0 1px #8a2330">{{ evCancelL }}</button></div>
+</section></div></sc-if>
+
+<sc-if value="{{ isPay }}" hint-placeholder-val="{{ false }}"><div style="display:flex;flex-direction:column;gap:20px">
+<div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(165px,1fr));gap:14px"><sc-for list="{{ payKpis }}" as="k" hint-placeholder-count="4"><div style="padding:18px 20px;border-radius:20px;background:#fbf8f2;box-shadow:inset 0 0 0 1px #e6dfd0;display:flex;flex-direction:column;gap:8px"><span style="font-size:13px;color:#55665a">{{ k.l }}</span><span style="font:400 32px/1 'Instrument Serif',serif">{{ k.v }}</span><span style="font-size:12px;font-weight:600;color:{{ k.c }}">{{ k.n }}</span></div></sc-for></div>
+<sc-if value="{{ manOpen }}" hint-placeholder-val="{{ false }}"><section style="padding:24px 26px;border-radius:22px;background:#fbf8f2;box-shadow:inset 0 0 0 1px #e6dfd0;display:flex;flex-direction:column;gap:14px">
+<div style="display:flex;justify-content:space-between;align-items:baseline"><h2 style="margin:0;font:400 26px 'Instrument Serif',serif">Saisie manuelle</h2><span style="font-size:12px;color:#55665a">Pour les dons remis en espèces, par chèque ou par virement</span></div>
+<div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:12px">
+<label style="display:flex;flex-direction:column;gap:6px;font-size:13px;font-weight:700">Fidèle<input value="{{ mName }}" onChange="{{ onMName }}" placeholder="Nom du fidèle" style="height:44px;border-radius:12px;border:0;background:#f4efe6;box-shadow:inset 0 0 0 1px #d9d2c2;padding:0 14px;font-size:14px;outline:none"></label>
+<label style="display:flex;flex-direction:column;gap:6px;font-size:13px;font-weight:700">Type<select value="{{ mType }}" onChange="{{ onMType }}" style="height:44px;border-radius:12px;border:0;background:#f4efe6;box-shadow:inset 0 0 0 1px #d9d2c2;padding:0 14px;font-size:14px;outline:none"><option value="Offrande">Offrande</option><option value="Dîme">Dîme</option><option value="Projet · Bépanda">Projet · Bépanda</option><option value="Œuvre sociale">Œuvre sociale</option></select></label>
+<label style="display:flex;flex-direction:column;gap:6px;font-size:13px;font-weight:700">Montant (FCFA)<input value="{{ mAmt }}" onChange="{{ onMAmt }}" inputMode="numeric" placeholder="Ex. 10 000" style="height:44px;border-radius:12px;border:0;background:#f4efe6;box-shadow:inset 0 0 0 1px #d9d2c2;padding:0 14px;font-size:14px;outline:none"></label>
+</div>
+<div style="display:flex;flex-direction:column;gap:6px;font-size:13px;font-weight:700">Mode<div style="display:flex;gap:6px;flex-wrap:wrap"><sc-for list="{{ mModes }}" as="c" hint-placeholder-count="3"><button onClick="{{ c.onClick }}" style="height:36px;padding:0 14px;border-radius:999px;font-size:13px;font-weight:600;background:{{ c.bg }};color:{{ c.fg }};box-shadow:inset 0 0 0 1px {{ c.bc }}">{{ c.l }}</button></sc-for></div></div>
+<div style="display:flex;gap:8px"><button onClick="{{ saveMan }}" style="height:44px;padding:0 20px;border-radius:999px;background:#1f5a36;color:#f4efe6;display:flex;align-items:center;justify-content:center;gap:8px;font-size:14px;font-weight:700;opacity:{{ manOp }}">Enregistrer et émettre le reçu</button><button onClick="{{ closeMan }}" style="height:44px;padding:0 18px;border-radius:999px;box-shadow:inset 0 0 0 1px #1c2a21;display:flex;align-items:center;justify-content:center;gap:8px;font-size:14px;font-weight:600">Annuler</button></div>
+</section></sc-if>
+<section style="padding:24px 26px;border-radius:22px;background:#fbf8f2;box-shadow:inset 0 0 0 1px #e6dfd0;display:flex;flex-direction:column;gap:14px">
+<div style="display:flex;gap:10px;flex-wrap:wrap;align-items:center"><div style="position:relative;flex:1 1 220px"><i class="ph ph-magnifying-glass" style="position:absolute;left:14px;top:14px;color:#55665a"></i><input value="{{ cq }}" onChange="{{ onCq }}" placeholder="Fidèle, référence, type" style="height:44px;border-radius:12px;border:0;background:#f4efe6;box-shadow:inset 0 0 0 1px #d9d2c2;padding:0 14px;font-size:14px;outline:none;width:100%;box-sizing:border-box;padding-left:40px"></div><div style="display:flex;gap:6px;flex-wrap:wrap"><sc-for list="{{ payChips }}" as="c" hint-placeholder-count="5"><button onClick="{{ c.onClick }}" style="height:36px;padding:0 14px;border-radius:999px;font-size:13px;font-weight:600;background:{{ c.bg }};color:{{ c.fg }};box-shadow:inset 0 0 0 1px {{ c.bc }}">{{ c.l }}</button></sc-for></div></div>
+<div style="overflow:auto"><div style="min-width:900px">
+<div style="display:grid;grid-template-columns:120px 1.5fr 1.2fr 1fr 110px 130px 120px;gap:12px;padding:10px 0;font-size:12px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;color:#55665a;box-shadow:0 1px 0 #d9d2c2"><span>Date</span><span>Fidèle</span><span>Type</span><span>Moyen</span><span style="text-align:right">Montant</span><span>Statut</span><span></span></div>
+<sc-for list="{{ txRows }}" as="x" hint-placeholder-count="8"><div style="display:grid;grid-template-columns:120px 1.5fr 1.2fr 1fr 110px 130px 120px;gap:12px;padding:11px 0;align-items:center;font-size:13px;box-shadow:0 1px 0 #ece6d9"><span style="color:#55665a">{{ x.d }}</span><span><span style="display:block;font-weight:600">{{ x.who }}</span><span style="display:block;font-size:11px;color:#55665a">{{ x.ref }}</span></span><span>{{ x.type }}</span><span style="color:#33443a">{{ x.op }}</span><span style="text-align:right;font-weight:700;font-variant-numeric:tabular-nums">{{ x.amtL }}</span><span><span style="padding:4px 10px;border-radius:999px;font-size:11px;font-weight:700;white-space:nowrap;background:{{ x.sBg }};color:{{ x.sFg }}">{{ x.st }}</span></span><span><sc-if value="{{ x.hasAct }}" hint-placeholder-val="{{ false }}"><button onClick="{{ x.act }}" style="height:32px;padding:0 12px;border-radius:999px;box-shadow:inset 0 0 0 1.5px #1f5a36;color:#1f5a36;font-size:12px;font-weight:700">{{ x.actL }}</button></sc-if></span></div></sc-for>
+<sc-if value="{{ noTx }}" hint-placeholder-val="{{ false }}"><div style="padding:24px 0;font-size:14px;color:#55665a">Aucune contribution ne correspond.</div></sc-if>
+</div></div>
+<div style="display:flex;justify-content:space-between;align-items:center;gap:12px;flex-wrap:wrap"><span style="font-size:12px;color:#55665a">{{ txCount }} transaction(s) · frais opérateur de 1,5 % à la charge du fidèle</span><button onClick="{{ closeMonth }}" style="height:44px;padding:0 18px;border-radius:999px;box-shadow:inset 0 0 0 1px #1c2a21;display:flex;align-items:center;justify-content:center;gap:8px;font-size:14px;font-weight:600"><i class="ph ph-lock-simple"></i>{{ closeL }}</button></div>
+</section></div></sc-if>
+
+<sc-if value="{{ isSerm }}" hint-placeholder-val="{{ false }}"><div style="display:flex;flex-wrap:wrap;gap:20px;align-items:flex-start">
+<section style="padding:24px 26px;border-radius:22px;background:#fbf8f2;box-shadow:inset 0 0 0 1px #e6dfd0;flex:1 1 500px;min-width:0;display:flex;flex-direction:column;gap:4px">
+<h2 style="margin:0;font:400 26px 'Instrument Serif',serif;margin-bottom:8px">Prédications</h2>
+<sc-for list="{{ serRows }}" as="x" hint-placeholder-count="4"><button onClick="{{ x.onClick }}" style="display:flex;gap:14px;align-items:center;padding:12px;border-radius:14px;background:{{ x.bg }};box-shadow:0 1px 0 #ece6d9" style-hover="background:#f4efe6"><span style="width:44px;height:44px;flex:none;border-radius:12px;background:#e3eee5;color:#1f5a36;display:grid;place-items:center;font-size:20px"><i class="{{ x.icon }}"></i></span><div style="flex:1;min-width:0"><div style="font-size:14px;font-weight:700">{{ x.tt }}</div><div style="font-size:12px;color:#55665a">{{ x.p }} · {{ x.ref }} · {{ x.dl }}</div></div><div style="text-align:right;font-size:12px;color:#55665a"><div style="font-weight:700;color:#1c2a21">{{ x.playsL }}</div>écoutes</div><span style="padding:4px 10px;border-radius:999px;font-size:12px;font-weight:700;white-space:nowrap;background:{{ x.sBg }};color:{{ x.sFg }}">{{ x.st }}</span></button></sc-for>
+</section>
+<section style="padding:24px 26px;border-radius:22px;background:#fbf8f2;box-shadow:inset 0 0 0 1px #e6dfd0;flex:1 1 380px;min-width:0;display:flex;flex-direction:column;gap:14px;position:sticky;top:92px">
+<div style="display:flex;justify-content:space-between;align-items:center"><h2 style="margin:0;font:400 26px 'Instrument Serif',serif">Fiche</h2><span style="padding:4px 10px;border-radius:999px;font-size:12px;font-weight:700;white-space:nowrap;background:{{ sb.sBg }};color:{{ sb.sFg }}">{{ sb.st }}</span></div>
+<label style="display:flex;flex-direction:column;gap:6px;font-size:13px;font-weight:700">Titre<input value="{{ sb.t }}" onChange="{{ onSbT }}" placeholder="Ex. La lumière du monde" style="height:44px;border-radius:12px;border:0;background:#f4efe6;box-shadow:inset 0 0 0 1px #d9d2c2;padding:0 14px;font-size:14px;outline:none"></label>
+<div style="display:grid;grid-template-columns:1fr 1fr;gap:10px"><label style="display:flex;flex-direction:column;gap:6px;font-size:13px;font-weight:700">Prédicateur<input value="{{ sb.p }}" onChange="{{ onSbP }}" style="height:44px;border-radius:12px;border:0;background:#f4efe6;box-shadow:inset 0 0 0 1px #d9d2c2;padding:0 14px;font-size:14px;outline:none"></label><label style="display:flex;flex-direction:column;gap:6px;font-size:13px;font-weight:700">Référence biblique<input value="{{ sb.ref }}" onChange="{{ onSbR }}" placeholder="Ex. Jean 8, 12" style="height:44px;border-radius:12px;border:0;background:#f4efe6;box-shadow:inset 0 0 0 1px #d9d2c2;padding:0 14px;font-size:14px;outline:none"></label></div>
+<div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;align-items:end"><label style="display:flex;flex-direction:column;gap:6px;font-size:13px;font-weight:700">Date du culte<input type="date" value="{{ sb.date }}" onChange="{{ onSbD }}" style="height:44px;border-radius:12px;border:0;background:#f4efe6;box-shadow:inset 0 0 0 1px #d9d2c2;padding:0 14px;font-size:14px;outline:none"></label><div style="display:flex;flex-direction:column;gap:6px;font-size:13px;font-weight:700">Format<div style="display:flex;gap:6px;flex-wrap:wrap"><sc-for list="{{ sbTypes }}" as="c" hint-placeholder-count="2"><button onClick="{{ c.onClick }}" style="height:36px;padding:0 14px;border-radius:999px;font-size:13px;font-weight:600;background:{{ c.bg }};color:{{ c.fg }};box-shadow:inset 0 0 0 1px {{ c.bc }}">{{ c.l }}</button></sc-for></div></div></div>
+<div style="padding:16px;border-radius:16px;box-shadow:inset 0 0 0 1.5px {{ sbFileBc }};background:#f4efe6;display:flex;align-items:center;gap:12px"><i class="{{ sbFileIcon }}" style="font-size:26px;color:#1f5a36"></i><div style="flex:1;min-width:0"><div style="font-size:14px;font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">{{ sbFileL }}</div><div style="font-size:12px;color:#55665a">{{ sbFileSub }}</div></div><button onClick="{{ sbUpload }}" style="height:44px;padding:0 18px;border-radius:999px;box-shadow:inset 0 0 0 1px #1c2a21;display:flex;align-items:center;justify-content:center;gap:8px;font-size:14px;font-weight:600;height:38px">{{ sbUpL }}</button></div>
+<div style="display:flex;align-items:center;gap:12px;padding:10px 14px;border-radius:14px;background:#f4efe6"><div style="flex:1"><div style="font-size:14px;font-weight:600">Écoute hors ligne</div><div style="font-size:12px;color:#55665a">Les fidèles peuvent télécharger le fichier</div></div><button onClick="{{ toggleSbOff }}" aria-label="Écoute hors ligne" style="width:48px;height:28px;flex:none;border-radius:14px;background:{{ sbOffBg }};position:relative"><span style="position:absolute;top:3px;left:{{ sbOffX }};width:22px;height:22px;border-radius:50%;background:#fbf8f2;transition:left .2s"></span></button></div>
+<div style="display:flex;gap:8px;flex-wrap:wrap"><button onClick="{{ sbPublish }}" style="height:44px;padding:0 20px;border-radius:999px;background:#1f5a36;color:#f4efe6;display:flex;align-items:center;justify-content:center;gap:8px;font-size:14px;font-weight:700;opacity:{{ sbPubOp }}"><i class="ph-bold ph-paper-plane-tilt"></i>{{ sbPubL }}</button><button onClick="{{ sbDraft }}" style="height:44px;padding:0 18px;border-radius:999px;box-shadow:inset 0 0 0 1px #1c2a21;display:flex;align-items:center;justify-content:center;gap:8px;font-size:14px;font-weight:600">Enregistrer le brouillon</button></div>
+</section></div></sc-if>
+
+<sc-if value="{{ isDocs }}" hint-placeholder-val="{{ false }}"><div style="display:flex;flex-direction:column;gap:20px">
+<sc-if value="{{ docForm }}" hint-placeholder-val="{{ false }}"><section style="padding:24px 26px;border-radius:22px;background:#fbf8f2;box-shadow:inset 0 0 0 1px #e6dfd0;display:flex;flex-direction:column;gap:14px">
+<h2 style="margin:0;font:400 26px 'Instrument Serif',serif">Ajouter un document</h2>
+<div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(240px,1fr));gap:12px"><label style="display:flex;flex-direction:column;gap:6px;font-size:13px;font-weight:700">Nom du document<input value="{{ dName }}" onChange="{{ onDName }}" placeholder="Ex. Méditations de novembre" style="height:44px;border-radius:12px;border:0;background:#f4efe6;box-shadow:inset 0 0 0 1px #d9d2c2;padding:0 14px;font-size:14px;outline:none"></label><label style="display:flex;flex-direction:column;gap:6px;font-size:13px;font-weight:700">Catégorie<select value="{{ dCat }}" onChange="{{ onDCat }}" style="height:44px;border-radius:12px;border:0;background:#f4efe6;box-shadow:inset 0 0 0 1px #d9d2c2;padding:0 14px;font-size:14px;outline:none"><sc-for list="{{ docCatNames }}" as="o" hint-placeholder-count="5"><option value="{{ o }}">{{ o }}</option></sc-for></select></label></div>
+<div style="display:flex;flex-direction:column;gap:6px;font-size:13px;font-weight:700">Visible par<div style="display:flex;gap:6px;flex-wrap:wrap"><sc-for list="{{ dVisChips }}" as="c" hint-placeholder-count="3"><button onClick="{{ c.onClick }}" style="height:36px;padding:0 14px;border-radius:999px;font-size:13px;font-weight:600;background:{{ c.bg }};color:{{ c.fg }};box-shadow:inset 0 0 0 1px {{ c.bc }}">{{ c.l }}</button></sc-for></div></div>
+<div style="display:flex;align-items:center;gap:12px;padding:14px 16px;border-radius:14px;background:#f4efe6;box-shadow:inset 0 0 0 1.5px {{ dFileBc }}"><i class="ph ph-file-pdf" style="font-size:26px;color:#1f5a36"></i><span style="flex:1;font-size:14px;font-weight:600">{{ dFileL }}</span><button onClick="{{ dPick }}" style="height:44px;padding:0 18px;border-radius:999px;box-shadow:inset 0 0 0 1px #1c2a21;display:flex;align-items:center;justify-content:center;gap:8px;font-size:14px;font-weight:600;height:38px">Choisir un PDF</button></div>
+<div style="display:flex;gap:8px"><button onClick="{{ dSave }}" style="height:44px;padding:0 20px;border-radius:999px;background:#1f5a36;color:#f4efe6;display:flex;align-items:center;justify-content:center;gap:8px;font-size:14px;font-weight:700;opacity:{{ dOp }}">Mettre en ligne</button><button onClick="{{ dCancel }}" style="height:44px;padding:0 18px;border-radius:999px;box-shadow:inset 0 0 0 1px #1c2a21;display:flex;align-items:center;justify-content:center;gap:8px;font-size:14px;font-weight:600">Annuler</button></div>
+</section></sc-if>
+<section style="padding:24px 26px;border-radius:22px;background:#fbf8f2;box-shadow:inset 0 0 0 1px #e6dfd0;display:flex;flex-direction:column;gap:14px">
+<div style="display:flex;gap:6px;flex-wrap:wrap"><sc-for list="{{ docChips }}" as="c" hint-placeholder-count="6"><button onClick="{{ c.onClick }}" style="height:36px;padding:0 14px;border-radius:999px;font-size:13px;font-weight:600;background:{{ c.bg }};color:{{ c.fg }};box-shadow:inset 0 0 0 1px {{ c.bc }}">{{ c.l }}</button></sc-for></div>
+<div style="overflow:auto"><div style="min-width:760px">
+<div style="display:grid;grid-template-columns:2.4fr 1.3fr 80px 120px 110px 100px;gap:12px;padding:10px 0;font-size:12px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;color:#55665a;box-shadow:0 1px 0 #d9d2c2"><span>Document</span><span>Catégorie</span><span>Taille</span><span>Visibilité</span><span>Téléch.</span><span></span></div>
+<sc-for list="{{ docRows }}" as="x" hint-placeholder-count="6"><div style="display:grid;grid-template-columns:2.4fr 1.3fr 80px 120px 110px 100px;gap:12px;padding:11px 0;align-items:center;font-size:13px;box-shadow:0 1px 0 #ece6d9"><span style="display:flex;align-items:center;gap:10px;font-weight:600"><i class="ph ph-file-pdf" style="font-size:20px;color:#1f5a36"></i>{{ x.t }}</span><span style="color:#33443a">{{ x.c }}</span><span style="color:#55665a">{{ x.size }}</span><span><button onClick="{{ x.cycle }}" title="Changer la visibilité" style="padding:4px 10px;border-radius:999px;font-size:12px;font-weight:700;background:{{ x.vBg }};color:{{ x.vFg }}">{{ x.vis }}</button></span><span style="font-variant-numeric:tabular-nums">{{ x.dlL }}</span><span><button onClick="{{ x.remove }}" style="font-size:12px;font-weight:700;color:#8a2330">Retirer</button></span></div></sc-for>
+<sc-if value="{{ noDocs }}" hint-placeholder-val="{{ false }}"><div style="padding:24px 0;font-size:14px;color:#55665a">Aucun document dans cette catégorie.</div></sc-if>
+</div></div>
+<span style="font-size:12px;color:#55665a">Cliquez sur la visibilité pour la changer : Public (portail), Fidèles (application), Responsables (back-office).</span>
+</section></div></sc-if>
+
+<sc-if value="{{ isNotif }}" hint-placeholder-val="{{ false }}"><div style="display:flex;flex-wrap:wrap;gap:20px;align-items:flex-start">
+<section style="padding:24px 26px;border-radius:22px;background:#fbf8f2;box-shadow:inset 0 0 0 1px #e6dfd0;flex:1 1 420px;min-width:0;display:flex;flex-direction:column;gap:14px">
+<h2 style="margin:0;font:400 26px 'Instrument Serif',serif">Nouvelle notification</h2>
+<label style="display:flex;flex-direction:column;gap:6px;font-size:13px;font-weight:700">Titre<input value="{{ nT }}" onChange="{{ onNT }}" placeholder="Ex. Culte d'union dimanche" style="height:44px;border-radius:12px;border:0;background:#f4efe6;box-shadow:inset 0 0 0 1px #d9d2c2;padding:0 14px;font-size:14px;outline:none"></label>
+<label style="display:flex;flex-direction:column;gap:6px;font-size:13px;font-weight:700"><span style="display:flex;justify-content:space-between">Message<span style="font-weight:600;color:{{ nCountFg }}">{{ nCount }} / 160</span></span><textarea value="{{ nM }}" onChange="{{ onNM }}" rows="3" placeholder="160 caractères maximum pour l'envoi par SMS" style="border-radius:12px;border:0;background:#f4efe6;box-shadow:inset 0 0 0 1px #d9d2c2;padding:12px 14px;font:500 14px/1.55 Manrope,sans-serif;resize:vertical;outline:none"></textarea></label>
+<div style="display:flex;flex-direction:column;gap:6px;font-size:13px;font-weight:700">Destinataires<div style="display:flex;gap:6px;flex-wrap:wrap"><sc-for list="{{ nAuds }}" as="c" hint-placeholder-count="5"><button onClick="{{ c.onClick }}" style="height:36px;padding:0 14px;border-radius:999px;font-size:13px;font-weight:600;background:{{ c.bg }};color:{{ c.fg }};box-shadow:inset 0 0 0 1px {{ c.bc }}">{{ c.l }}</button></sc-for></div></div>
+<div style="display:flex;flex-direction:column;gap:6px;font-size:13px;font-weight:700">Canal<div style="display:flex;gap:6px;flex-wrap:wrap"><sc-for list="{{ nChs }}" as="c" hint-placeholder-count="2"><button onClick="{{ c.onClick }}" style="height:36px;padding:0 14px;border-radius:999px;font-size:13px;font-weight:600;background:{{ c.bg }};color:{{ c.fg }};box-shadow:inset 0 0 0 1px {{ c.bc }}">{{ c.l }}</button></sc-for></div></div>
+<div style="display:flex;flex-direction:column;gap:6px;font-size:13px;font-weight:700">Envoi<div style="display:flex;gap:6px;flex-wrap:wrap"><sc-for list="{{ nWhens }}" as="c" hint-placeholder-count="2"><button onClick="{{ c.onClick }}" style="height:36px;padding:0 14px;border-radius:999px;font-size:13px;font-weight:600;background:{{ c.bg }};color:{{ c.fg }};box-shadow:inset 0 0 0 1px {{ c.bc }}">{{ c.l }}</button></sc-for></div></div>
+<sc-if value="{{ nLater }}" hint-placeholder-val="{{ false }}"><input type="datetime-local" value="{{ nDate }}" onChange="{{ onNDate }}" style="height:44px;border-radius:12px;border:0;background:#f4efe6;box-shadow:inset 0 0 0 1px #d9d2c2;padding:0 14px;font-size:14px;outline:none"></sc-if>
+<div style="padding:12px 14px;border-radius:14px;background:#e3eee5;font-size:13px;line-height:1.5">{{ nSummary }}</div>
+<button onClick="{{ nSend }}" style="height:44px;padding:0 20px;border-radius:999px;background:#1f5a36;color:#f4efe6;display:flex;align-items:center;justify-content:center;gap:8px;font-size:14px;font-weight:700;opacity:{{ nOp }}"><i class="ph-bold ph-paper-plane-tilt"></i>{{ nSendL }}</button>
+</section>
+<section style="padding:24px 26px;border-radius:22px;background:#fbf8f2;box-shadow:inset 0 0 0 1px #e6dfd0;flex:1 1 420px;min-width:0;display:flex;flex-direction:column;gap:4px">
+<h2 style="margin:0;font:400 26px 'Instrument Serif',serif;margin-bottom:8px">Envoyées et programmées</h2>
+<sc-for list="{{ notifRows }}" as="x" hint-placeholder-count="3"><div style="display:flex;gap:12px;padding:12px 0;box-shadow:0 1px 0 #ece6d9"><span style="width:40px;height:40px;flex:none;border-radius:12px;background:#e3eee5;color:#1f5a36;display:grid;place-items:center;font-size:18px"><i class="{{ x.icon }}"></i></span><div style="flex:1;min-width:0"><div style="font-size:14px;font-weight:700">{{ x.t }}</div><div style="font-size:13px;color:#33443a;margin-top:2px">{{ x.m }}</div><div style="font-size:12px;color:#55665a;margin-top:4px">{{ x.aud }} · {{ x.ch }} · {{ x.when }}</div></div><div style="text-align:right;font-size:12px;color:#55665a;white-space:nowrap"><div style="font-weight:700;color:#1c2a21">{{ x.nL }}</div>{{ x.openL }}</div></div></sc-for>
+</section></div></sc-if>
+
+<sc-if value="{{ isProj }}" hint-placeholder-val="{{ false }}"><div style="display:flex;flex-wrap:wrap;gap:20px;align-items:flex-start">
+<section style="padding:24px 26px;border-radius:22px;background:#fbf8f2;box-shadow:inset 0 0 0 1px #e6dfd0;flex:1 1 440px;min-width:0;display:flex;flex-direction:column;gap:10px">
+<h2 style="margin:0;font:400 26px 'Instrument Serif',serif;margin-bottom:6px">Projets et campagnes</h2>
+<sc-for list="{{ prjRows }}" as="x" hint-placeholder-count="3"><button onClick="{{ x.onClick }}" style="padding:14px 16px;border-radius:16px;background:{{ x.bg }};box-shadow:inset 0 0 0 1px #e6dfd0;display:flex;flex-direction:column;gap:8px" style-hover="box-shadow:inset 0 0 0 1.5px #1f5a36"><div style="display:flex;justify-content:space-between;gap:10px;width:100%"><span style="font-size:15px;font-weight:700">{{ x.tt }}</span><span style="font-size:12px;font-weight:700;color:#1f5a36">{{ x.pctL }}</span></div><div style="width:100%;height:6px;border-radius:3px;background:#e3e8df"><div style="height:100%;border-radius:3px;background:#1f5a36;width:{{ x.w }}"></div></div><span style="font-size:12px;color:#55665a">{{ x.raisedL }} / {{ x.goalL }} FCFA · {{ x.resp }} · {{ x.openL }}</span></button></sc-for>
+</section>
+<section style="padding:24px 26px;border-radius:22px;background:#fbf8f2;box-shadow:inset 0 0 0 1px #e6dfd0;flex:1 1 420px;min-width:0;display:flex;flex-direction:column;gap:14px;position:sticky;top:92px">
+<label style="display:flex;flex-direction:column;gap:6px;font-size:13px;font-weight:700">Nom du projet<input value="{{ pj.t }}" onChange="{{ onPjT }}" style="height:44px;border-radius:12px;border:0;background:#f4efe6;box-shadow:inset 0 0 0 1px #d9d2c2;padding:0 14px;font-size:14px;outline:none"></label>
+<div style="display:grid;grid-template-columns:repeat(3,1fr);gap:10px"><sc-for list="{{ pjFacts }}" as="f" hint-placeholder-count="3"><div style="padding:12px;border-radius:14px;background:#f4efe6"><div style="font-size:12px;color:#55665a">{{ f.k }}</div><div style="font-size:15px;font-weight:700;margin-top:2px">{{ f.v }}</div></div></sc-for></div>
+<div style="display:flex;align-items:center;gap:12px;padding:10px 14px;border-radius:14px;background:#f4efe6"><div style="flex:1"><div style="font-size:14px;font-weight:600">Collecte ouverte</div><div style="font-size:12px;color:#55665a">Le projet apparaît dans « Contribuer » de l'application</div></div><button onClick="{{ togglePjOpen }}" aria-label="Collecte ouverte" style="width:48px;height:28px;flex:none;border-radius:14px;background:{{ pjOpenBg }};position:relative"><span style="position:absolute;top:3px;left:{{ pjOpenX }};width:22px;height:22px;border-radius:50%;background:#fbf8f2;transition:left .2s"></span></button></div>
+<div style="display:flex;flex-direction:column"><span style="font:22px 'Instrument Serif',serif;margin-bottom:6px">Étapes</span><sc-for list="{{ pjSteps }}" as="x" hint-placeholder-count="4"><button onClick="{{ x.onClick }}" style="display:flex;align-items:center;gap:12px;padding:10px 0;box-shadow:0 1px 0 #ece6d9;font-size:14px"><span style="width:24px;height:24px;border-radius:7px;display:grid;place-items:center;font-size:13px;background:{{ x.bg }};color:#f4efe6;box-shadow:inset 0 0 0 1.5px {{ x.bc }}"><i class="{{ x.icon }}"></i></span><span style="flex:1;font-weight:{{ x.fw }}">{{ x.l }}</span><span style="font-size:12px;color:#55665a">{{ x.st }}</span></button></sc-for></div>
+<label style="display:flex;flex-direction:column;gap:6px;font-size:13px;font-weight:700">Publier une mise à jour<textarea value="{{ pjUp }}" onChange="{{ onPjUp }}" rows="2" placeholder="Ex. La toiture est posée, merci à tous les donateurs !" style="border-radius:12px;border:0;background:#f4efe6;box-shadow:inset 0 0 0 1px #d9d2c2;padding:12px 14px;font:500 14px/1.55 Manrope,sans-serif;resize:vertical;outline:none"></textarea></label>
+<button onClick="{{ pjPost }}" style="height:44px;padding:0 20px;border-radius:999px;background:#1f5a36;color:#f4efe6;display:flex;align-items:center;justify-content:center;gap:8px;font-size:14px;font-weight:700;opacity:{{ pjPostOp }}"><i class="ph-bold ph-megaphone"></i>Publier pour les contributeurs</button>
+<div style="display:flex;flex-direction:column"><sc-for list="{{ pjUps }}" as="u" hint-placeholder-count="2"><div style="display:flex;gap:12px;padding:8px 0;font-size:13px;box-shadow:0 1px 0 #ece6d9"><span style="width:62px;flex:none;color:#55665a;font-weight:700">{{ u.d }}</span><span>{{ u.t }}</span></div></sc-for></div>
+</section></div></sc-if>
+
+<sc-if value="{{ isSettings }}" hint-placeholder-val="{{ false }}"><div style="display:flex;flex-wrap:wrap;gap:20px;align-items:flex-start">
+<section style="padding:24px 26px;border-radius:22px;background:#fbf8f2;box-shadow:inset 0 0 0 1px #e6dfd0;flex:1 1 380px;min-width:0;display:flex;flex-direction:column;gap:14px">
+<h2 style="margin:0;font:400 26px 'Instrument Serif',serif">Identité</h2>
+<label style="display:flex;flex-direction:column;gap:6px;font-size:13px;font-weight:700">Nom affiché<input value="{{ stName }}" onChange="{{ onStName }}" style="height:44px;border-radius:12px;border:0;background:#f4efe6;box-shadow:inset 0 0 0 1px #d9d2c2;padding:0 14px;font-size:14px;outline:none"></label>
+<label style="display:flex;flex-direction:column;gap:6px;font-size:13px;font-weight:700">Adresse du siège<input value="{{ stAddr }}" onChange="{{ onStAddr }}" style="height:44px;border-radius:12px;border:0;background:#f4efe6;box-shadow:inset 0 0 0 1px #d9d2c2;padding:0 14px;font-size:14px;outline:none"></label>
+<div style="display:flex;flex-direction:column;gap:6px;font-size:13px;font-weight:700">Langues de l'application<div style="display:flex;gap:6px;flex-wrap:wrap"><sc-for list="{{ stLangs }}" as="c" hint-placeholder-count="2"><button onClick="{{ c.onClick }}" style="height:36px;padding:0 14px;border-radius:999px;font-size:13px;font-weight:600;background:{{ c.bg }};color:{{ c.fg }};box-shadow:inset 0 0 0 1px {{ c.bc }}">{{ c.l }}</button></sc-for></div></div>
+<div style="display:flex;flex-direction:column;gap:6px;font-size:13px;font-weight:700">Fuseau de référence<div style="display:flex;gap:6px;flex-wrap:wrap"><sc-for list="{{ stTzs }}" as="c" hint-placeholder-count="2"><button onClick="{{ c.onClick }}" style="height:36px;padding:0 14px;border-radius:999px;font-size:13px;font-weight:600;background:{{ c.bg }};color:{{ c.fg }};box-shadow:inset 0 0 0 1px {{ c.bc }}">{{ c.l }}</button></sc-for></div></div>
+<label style="display:flex;flex-direction:column;gap:6px;font-size:13px;font-weight:700">Mention sur les reçus<textarea value="{{ stReceipt }}" onChange="{{ onStReceipt }}" rows="3" style="border-radius:12px;border:0;background:#f4efe6;box-shadow:inset 0 0 0 1px #d9d2c2;padding:12px 14px;font:500 14px/1.55 Manrope,sans-serif;resize:vertical;outline:none"></textarea></label>
+</section>
+<section style="padding:24px 26px;border-radius:22px;background:#fbf8f2;box-shadow:inset 0 0 0 1px #e6dfd0;flex:1 1 380px;min-width:0;display:flex;flex-direction:column;gap:14px">
+<h2 style="margin:0;font:400 26px 'Instrument Serif',serif">Contributions</h2>
+<div style="display:flex;flex-direction:column"><span style="font-size:13px;font-weight:700;margin-bottom:4px">Types proposés aux fidèles</span><sc-for list="{{ stTypes }}" as="x" hint-placeholder-count="5"><div style="display:flex;align-items:center;gap:12px;padding:9px 0;box-shadow:0 1px 0 #ece6d9"><span style="flex:1;font-size:14px;font-weight:600">{{ x.l }}</span><button onClick="{{ x.onClick }}" aria-label="{{ x.l }}" style="width:48px;height:28px;flex:none;border-radius:14px;background:{{ x.bg }};position:relative"><span style="position:absolute;top:3px;left:{{ x.x }};width:22px;height:22px;border-radius:50%;background:#fbf8f2;transition:left .2s"></span></button></div></sc-for></div>
+<div style="display:flex;gap:8px"><input value="{{ stNew }}" onChange="{{ onStNew }}" placeholder="Nouveau type" style="height:44px;border-radius:12px;border:0;background:#f4efe6;box-shadow:inset 0 0 0 1px #d9d2c2;padding:0 14px;font-size:14px;outline:none;flex:1;min-width:0"><button onClick="{{ stAdd }}" style="height:44px;padding:0 18px;border-radius:999px;box-shadow:inset 0 0 0 1px #1c2a21;display:flex;align-items:center;justify-content:center;gap:8px;font-size:14px;font-weight:600">Ajouter</button></div>
+<div style="display:flex;flex-direction:column"><span style="font-size:13px;font-weight:700;margin-bottom:4px">Moyens de paiement</span><sc-for list="{{ stOps }}" as="x" hint-placeholder-count="3"><div style="display:flex;align-items:center;gap:12px;padding:9px 0;box-shadow:0 1px 0 #ece6d9"><div style="flex:1"><div style="font-size:14px;font-weight:600">{{ x.l }}</div><div style="font-size:12px;color:#55665a">Frais {{ x.fee }}</div></div><button onClick="{{ x.onClick }}" aria-label="{{ x.l }}" style="width:48px;height:28px;flex:none;border-radius:14px;background:{{ x.bg }};position:relative"><span style="position:absolute;top:3px;left:{{ x.x }};width:22px;height:22px;border-radius:50%;background:#fbf8f2;transition:left .2s"></span></button></div></sc-for></div>
+</section></div></sc-if>
+
+</div>
+</main>
+
+<sc-if value="{{ hasToast }}" hint-placeholder-val="{{ false }}"><div style="position:fixed;left:50%;bottom:28px;transform:translateX(-50%);padding:14px 22px;border-radius:999px;background:#102a1c;color:#f4efe6;font-size:14px;font-weight:600;display:flex;align-items:center;gap:10px;box-shadow:0 12px 30px rgba(16,42,28,.35);z-index:30"><i class="ph-fill ph-check-circle" style="color:#e0a043;font-size:18px"></i>{{ toast }}</div></sc-if>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props="{&quot;role&quot;:{&quot;editor&quot;:&quot;enum&quot;,&quot;options&quot;:[&quot;cepca&quot;,&quot;conf&quot;,&quot;syn&quot;,&quot;cons&quot;,&quot;par&quot;,&quot;chap&quot;,&quot;fin&quot;,&quot;proj&quot;,&quot;com&quot;],&quot;default&quot;:&quot;cepca&quot;,&quot;tsType&quot;:&quot;string&quot;,&quot;section&quot;:&quot;Démo&quot;}}">
+const M = ['Avr','Mai','Juin','Juil','Août','Sept'];
+const P = (a) => ['Actualités','Fidèles','Contributions','Projets','Rapports','Paramétrage'].map((f,i)=>({f,v:a[i]}));
+const NAV = { dash:['ph ph-squares-four','Tableau de bord'], users:['ph ph-users','Utilisateurs'], roles:['ph ph-shield-check','Rôles et droits'], struct:['ph ph-tree-structure','Structures'], news:['ph ph-newspaper','Publications'], events:['ph ph-calendar-blank','Événements'], proj:['ph ph-buildings','Projets'], pay:['ph ph-hand-coins','Contributions'], sermons:['ph ph-microphone-stage','Prédications'], docs:['ph ph-folder','Documents'], notif:['ph ph-bell-ringing','Notifications'], reports:['ph ph-chart-bar','Rapports'], audit:['ph ph-list-checks','Journal d\'audit'], settings:['ph ph-gear','Paramètres'] };
+const ROLES = [
+{id:'cepca',label:'Administrateur CEPCA',level:'National',user:'Pasteur Samuel Ngo',crumbs:['CEPCA'],scope:'Vue agrégée des confessions membres. Les données détaillées restent isolées par confession.',nav:['dash','struct','users','roles','news','reports','audit','settings'],badges:{struct:2},primary:'Nouvelle confession',
+ kpis:[['Confessions actives','8','2 demandes d\'adhésion'],['Fidèles inscrits','184 320','+3,1 % ce mois'],['Contributions (sept.)','412 M FCFA','Agrégé, toutes confessions'],['Projets en cours','47','12 au niveau CEPCA']],
+ chart:['Contributions agrégées','M FCFA',[318,342,356,371,389,412]],
+ queue:[['ph ph-church','Adhésion : Église Protestante Africaine','Dossier complet · reçu le 24 sept.'],['ph ph-church','Adhésion : Mission du Plein Évangile','Pièces manquantes · 19 sept.'],['ph ph-megaphone','Communiqué national : rentrée scolaire','Rédigé par la communication · 27 sept.']],
+ table:['Confessions membres',['Confession','Responsable','Fidèles','Statut'],[['EEC','Rév. J. Ekwalla','58 210','Actif'],['EPC','Rév. M. Abessolo','41 870','Actif'],['PCC','Rt Rev. F. Nkwain','36 400','Actif'],['UEBC','Pasteur D. Mbarga','22 140','Actif'],['EELC','Rév. P. Doumba','14 900','Configuration']]],
+ perms:P(['C/R/V','Global autorisé','Agrégé','C/R/V','Oui','Oui'])},
+{id:'conf',label:'Administrateur confession',level:'Confession',user:'Rév. Joseph Ekwalla',crumbs:['CEPCA','EEC'],scope:'Église Évangélique du Cameroun · 6 synodes, 41 consistoires, 612 paroisses.',nav:['dash','struct','users','roles','news','proj','pay','reports','audit','settings'],badges:{users:5},primary:'Nouvelle structure',
+ kpis:[['Paroisses','612','18 sans administrateur'],['Fidèles','58 210','+2,4 % ce mois'],['Contributions (sept.)','146 M FCFA','+6 % vs août'],['Taux de paiement réussi','96,8 %','MoMo et Orange Money']],
+ chart:['Contributions EEC','M FCFA',[112,118,121,130,138,146]],
+ queue:[['ph ph-user-plus','Nomination : trésorier, Paroisse de Bonabéri','Proposé par le Consistoire Douala-Nord'],['ph ph-buildings','Projet : Centre de santé de Nkongsamba','Budget 120 M FCFA · Synode du Moungo'],['ph ph-gear','Nouveau type de contribution : Jubilé 2027','Demande du Synode du Littoral']],
+ table:['Synodes',['Synode','Président','Contributions (sept.)','Statut'],[['Synode du Littoral','Rév. A. Din','52 M','Actif'],['Synode du Centre','Rév. B. Essomba','38 M','Actif'],['Synode du Moungo','Rév. C. Ngando','21 M','Actif'],['Synode de l\'Ouest','Rév. D. Kamga','19 M','Actif'],['Synode Diaspora','Rév. E. Tonye','16 M','Actif']]],
+ perms:P(['C/R/V','Confession','Oui','C/R/V','Oui','Oui'])},
+{id:'syn',label:'Responsable synode',level:'Synode',user:'Rév. Alain Din',crumbs:['CEPCA','EEC','Synode du Littoral'],scope:'9 consistoires et 148 paroisses sous votre responsabilité.',nav:['dash','struct','users','news','proj','pay','reports'],badges:{proj:1},primary:'Nouvelle annonce',
+ kpis:[['Consistoires','9',''],['Paroisses','148','3 en création'],['Contributions (sept.)','52 M FCFA','+4 % vs août'],['Projets actifs','14','2 en retard']],
+ chart:['Contributions du synode','M FCFA',[41,43,44,47,50,52]],
+ queue:[['ph ph-buildings','Projet : Chapelle de Bépanda, phase 2','Consistoire Douala-Centre · 15 M FCFA'],['ph ph-calendar-blank','Événement : Convention synodale 2026','Du 12 au 14 nov. · Douala']],
+ table:['Consistoires',['Consistoire','Responsable','Contributions (sept.)','Statut'],[['Douala-Centre','Rév. F. Mbappe','11,2 M','Actif'],['Douala-Nord','Rév. G. Eboa','9,8 M','Actif'],['Douala-Sud','Rév. H. Kotto','8,1 M','Actif'],['Édéa','Rév. I. Mandeng','6,4 M','Actif'],['Limbé','Rev. J. Ashu','4,9 M','Actif']]],
+ perms:P(['C/R/V','Niveau','Oui','Oui','Oui','Limité'])},
+{id:'cons',label:'Responsable consistoire',level:'Consistoire',user:'Rév. François Mbappe',crumbs:['CEPCA','EEC','Littoral','Douala-Centre'],scope:'16 paroisses et 23 chapelles.',nav:['dash','struct','users','news','events','proj','pay','reports'],badges:{},primary:'Nouvelle annonce',
+ kpis:[['Paroisses','16',''],['Chapelles','23','2 rattachées ce mois'],['Contributions (sept.)','11,2 M FCFA','+3 % vs août'],['Fidèles','6 840','']],
+ chart:['Contributions du consistoire','M FCFA',[8.9,9.3,9.6,10.1,10.7,11.2]],
+ queue:[['ph ph-tree-structure','Rattachement : Chapelle de Ndogpassi II','Demande de la Paroisse de New-Bell'],['ph ph-newspaper','Annonce : culte d\'union du 18 oct.','Brouillon · Paroisse de Deïdo']],
+ table:['Paroisses',['Paroisse','Pasteur','Contributions (sept.)','Statut'],[['Deïdo','Pasteur É. Moukoko','1,9 M','Actif'],['Akwa','Pasteur R. Tchana','1,6 M','Actif'],['Bépanda','Pasteur L. Njoh','1,2 M','Actif'],['New-Bell','Pasteur K. Ewane','0,9 M','Actif'],['Bali','Poste vacant','0,7 M','À pourvoir']]],
+ perms:P(['C/R/V','Niveau','Oui','Oui','Oui','Limité'])},
+{id:'par',label:'Pasteur de paroisse',level:'Paroisse',user:'Pasteur Élise Moukoko',crumbs:['CEPCA','EEC','Douala-Centre','Paroisse de Deïdo'],scope:'Paroisse de Deïdo · 3 chapelles rattachées.',nav:['dash','users','news','events','sermons','proj','pay','docs','notif','reports'],badges:{users:3},primary:'Nouvelle annonce',
+ kpis:[['Fidèles inscrits','1 284','+26 ce mois'],['Diaspora','214','17 %'],['Contributions (sept.)','1,9 M FCFA','Validé par le trésorier'],['Présence en ligne (dim.)','412','Culte du 27 sept.']],
+ chart:['Contributions de la paroisse','M FCFA',[1.4,1.5,1.5,1.6,1.8,1.9]],
+ queue:[['ph ph-user-plus','Inscription : Marie-Claire Essomba','Chapelle de Bonamoussadi · 29 sept.'],['ph ph-user-plus','Inscription : Paul Ndoumbe (Lyon)','Diaspora · 28 sept.'],['ph ph-user-plus','Inscription : famille Kingue (4 pers.)','Paroisse · 27 sept.']],
+ table:['Prochaines activités',['Activité','Responsable','Date','Statut'],[['Culte dominical','Pasteur É. Moukoko','Dim. 4 oct.','Publié'],['Semaine de prière','Conseil paroissial','5–9 oct.','Publié'],['Répétition chorale','M. Ebelle','Mer. 7 oct.','Publié'],['Assemblée des jeunes','S. Njanga','Sam. 10 oct.','Brouillon']]],
+ perms:P(['C/R/V','Local','Oui','Oui','Oui','Limité'])},
+{id:'chap',label:'Responsable chapelle',level:'Chapelle',user:'Ancien Thomas Ekambi',crumbs:['CEPCA','EEC','Deïdo','Chapelle de Bonamoussadi'],scope:'Chapelle rattachée à la Paroisse de Deïdo.',nav:['dash','users','news','events','pay'],badges:{},primary:'Nouvelle annonce',
+ kpis:[['Fidèles','186','+4 ce mois'],['Contributions (sept.)','284 000 FCFA','Selon règles paroissiales'],['Activités ce mois','6',''],['Présence (dim.)','142','']],
+ chart:['Contributions de la chapelle','milliers FCFA',[210,225,231,248,262,284]],
+ queue:[['ph ph-calendar-blank','Activité : nettoyage de la chapelle','Sam. 3 oct. · 12 bénévoles inscrits']],
+ table:['Fidèles récents',['Nom','Groupe','Inscription','Statut'],[['Marie-Claire Essomba','Femmes','29 sept.','En attente'],['Joël Mbida','Jeunesse','21 sept.','Actif'],['Famille Tchoupo','—','14 sept.','Actif']]],
+ perms:P(['C/R/V','Local','Selon règles','Oui','Selon droits','Limité'])},
+{id:'fin',label:'Responsable financier',level:'Paroisse',user:'Grâce Ndjock',crumbs:['CEPCA','EEC','Douala-Centre','Paroisse de Deïdo'],scope:'Contributions de la Paroisse de Deïdo uniquement.',nav:['dash','pay','proj','reports','audit'],badges:{pay:4},primary:'Saisie manuelle',
+ kpis:[['Collecté (sept.)','1,9 M FCFA','+8 % vs août'],['Transactions','612','96,4 % réussies'],['Écarts à rapprocher','4','Opérateur ≠ plateforme'],['Récurrentes actives','138','Dont 61 diaspora']],
+ chart:['Collecte mensuelle','M FCFA',[1.4,1.5,1.5,1.6,1.8,1.9]],
+ queue:[['ph ph-warning','Écart : MoMo 25 000 FCFA non confirmé','Réf. MP2609-4471 · 26 sept.'],['ph ph-warning','Écart : Orange Money 10 000 FCFA en double','Réf. OM2509-1192 · 25 sept.'],['ph ph-receipt','Clôture du mois de septembre','612 transactions · 1 902 400 FCFA']],
+ table:['Dernières contributions',['Fidèle','Type','Montant','Statut'],[['É. Moukoko','Dîme','25 000','Réussi'],['P. Ndoumbe (Lyon)','Projet Bépanda','65 600','Réussi'],['J. Mbida','Offrande','2 000','Réussi'],['A. Kingue','Dîme','15 000','En attente'],['S. Njanga','Œuvre sociale','5 000','Échec']]],
+ perms:P(['C','Local','Oui','C','Oui','Non'])},
+{id:'proj',label:'Responsable projet',level:'Paroisse',user:'Luc Njoh',crumbs:['CEPCA','EEC','Deïdo','Projets'],scope:'Projets dont vous êtes responsable.',nav:['dash','proj','pay','docs','news'],badges:{},primary:'Nouveau projet',
+ kpis:[['Projets suivis','3','1 en retard'],['Mobilisé','25 M FCFA','Sur 40 M visés'],['Contributeurs','318','Dont 74 diaspora'],['Bénévoles','46','']],
+ chart:['Mobilisation Chapelle de Bépanda','M FCFA',[12,15,17,20,23,25]],
+ queue:[['ph ph-camera','Photos du chantier (lot 4)','À publier dans le suivi du projet'],['ph ph-file-text','Rapport d\'étape de septembre','Brouillon · à soumettre au pasteur']],
+ table:['Mes projets',['Projet','Échéance','Mobilisé','Statut'],[['Chapelle de Bépanda','Juin 2027','62,5 %','En cours'],['Forage de Bonamoussadi','Déc. 2026','88 %','En cours'],['Bibliothèque des jeunes','Mars 2026','100 %','Achevé']]],
+ perms:P(['C/R','Local','C','C/R','Oui','Non'])},
+{id:'com',label:'Responsable communication',level:'Paroisse',user:'Sandrine Njanga',crumbs:['CEPCA','EEC','Deïdo','Communication'],scope:'Publications et notifications de la Paroisse de Deïdo.',nav:['dash','news','events','sermons','notif','docs'],badges:{news:2},primary:'Nouvelle publication',
+ kpis:[['Publications (sept.)','18','+5 vs août'],['Lectures','9 420','Moyenne 523 par article'],['Notifications envoyées','6','Taux d\'ouverture 64 %'],['Prédications en ligne','12','3 480 écoutes']],
+ chart:['Lectures des publications','lectures',[4200,5100,4800,6300,7900,9420]],
+ queue:[['ph ph-newspaper','Annonce : culte d\'union du 18 oct.','Brouillon prêt · validation du pasteur requise'],['ph ph-microphone-stage','Prédication : « Demeurer dans la vigne »','Audio 38 min · à publier']],
+ table:['Publications récentes',['Titre','Audience','Lectures','Statut'],[['Semaine de prière du 5 au 9 oct.','Tous les fidèles','1 204','Publié'],['Répétition chorale déplacée','Chorale','86','Publié'],['Collecte pour les familles déplacées','Tous les fidèles','942','Publié'],['Culte d\'union du 18 oct.','Tous les fidèles','—','Brouillon']]],
+ perms:P(['C/R','Local','Non','C','Selon droits','Non'])}];
+const RI = {cepca:'ph ph-globe-hemisphere-west',conf:'ph ph-church',syn:'ph ph-tree-structure',cons:'ph ph-git-branch',par:'ph ph-book-open-text',chap:'ph ph-house-line',fin:'ph ph-hand-coins',proj:'ph ph-buildings',com:'ph ph-megaphone'};
+const ST = { 'Actif':['#e3eee5','#1f5a36'],'Réussi':['#e3eee5','#1f5a36'],'Publié':['#e3eee5','#1f5a36'],'Achevé':['#e3eee5','#1f5a36'],'En cours':['#f6ead2','#8a5a10'],'En attente':['#f6ead2','#8a5a10'],'Configuration':['#f6ead2','#8a5a10'],'Brouillon':['#ece6d9','#55665a'],'Suspendu':['#f3dcdc','#8a2330'],'Annulé':['#f3dcdc','#8a2330'],'À valider':['#f6ead2','#8a5a10'],'Saisie manuelle':['#e1e8f0','#2b4a6b'],'À pourvoir':['#f3dcdc','#8a2330'],'Échec':['#f3dcdc','#8a2330'] };
+const AUDIT = u => [['09:42',u,'s\'est connecté(e)'],['09:15','Système','a synchronisé 38 paiements MoMo'],['Hier 18:04',u,'a exporté le rapport d\'août'],['Hier 11:30','Grâce Ndjock','a validé 212 contributions'],['28 sept.','Rév. A. Din','a modifié les droits du consistoire Édéa']];
+const TYPES = ['Conseil','Confession','Synode','Consistoire','Paroisse','Chapelle'];
+const TICON = ['ph ph-globe-hemisphere-west','ph ph-church','ph ph-tree-structure','ph ph-git-branch','ph ph-book-open-text','ph ph-house-line'];
+const N = (id, name, resp, fid, st, children = []) => ({ id, name, resp, fid, st, children });
+const TREE = N('cepca','CEPCA','Pasteur Samuel Ngo','184 320','Actif',[
+ N('eec','Église Évangélique du Cameroun (EEC)','Rév. Joseph Ekwalla','58 210','Actif',[
+  N('lit','Synode du Littoral','Rév. Alain Din','21 400','Actif',[
+   N('dc','Consistoire Douala-Centre','Rév. François Mbappe','6 840','Actif',[
+    N('dei','Paroisse de Deïdo','Pasteur Élise Moukoko','1 284','Actif',[N('bon','Chapelle de Bonamoussadi','Ancien Thomas Ekambi','186','Actif'),N('ndo','Chapelle de Ndogbong','Ancien Rose Mbella','142','Actif'),N('kot','Chapelle de Kotto','Poste vacant','97','À pourvoir')]),
+    N('akw',"Paroisse d'Akwa",'Pasteur R. Tchana','1 102','Actif'),
+    N('bep','Paroisse de Bépanda','Pasteur L. Njoh','860','Actif'),
+    N('nbl','Paroisse de New-Bell','Pasteur K. Ewane','744','Actif')]),
+   N('dn','Consistoire Douala-Nord','Rév. G. Eboa','5 920','Actif'),
+   N('ede',"Consistoire d'Édéa",'Rév. I. Mandeng','3 110','Actif')]),
+  N('cen','Synode du Centre','Rév. B. Essomba','15 870','Actif'),
+  N('dia','Synode Diaspora','Rév. E. Tonye','4 260','Actif')]),
+ N('epc','Église Presbytérienne Camerounaise (EPC)','Rév. M. Abessolo','41 870','Actif'),
+ N('pcc','Presbyterian Church in Cameroon (PCC)','Rt Rev. F. Nkwain','36 400','Actif'),
+ N('uebc','Union des Églises Baptistes du Cameroun (UEBC)','Pasteur D. Mbarga','22 140','Actif'),
+ N('eelc','Église Évangélique Luthérienne au Cameroun (EELC)','Rév. P. Doumba','14 900','Configuration')]);
+const ROOT = { cepca:'cepca', conf:'eec', syn:'lit', cons:'dc', par:'dei', chap:'bon', fin:'dei', proj:'dei', com:'dei' };
+const OPEN0 = { cepca:1, eec:1, lit:1, dc:1, dei:1 };
+const USERS = [
+['Élise Moukoko','Pasteur','Paroisse de Deïdo','+237 677 12 34 42','Actif','dei'],['Grâce Ndjock','Responsable financier','Paroisse de Deïdo','+237 699 45 10 21','Actif','dei'],
+['Sandrine Njanga','Responsable communication','Paroisse de Deïdo','+237 655 87 32 09','Actif','dei'],['Joël Mbida','Responsable jeunesse','Paroisse de Deïdo','+237 694 58 20 37','Actif','dei'],
+['Paul Ndoumbe','Fidèle','Paroisse de Deïdo','+33 6 12 45 78 90','Actif','dei'],['Thomas Ekambi','Responsable chapelle','Chapelle de Bonamoussadi','+237 691 04 55 70','Actif','bon'],
+['Marie-Claire Essomba','Fidèle','Chapelle de Bonamoussadi','+237 650 77 21 18','En attente','bon'],['Rose Mbella','Responsable chapelle','Chapelle de Ndogbong','+237 678 66 13 45','Actif','ndo'],
+['Luc Njoh','Pasteur','Paroisse de Bépanda','+237 670 22 81 34','Actif','bep'],['Famille Kingue','Fidèle','Paroisse de New-Bell','+237 677 54 09 81','En attente','nbl'],
+['François Mbappe','Responsable consistoire','Consistoire Douala-Centre','+237 677 90 12 66','Actif','dc'],['Alain Din','Responsable synode','Synode du Littoral','+237 699 31 48 02','Actif','lit'],
+['Joseph Ekwalla','Administrateur confession','EEC','+237 699 00 11 22','Actif','eec'],['Martin Abessolo','Administrateur confession','EPC','+237 677 31 22 10','Actif','epc']];
+const ROLE_NAMES = ['Pasteur','Responsable financier','Responsable projet','Responsable communication','Responsable jeunesse','Responsable chapelle','Responsable consistoire','Responsable synode','Administrateur confession'];
+const MODS = ['Actualités et annonces','Événements','Prédications','Documents','Fidèles','Contributions','Projets','Rapports','Utilisateurs et rôles','Paramétrage'];
+const MX = { cepca:['CRV','CRV','C','CR','C','C','CRV','CRV','CRV','CRV'], conf:['CRV','CRV','CRV','CRV','CRV','CV','CRV','CRV','CRV','CRV'], syn:['CRV','CRV','CR','CR','CRV','C','CRV','CR','CR',''], cons:['CRV','CRV','CR','CR','CRV','C','CRV','CR','CR',''], par:['CRV','CRV','CRV','CRV','CRV','C','CRV','CR','CR',''], chap:['CR','CR','C','C','CR','C','C','C','',''], fin:['C','C','','C','C','CRV','C','CR','',''], proj:['CR','C','','CR','C','C','CR','C','',''], com:['CR','CR','CR','CR','C','','C','C','',''] };
+const REP = {
+ contrib:{l:'Contributions',icon:'ph ph-hand-coins',kp:[['Collecté','146,2 M FCFA'],['Transactions','48 210'],['Taux de réussite','96,8 %']],cols:['Structure','Montant (FCFA)','Transactions','Évolution'],rw:[['Synode du Littoral','52,0 M','16 940','+4 %'],['Synode du Centre','38,1 M','12 310','+7 %'],['Synode du Moungo','21,4 M','7 020','+2 %'],['Synode Diaspora','16,3 M','3 880','+11 %']]},
+ fid:{l:'Fidèles',icon:'ph ph-users',kp:[['Fidèles inscrits','58 210'],['Nouveaux','1 392'],['Diaspora','9 640']],cols:['Structure','Fidèles','Nouveaux','Diaspora'],rw:[['Synode du Littoral','21 400','512','2 870'],['Synode du Centre','15 870','388','1 940'],['Synode du Moungo','8 230','176','610'],['Synode Diaspora','4 260','140','4 260']]},
+ proj:{l:'Projets',icon:'ph ph-buildings',kp:[['Projets actifs','14'],['Mobilisé','186 M FCFA'],['Achevés','3']],cols:['Projet','Budget (FCFA)','Mobilisé','Avancement'],rw:[['Centre de santé de Nkongsamba','120 M','41 M','34 %'],['Chapelle de Bépanda','40 M','25 M','62,5 %'],['Forage de Bonamoussadi','6 M','5,3 M','88 %'],['Bibliothèque des jeunes','4 M','4 M','100 %']]},
+ act:{l:'Activité et audience',icon:'ph ph-chart-line',kp:[['Publications','212'],['Lectures','84 300'],['Écoutes','31 900']],cols:['Structure','Publications','Lectures','Écoutes'],rw:[['Synode du Littoral','78','31 200','12 400'],['Synode du Centre','61','24 800','9 100'],['Synode du Moungo','39','14 100','5 600'],['Synode Diaspora','34','14 200','4 800']]}};
+const PERIODS = [['m','Septembre 2026'],['t','3e trimestre 2026'],['y','Année 2026']];
+const RECENT0 = [{t:'Contributions · Septembre 2026',m:'Synode du Littoral · généré le 1 oct. par Rév. Alain Din',f:'PDF'},{t:'Fidèles · 3e trimestre 2026',m:'EEC · généré le 30 sept. par Rév. Joseph Ekwalla',f:'Excel'}];
+const AUD = [
+['2 oct. 10:14','Rév. Joseph Ekwalla','Connexion','Connexion au back-office','EEC','41.202.219.12'],
+['2 oct. 09:58','Grâce Ndjock','Validation','A validé 38 contributions','Paroisse de Deïdo','154.72.160.4'],
+['2 oct. 09:15','Système','Paiement','Synchronisation de 38 paiements MTN MoMo','Paroisse de Deïdo','—'],
+['1 oct. 18:40','Pasteur Élise Moukoko','Publication','A publié « Semaine de prière du 5 au 9 octobre »','Paroisse de Deïdo','102.244.31.8'],
+['1 oct. 17:02','Rév. Alain Din','Droits',"A nommé Rév. I. Mandeng responsable du Consistoire d'Édéa",'Synode du Littoral','41.202.207.55'],
+['1 oct. 11:26','Grâce Ndjock','Export','A exporté le rapport des contributions de septembre (PDF)','Paroisse de Deïdo','154.72.160.4'],
+['30 sept. 20:12','Système','Paiement','Échec Orange Money OM3009-2210 (solde insuffisant)','Chapelle de Bonamoussadi','—'],
+['30 sept. 16:45','Pasteur Samuel Ngo','Validation',"A validé l'adhésion de l'Église Protestante Africaine",'CEPCA','197.159.2.90'],
+['30 sept. 09:03','Sandrine Njanga','Publication','A envoyé une notification à 1 284 fidèles','Paroisse de Deïdo','102.244.31.20'],
+['29 sept. 15:30','Rév. Joseph Ekwalla','Droits','A modifié les droits du rôle Responsable communication','EEC','41.202.219.12'],
+['29 sept. 08:11','Ancien Thomas Ekambi','Connexion','Échec de connexion (code SMS expiré)','Chapelle de Bonamoussadi','154.72.171.3'],
+['28 sept. 19:47','Rév. François Mbappe','Validation','A rattaché la Chapelle de Ndogpassi II à la Paroisse de New-Bell','Consistoire Douala-Centre','41.202.199.7']];
+const AK = { Connexion:['#ece6d9','#33443a'], Validation:['#e3eee5','#1f5a36'], Paiement:['#f6ead2','#8a5a10'], Droits:['#f3dcdc','#8a2330'], Export:['#e1e8f0','#2b4a6b'], Publication:['#e8e3f1','#4b3a7a'] };
+const SPECIAL = ['struct','users','roles','reports','audit','news','events','pay','sermons','docs','notif','proj','settings'];
+const PUBS0 = [
+{t:'Semaine de prière du 5 au 9 octobre',k:'Annonce',aud:'Tous les fidèles',d:'30 sept.',reads:1204,st:'Publié',notif:true,body:"Du lundi 5 au vendredi 9 octobre, la paroisse se réunit chaque soir à 18:30 au temple de Deïdo autour du thème « Veillez et priez »."},
+{t:'Répétition chorale déplacée au mercredi',k:'Annonce',aud:'Chorale',d:'28 sept.',reads:86,st:'Publié',notif:true,body:'La répétition de jeudi est déplacée au mercredi 7 octobre à 18:00.'},
+{t:'Collecte pour les familles déplacées',k:'Actualité',aud:'Tous les fidèles',d:'24 sept.',reads:942,st:'Publié',notif:false,body:'Vivres, fournitures scolaires et dons en argent sont reçus jusqu\'au 11 octobre.'},
+{t:"Culte d'union du 18 octobre",k:'Annonce',aud:'Tous les fidèles',d:'—',reads:0,st:'À valider',notif:true,body:"Les paroisses du consistoire Douala-Centre célèbrent ensemble au temple d'Akwa, à 10:00."},
+{t:'Forum jeunesse : le programme',k:'Actualité',aud:'Jeunesse',d:'—',reads:0,st:'Brouillon',notif:false,body:''}];
+const AUDS = [['Tous les fidèles',1284],['Jeunesse',164],['Chorale',42],['Femmes',86],['Diaspora',214]];
+const EV0 = [
+{t:'Culte dominical',date:'2026-10-04',h:'10:00',lieu:'Temple de Deïdo',live:true,insc:false,cap:0,n:0,st:'Publié'},
+{t:'Semaine de prière',date:'2026-10-05',h:'18:30',lieu:'Temple de Deïdo',live:true,insc:false,cap:0,n:0,st:'Publié'},
+{t:'Répétition chorale',date:'2026-10-07',h:'18:00',lieu:'Salle paroissiale',live:false,insc:true,cap:60,n:42,st:'Publié'},
+{t:'Assemblée des jeunes',date:'2026-10-10',h:'15:00',lieu:'Salle paroissiale',live:false,insc:true,cap:120,n:64,st:'Brouillon'},
+{t:"Culte d'union du consistoire",date:'2026-10-18',h:'10:00',lieu:"Temple d'Akwa",live:true,insc:false,cap:0,n:0,st:'Publié'}];
+const TX0 = [
+['2 oct. 09:41','Élise Moukoko','Dîme','MTN MoMo',25000,'Réussi','MP0210-4412'],['2 oct. 09:12','Paul Ndoumbe (Lyon)','Projet · Bépanda','Orange Money',65600,'Réussi','OM0210-1187'],
+['2 oct. 08:55','Joël Mbida','Offrande','MTN MoMo',2000,'Réussi','MP0210-3390'],['1 oct. 21:03','Alice Kingue','Dîme','MTN MoMo',15000,'En attente','MP0110-7781'],
+['1 oct. 19:47','Sandrine Njanga','Œuvre sociale','Orange Money',5000,'Échec','OM0110-2210'],['1 oct. 18:30','Famille Tchoupo','Offrande','MTN MoMo',10000,'Réussi','MP0110-6604'],
+['1 oct. 12:15','Rose Mbella','Projet · Forage','Orange Money',20000,'Réussi','OM0110-0932'],['30 sept. 20:12','Marc Ebelle','Dîme','Orange Money',30000,'En attente','OM3009-5521'],
+['30 sept. 11:02','Grâce Ndjock','Offrande','Espèces',50000,'Saisie manuelle','MAN-0930-01'],['29 sept. 17:40','Thomas Ekambi','Dîme','MTN MoMo',25000,'Réussi','MP2909-1043']];
+const SER0 = [
+{t:'Demeurer dans la vigne',p:'Pasteur Élise Moukoko',ref:'Jean 15, 1-8',date:'2026-09-27',type:'Vidéo',dur:'38 min',plays:1240,st:'Publié',file:'culte-27-09.mp4',off:true},
+{t:'La foi qui agit',p:'Rév. Alain Din',ref:'Jacques 2, 14-26',date:'2026-09-20',type:'Audio',dur:'41 min',plays:980,st:'Publié',file:'la-foi-qui-agit.mp3',off:true},
+{t:'Veillez et priez',p:'Pasteur Élise Moukoko',ref:'Matthieu 26, 36-46',date:'2026-09-13',type:'Audio',dur:'29 min',plays:760,st:'Publié',file:'veillez-et-priez.mp3',off:false},
+{t:'Le bon berger',p:'Rév. Joseph Ekwalla',ref:'Jean 10, 11-18',date:'2026-10-04',type:'Vidéo',dur:'',plays:0,st:'Brouillon',file:'',off:true}];
+const DOC_CATS = ['Méditations','Études bibliques','Lettres pastorales','Bulletins','Administratif'];
+const VIS = ['Public','Fidèles','Responsables'], VISC = { Public:['#e3eee5','#1f5a36'], 'Fidèles':['#f6ead2','#8a5a10'], Responsables:['#ece6d9','#33443a'] };
+const DOC0 = [{t:"Méditations d'octobre",c:'Méditations',size:'1,2 Mo',vis:'Fidèles',dl:412},{t:"Étude biblique : l'Évangile de Marc (1/6)",c:'Études bibliques',size:'840 Ko',vis:'Fidèles',dl:233},{t:'Lettre pastorale de rentrée',c:'Lettres pastorales',size:'310 Ko',vis:'Public',dl:968},{t:"Bulletin paroissial d'octobre",c:'Bulletins',size:'2,3 Mo',vis:'Fidèles',dl:301},{t:'Procès-verbal du conseil paroissial (sept.)',c:'Administratif',size:'520 Ko',vis:'Responsables',dl:14},{t:"Guide de l'animateur",c:'Études bibliques',size:'2,1 Mo',vis:'Responsables',dl:38}];
+const NOT0 = [{t:'Le culte commence dans 1 h',m:"Culte dominical au temple de Deïdo, en direct dans l'app.",aud:'Tous les fidèles',ch:'Push',when:'27 sept. 09:00',n:1284,open:'71 % ouvertes'},{t:'Semaine de prière',m:'Du 5 au 9 octobre, chaque soir à 18:30 au temple.',aud:'Tous les fidèles',ch:'Push + SMS',when:'30 sept. 18:00',n:1284,open:'64 % ouvertes'},{t:'Répétition déplacée',m:'La répétition a lieu mercredi 7 octobre à 18:00.',aud:'Chorale',ch:'SMS',when:'28 sept. 12:10',n:42,open:'SMS remis'}];
+const PRJ0 = [
+{t:'Chapelle de Bépanda',resp:'Luc Njoh',goal:40e6,raised:25e6,end:'Juin 2027',open:true,steps:[['Fondations',true],['Élévation des murs',false],['Charpente et toiture',false],['Finitions',false]],ups:[['28 sept.','Élévation des murs : 70 %'],['12 juil.','Fondations achevées']]},
+{t:'Forage de Bonamoussadi',resp:'Thomas Ekambi',goal:6e6,raised:5.28e6,end:'Déc. 2026',open:true,steps:[['Étude du sol',true],["Choix de l'entreprise",true],['Forage',false],['Mise en service',false]],ups:[['21 sept.','Entreprise de forage retenue']]},
+{t:'Soutien aux familles déplacées',resp:'Union des femmes',goal:3e6,raised:2.16e6,end:'Permanente',open:true,steps:[['Recensement des familles',true],['Distribution trimestrielle',false]],ups:[['25 sept.','48 familles aidées ce trimestre']]}];
+const CAN_PUB = ['cepca','conf','syn','cons','par','chap'];
+const PAGE_NOTE = { sermons:'Mettez en ligne les prédications audio et vidéo des cultes.', docs:'Méditations, études bibliques, lettres et bulletins en PDF, avec la visibilité de chacun.', notif:'Envoyez une notification push ou un SMS aux fidèles, maintenant ou à une date programmée.', proj:'Suivez la mobilisation, les étapes et les nouvelles de chaque projet.', settings:'Identité de la structure, langues, types de contributions et moyens de paiement.', news:'Annonces, actualités et communiqués de votre structure. Rédigez, ciblez une audience, faites valider puis publiez.', events:'Activités et cultes de l\'agenda des fidèles, avec horaires Douala et Paris, retransmission et inscriptions.', pay:'Contributions reçues par Mobile Money et saisies manuelles. Rapprochez les paiements en attente avant de clôturer le mois.', struct:'Créez et organisez les structures de votre périmètre. Chaque niveau hérite de son parent.', users:'Fidèles et responsables de votre périmètre. Attribuez les rôles et validez les inscriptions.', roles:'Ce que chaque rôle peut consulter, créer ou valider. Les droits s\'appliquent à la structure de la personne et à ses sous-structures.', reports:'Générez un rapport sur votre périmètre, prévisualisez-le puis exportez-le.', audit:'Toutes les actions sensibles sont tracées : connexions, validations, paiements, droits, exports.' };
+class Component extends DCLogic {
+  state = { role: this.props.role ?? 'cepca', nav: 'dash', dec: {}, toast: '', open: OPEN0, sel: null, added: {}, addOpen: false, addName: '', uq: '', uf: 'Tous', usel: null, assign: {}, valid: {}, susp: {}, aRole: 'Pasteur', aStruct: '', rr: 'par', mx: {}, mxSaved: true, rType: 'contrib', rPer: 'm', rScope: '', rFmt: 'PDF', recent: RECENT0, aq: '', af: 'Tous', pubs: PUBS0, pubSel: null, pf: 'Toutes', evs: EV0, evSel: 0, txs: TX0, cf: 'Tous', cq: '', manOpen: false, mName: '', mType: 'Offrande', mAmt: '', mMode: 'Espèces', closed: false, sers: SER0, serSel: 0, docs: DOC0, df: 'Tous', docForm: false, dName: '', dCat: 'Méditations', dVis: 'Fidèles', dFile: false, notifs: NOT0, nT: '', nM: '', nAud: 'Tous les fidèles', nPush: true, nSms: false, nWhen: 'now', nDate: '2026-10-04T08:00', prjs: PRJ0, prjSel: 0, pjUp: '', stName: 'Paroisse de Deïdo', stAddr: 'Rue du Temple, Deïdo, Douala', stFr: true, stEn: true, stTz: 'Douala', stReceipt: 'Reçu délivré par la plateforme CEPCA. Conservez-le pour vos déclarations.', stTypes: [['Offrande',true],['Dîme',true],['Projet',true],['Œuvre sociale',true],['Jubilé 2027',false]], stOps: [['MTN Mobile Money','1,5 %',true],['Orange Money','1,5 %',true],['Carte bancaire (diaspora)','2,9 %',false]], stNew: '' };
+  flash(t) { clearTimeout(this.tt); this.setState({ toast: t }); this.tt = setTimeout(() => this.setState({ toast: '' }), 2400); }
+  renderVals() {
+    const s = this.state, R = ROLES.find(r => r.id === s.role) || ROLES[0];
+    const max = Math.max(...R.chart[2]);
+    const fmt = v => v >= 1000 ? v.toLocaleString('fr-FR') : String(v).replace('.', ',');
+    const queue = R.queue.map((q, i) => { const k = R.id + i, d = s.dec[k]; return { icon: q[0], title: q[1], meta: q[2], open: !d, done: !!d, doneLabel: d === 'ok' ? 'Validé' : 'Refusé', doneIcon: d === 'ok' ? 'ph-bold ph-check' : 'ph-bold ph-x', doneColor: d === 'ok' ? '#1f5a36' : '#8a2330',
+      approve: () => { this.setState({ dec: { ...s.dec, [k]: 'ok' } }); this.flash('Validé : ' + q[1].split(' : ')[0]); }, reject: () => { this.setState({ dec: { ...s.dec, [k]: 'no' } }); this.flash('Refusé et renvoyé à l\'auteur'); } }; });
+    const pending = queue.filter(q => q.open).length;
+    const name = R.user.replace(/^(Pasteur|Rév\.|Ancien|Rt Rev\.)\s+/, '');
+    const chip = on => ({ bg: on ? '#1f5a36' : '#fbf8f2', fg: on ? '#f4efe6' : '#1c2a21', bc: on ? '#1f5a36' : '#d9d2c2' });
+    const stc = st => ST[st] || ['#ece6d9', '#55665a'];
+    const kids = n => [...(n.children || []), ...(s.added[n.id] || [])];
+    const findD = (n, id, d) => { if (n.id === id) return { n, d }; for (const c of kids(n)) { const x = findD(c, id, d + 1); if (x) return x; } return null; };
+    const root = findD(TREE, ROOT[R.id], 0);
+    const all = []; const walk = (n, d) => { all.push({ n, d }); kids(n).forEach(c => walk(c, d + 1)); }; walk(root.n, root.d);
+    const inScope = new Set(all.map(x => x.n.id));
+    const selId = s.sel && inScope.has(s.sel) ? s.sel : root.n.id;
+    const selD = all.find(x => x.n.id === selId);
+    const vis = []; const v = (n, d, rel) => { vis.push({ n, d, rel }); if (s.open[n.id]) kids(n).forEach(c => v(c, d + 1, rel + 1)); }; v(root.n, root.d, 0);
+    const confirmAdd = () => { const nm = s.addName.trim(); if (!nm) return; const node = N('n' + Date.now(), nm, 'À nommer', '0', 'Configuration'); this.setState({ added: { ...s.added, [selId]: [...(s.added[selId] || []), node] }, open: { ...s.open, [selId]: 1 }, addOpen: false, addName: '' }); this.flash(TYPES[selD.d + 1] + ' créée : ' + nm); };
+    // users
+    const ql = s.uq.trim().toLowerCase();
+    const usersAll = USERS.map((u, i) => { const pend = u[4] === 'En attente' && !s.valid[i]; const st = s.susp[i] ? 'Suspendu' : pend ? 'En attente' : 'Actif'; return { i, name: u[0], role: u[1], struct: u[2], phone: u[3], st, pending: pend, sid: u[5], ini: u[0].split(' ').map(w => w[0]).slice(0, 2).join('') }; }).filter(u => inScope.has(u.sid));
+    const users = usersAll.filter(u => (s.uf === 'Tous' || (s.uf === 'Responsables' && u.role !== 'Fidèle') || (s.uf === 'Fidèles' && u.role === 'Fidèle') || (s.uf === 'En attente' && u.st === 'En attente')) && (!ql || (u.name + ' ' + u.phone + ' ' + u.struct + ' ' + u.role).toLowerCase().includes(ql)));
+    const us = usersAll.find(u => u.i === s.usel);
+    const aStruct = s.aStruct && inScope.has(s.aStruct) ? s.aStruct : root.n.id;
+    // roles matrix
+    const RR = ROLES.find(x => x.id === s.rr) || ROLES[4];
+    // reports
+    const rep = REP[s.rType], rScope = s.rScope && inScope.has(s.rScope) ? s.rScope : root.n.id;
+    const repScopes = all.filter(x => x.d <= root.d + 1).map(x => ({ id: x.n.id, l: x.n.name }));
+    const generate = () => { const sc = all.find(x => x.n.id === rScope).n.name; this.setState({ recent: [{ t: rep.l + ' · ' + PERIODS.find(p => p[0] === s.rPer)[1], m: sc + ' · généré le 2 oct. par ' + R.user, f: s.rFmt }, ...s.recent] }); this.flash('Rapport généré (' + s.rFmt + ')'); };
+    // audit
+    const aql = s.aq.trim().toLowerCase();
+    const auditRows = AUD.filter(a => (s.af === 'Tous' || a[2] === s.af) && (!aql || a.join(' ').toLowerCase().includes(aql))).map(a => ({ t: a[0], u: a[1], k: a[2], d: a[3], s: a[4], ip: a[5], bg: AK[a[2]][0], fg: AK[a[2]][1] }));
+    const saveMx = () => { this.setState({ mxSaved: true }); this.flash('Droits enregistrés : ' + RR.label); };
+    const PRIM = { struct: ['Nouvelle structure', 'ph-bold ph-plus', () => selD.d < 5 ? this.setState({ addOpen: true }) : this.flash("Une chapelle n'a pas de sous-structure")], users: ['Inviter un utilisateur', 'ph-bold ph-user-plus', () => this.flash('Invitation envoyée par SMS')], roles: ['Enregistrer les droits', 'ph-bold ph-floppy-disk', saveMx], reports: ['Générer le rapport', 'ph-bold ph-file-arrow-down', generate], audit: ['Exporter le journal (CSV)', 'ph-bold ph-download-simple', () => this.flash('Journal exporté (CSV)')] };
+    const fmtN = n => Math.round(n).toLocaleString('fr-FR');
+    const canPub = CAN_PUB.includes(R.id);
+    const updP = (i, patch) => this.setState(st => ({ pubs: st.pubs.map((x, j) => j === i ? { ...x, ...patch } : x) }));
+    const newPub = () => this.setState(st => ({ pubs: [{ t: '', k: 'Annonce', aud: 'Tous les fidèles', d: '—', reads: 0, st: 'Brouillon', notif: true, body: '' }, ...st.pubs], pubSel: 0, pf: 'Toutes' }));
+    const PFM = { 'Toutes': () => true, 'Publiées': x => x.st === 'Publié', 'À valider': x => x.st === 'À valider', 'Brouillons': x => x.st === 'Brouillon' };
+    const pb = s.pubSel !== null ? s.pubs[s.pubSel] : null;
+    const pubActL = !pb ? '' : canPub ? (pb.st === 'À valider' ? 'Valider et publier' : pb.st === 'Publié' ? 'Mettre à jour' : 'Publier') : (pb.st === 'Publié' ? 'Proposer une modification' : 'Soumettre au pasteur');
+    const audN = pb ? (AUDS.find(a => a[0] === pb.aud) || AUDS[0])[1] : 0;
+    const pubAct = () => { if (!pb || !pb.t.trim()) return this.flash('Ajoutez un titre avant de publier'); if (canPub) { updP(s.pubSel, { st: 'Publié', d: pb.d === '—' ? '2 oct.' : pb.d }); this.flash('Publié' + (pb.notif ? ' · notification envoyée à ' + fmtN(audN) + ' fidèles' : '')); } else { updP(s.pubSel, { st: 'À valider' }); this.flash('Soumis au pasteur pour validation'); } };
+    const updE = (i, patch) => this.setState(st => ({ evs: st.evs.map((x, j) => j === i ? { ...x, ...patch } : x) }));
+    const newEv = () => this.setState(st => ({ evs: [...st.evs, { t: '', date: '2026-10-25', h: '10:00', lieu: 'Temple de Deïdo', live: false, insc: false, cap: 50, n: 0, st: 'Brouillon' }], evSel: st.evs.length }));
+    const eb = s.evs[Math.min(s.evSel, s.evs.length - 1)];
+    const dt = d => new Date(d + 'T12:00:00');
+    const plus1 = hh => { const [a, b] = (hh || '00:00').split(':').map(Number); return String((a + 1) % 24).padStart(2, '0') + ':' + String(b || 0).padStart(2, '0'); };
+    const cql = s.cq.trim().toLowerCase();
+    const txAll = s.txs.map((x, i) => ({ i, d: x[0], who: x[1], type: x[2], op: x[3], amt: x[4], st: x[5], ref: x[6] }));
+    const txs = txAll.filter(x => (s.cf === 'Tous' || x.st === s.cf || (s.cf === 'Manuel' && x.st === 'Saisie manuelle')) && (!cql || (x.who + ' ' + x.ref + ' ' + x.type).toLowerCase().includes(cql)));
+    const setTx = (i, st) => this.setState(p => ({ txs: p.txs.map((x, j) => j === i ? [...x.slice(0, 5), st, x[6]] : x) }));
+    const ok = txAll.filter(x => x.st === 'Réussi' || x.st === 'Saisie manuelle'), pend = txAll.filter(x => x.st === 'En attente'), fail = txAll.filter(x => x.st === 'Échec');
+    const mAmtN = parseInt(String(s.mAmt).replace(/\D/g, '') || '0', 10), manValid = s.mName.trim().length > 1 && mAmtN >= 100;
+    const saveMan = () => { if (!manValid) return; this.setState(p => ({ txs: [['2 oct. 10:20', p.mName.trim(), p.mType, p.mMode, mAmtN, 'Saisie manuelle', 'MAN-1002-0' + (p.txs.length + 1)], ...p.txs], manOpen: false, mName: '', mAmt: '' })); this.flash('Contribution enregistrée · reçu envoyé par SMS'); };
+    PRIM.news = ['Nouvelle publication', 'ph-bold ph-plus', newPub];
+    PRIM.events = ['Nouvel événement', 'ph-bold ph-plus', newEv];
+    PRIM.pay = ['Saisie manuelle', 'ph-bold ph-plus', () => this.setState({ manOpen: true })];
+    const upd = (key, i, patch) => this.setState(st => ({ [key]: st[key].map((x, j) => j === i ? { ...x, ...patch } : x) }));
+    const sb = s.sers[Math.min(s.serSel, s.sers.length - 1)];
+    const newSer = () => this.setState(st => ({ sers: [{ t: '', p: R.user, ref: '', date: '2026-10-04', type: 'Audio', dur: '', plays: 0, st: 'Brouillon', file: '', off: true }, ...st.sers], serSel: 0 }));
+    const sbPublish = () => { if (!sb.t.trim() || !sb.file) return this.flash('Ajoutez un titre et le fichier ' + sb.type.toLowerCase()); upd('sers', s.serSel, { st: 'Publié' }); this.flash('Prédication publiée · notification envoyée aux fidèles'); };
+    const dValid = s.dName.trim().length > 1 && s.dFile;
+    const dSave = () => { if (!dValid) return; this.setState(st => ({ docs: [{ t: st.dName.trim(), c: st.dCat, size: '640 Ko', vis: st.dVis, dl: 0 }, ...st.docs], docForm: false, dName: '', dFile: false })); this.flash('Document mis en ligne'); };
+    const audN2 = (AUDS.find(a => a[0] === s.nAud) || AUDS[0])[1];
+    const nValid = s.nT.trim().length > 1 && s.nM.trim().length > 1 && s.nM.length <= 160 && (s.nPush || s.nSms);
+    const chL = [s.nPush && 'Push', s.nSms && 'SMS'].filter(Boolean).join(' + ');
+    const nSend = () => { if (!nValid) return this.flash('Complétez le titre, le message et le canal'); const when = s.nWhen === 'now' ? '2 oct. 10:30' : 'Programmée · ' + new Date(s.nDate).toLocaleString('fr-FR', { day: 'numeric', month: 'short', hour: '2-digit', minute: '2-digit' }); this.setState(st => ({ notifs: [{ t: st.nT.trim(), m: st.nM.trim(), aud: st.nAud, ch: chL, when, n: audN2, open: st.nWhen === 'now' ? 'Envoi en cours' : 'En attente' }, ...st.notifs], nT: '', nM: '' })); this.flash(s.nWhen === 'now' ? 'Notification envoyée à ' + fmtN(audN2) + ' fidèles' : 'Notification programmée'); };
+    const pj = s.prjs[Math.min(s.prjSel, s.prjs.length - 1)];
+    const newPrj = () => this.setState(st => ({ prjs: [...st.prjs, { t: 'Nouveau projet', resp: R.user, goal: 1e6, raised: 0, end: 'À définir', open: false, steps: [['Cadrage', false]], ups: [] }], prjSel: st.prjs.length }));
+    const mil = n => n >= 1e6 ? String(Math.round(n / 1e4) / 100).replace('.', ',') + ' M' : fmtN(n);
+    const swv = on => ({ bg: on ? '#1f5a36' : '#c9d3c8', x: on ? '23px' : '3px' });
+    PRIM.sermons = ['Nouvelle prédication', 'ph-bold ph-plus', newSer];
+    PRIM.docs = ['Ajouter un document', 'ph-bold ph-upload-simple', () => this.setState({ docForm: true })];
+    PRIM.notif = ['Envoyer la notification', 'ph-bold ph-paper-plane-tilt', nSend];
+    PRIM.proj = ['Nouveau projet', 'ph-bold ph-plus', newPrj];
+    PRIM.settings = ['Enregistrer', 'ph-bold ph-floppy-disk', () => this.flash('Paramètres enregistrés')];
+    const pg = PRIM[s.nav];
+    const special = {
+      isDash: !SPECIAL.includes(s.nav), isStruct: s.nav === 'struct', isUsers: s.nav === 'users', isRoles: s.nav === 'roles', isReports: s.nav === 'reports', isAudit: s.nav === 'audit',
+      primaryIcon: pg ? pg[1] : 'ph-bold ph-plus',
+      structCount: all.length,
+      tree: vis.map(({ n, d, rel }) => { const hk = kids(n).length > 0, on = n.id === selId; return { name: n.name, type: TYPES[d], icon: TICON[d], indent: (rel * 22) + 'px', caret: hk ? (s.open[n.id] ? 'ph-bold ph-caret-down' : 'ph-bold ph-caret-right') : 'ph ph-dot-outline', caretOp: hk ? 1 : 0.35, bg: on ? '#e3eee5' : 'transparent', fw: on ? 700 : 500, toggle: () => hk && this.setState({ open: { ...s.open, [n.id]: !s.open[n.id] } }), select: () => this.setState({ sel: n.id, addOpen: false }) }; }),
+      sd: { name: selD.n.name, type: TYPES[selD.d], icon: TICON[selD.d], next: TYPES[selD.d + 1] || '', canAdd: selD.d < 5, noNext: selD.d >= 5 },
+      sdFacts: [['Responsable', selD.n.resp], ['Fidèles', selD.n.fid], ['Sous-structures', String(kids(selD.n).length)], ['Statut', selD.n.st]].map(f => ({ k: f[0], v: f[1] })),
+      sdKids: kids(selD.n).map(c => ({ name: c.name, resp: c.resp, st: c.st, sBg: stc(c.st)[0], sFg: stc(c.st)[1], select: () => this.setState({ sel: c.id, addOpen: false, open: { ...s.open, [selId]: 1 } }) })),
+      sdNoKids: kids(selD.n).length === 0,
+      openAdd: () => this.setState({ addOpen: true }), cancelAdd: () => this.setState({ addOpen: false, addName: '' }), editSel: () => this.flash('Modification de « ' + selD.n.name + ' » : formulaire ouvert'),
+      addOpen: s.addOpen, addName: s.addName, onAddName: e => this.setState({ addName: e.target.value }), addPh: selD.d === 4 ? 'Ex. Chapelle de Makepe' : selD.d === 3 ? 'Ex. Paroisse de Logbaba' : 'Nom', addOp: s.addName.trim() ? 1 : 0.45, confirmAdd,
+      uq: s.uq, onUq: e => this.setState({ uq: e.target.value }),
+      uChips: ['Tous', 'Responsables', 'Fidèles', 'En attente'].map(l => ({ l, ...chip(s.uf === l), onClick: () => this.setState({ uf: l }) })),
+      users: users.map(u => ({ ...u, sBg: stc(u.st)[0], sFg: stc(u.st)[1], bg: u.i === s.usel ? '#e3eee5' : 'transparent', onClick: () => this.setState({ usel: u.i }) })),
+      noUsers: users.length === 0, usersCount: usersAll.length,
+      hasUser: !!us, noUser: !us,
+      us: us ? { ...us, sBg: stc(us.st)[0], sFg: stc(us.st)[1] } : { name: '', phone: '', ini: '', st: '', pending: false },
+      uRoles: us ? [{ r: us.role, s: us.struct }, ...(s.assign[us.i] || [])] : [],
+      validateUser: () => { this.setState({ valid: { ...s.valid, [us.i]: true } }); this.flash('Inscription validée : ' + us.name); },
+      toggleSusp: () => { this.setState({ susp: { ...s.susp, [us.i]: !s.susp[us.i] } }); this.flash(s.susp[us.i] ? 'Compte réactivé' : 'Compte suspendu'); },
+      suspL: us && s.susp[us.i] ? 'Réactiver' : 'Suspendre', suspIcon: us && s.susp[us.i] ? 'ph ph-play' : 'ph ph-pause',
+      roleNames: ROLE_NAMES, aRole: s.aRole, onARole: e => this.setState({ aRole: e.target.value }),
+      structOpts: all.map(x => ({ id: x.n.id, l: '\u00a0'.repeat((x.d - root.d) * 3) + x.n.name })), aStruct, onAStruct: e => this.setState({ aStruct: e.target.value }),
+      assignNow: () => { const nm = all.find(x => x.n.id === aStruct).n.name; this.setState({ assign: { ...s.assign, [us.i]: [...(s.assign[us.i] || []), { r: s.aRole, s: nm }] } }); this.flash(s.aRole + ' · ' + nm + ' attribué à ' + us.name); },
+      mxRoles: ROLES.map(x => ({ l: x.label, ...chip(s.rr === x.id), onClick: () => this.setState({ rr: x.id }) })),
+      mxRows: MODS.map((m, i) => ({ m, cells: ['C', 'R', 'V'].map(L => { const k = s.rr + i + L, on = k in s.mx ? s.mx[k] : MX[s.rr][i].includes(L); return { aria: m + ' ' + L, bg: on ? '#1f5a36' : '#fbf8f2', bc: on ? '#1f5a36' : '#c9d3c8', icon: on ? 'ph-bold ph-check' : '', onClick: () => this.setState({ mx: { ...s.mx, [k]: !on }, mxSaved: false }) }; }) })),
+      mxScope: RR.level + ' · ' + RR.crumbs[RR.crumbs.length - 1] + ' et ses sous-structures',
+      mxState: s.mxSaved ? 'Enregistré' : 'Modifications non enregistrées', mxStateFg: s.mxSaved ? '#1f5a36' : '#8a5a10',
+      repTypes: Object.entries(REP).map(([k, x]) => ({ l: x.l, icon: x.icon, bw: s.rType === k ? '2px' : '1px', radio: s.rType === k ? 'ph-fill ph-check-circle' : 'ph ph-circle', onClick: () => this.setState({ rType: k }) })),
+      repPeriods: PERIODS.map(([k, l]) => ({ l, ...chip(s.rPer === k), onClick: () => this.setState({ rPer: k }) })),
+      repScopes, rScope, onRScope: e => this.setState({ rScope: e.target.value }),
+      repFmts: ['PDF', 'Excel', 'CSV'].map(l => ({ l, ...chip(s.rFmt === l), onClick: () => this.setState({ rFmt: l }) })), rFmt: s.rFmt,
+      rep: { l: rep.l, cols: rep.cols, kp: rep.kp.map(k => ({ l: k[0], v: k[1] })), rw: rep.rw.map(x => ({ a: x[0], b: x[1], c: x[2], d: x[3] })) },
+      repScopeName: all.find(x => x.n.id === rScope).n.name, repPeriodL: PERIODS.find(p => p[0] === s.rPer)[1], generate,
+      recent: s.recent.map(x => ({ ...x, onClick: () => this.flash('Téléchargement : ' + x.t) })),
+      aq: s.aq, onAq: e => this.setState({ aq: e.target.value }),
+      aChips: ['Tous', 'Connexion', 'Validation', 'Paiement', 'Droits', 'Export', 'Publication'].map(l => ({ l, ...chip(s.af === l), onClick: () => this.setState({ af: l }) })),
+      auditRows, noAudit: auditRows.length === 0, auditCount: auditRows.length,
+      isNews: s.nav === 'news', isEvents: s.nav === 'events', isPay: s.nav === 'pay',
+      pubChips: Object.keys(PFM).map(l => ({ l: l + ' · ' + s.pubs.filter(PFM[l]).length, ...chip(s.pf === l), onClick: () => this.setState({ pf: l }) })),
+      pubRows: s.pubs.map((x, i) => ({ ...x, i })).filter(PFM[s.pf]).map(x => ({ tt: x.t || 'Sans titre', k: x.k, aud: x.aud, d: x.d, readsL: x.reads ? fmtN(x.reads) : '—', st: x.st, sBg: stc(x.st)[0], sFg: stc(x.st)[1], bg: x.i === s.pubSel ? '#e3eee5' : 'transparent', onClick: () => this.setState({ pubSel: x.i }) })),
+      noPubs: s.pubs.filter(PFM[s.pf]).length === 0, hasPub: !!pb, noPub: !pb,
+      pb: pb ? { ...pb, sBg: stc(pb.st)[0], sFg: stc(pb.st)[1] } : { t: '', body: '', st: '', sBg: '', sFg: '' },
+      pubHead: pb && pb.d === '—' && !pb.t ? 'Nouvelle publication' : 'Publication',
+      onPubT: e => updP(s.pubSel, { t: e.target.value }), onPubB: e => updP(s.pubSel, { body: e.target.value }),
+      pubKinds: ['Annonce', 'Actualité', 'Communiqué'].map(l => ({ l, ...chip(pb && pb.k === l), onClick: () => updP(s.pubSel, { k: l }) })),
+      pubAuds: AUDS.map(([l]) => ({ l, ...chip(pb && pb.aud === l), onClick: () => updP(s.pubSel, { aud: l }) })),
+      togglePubNotif: () => updP(s.pubSel, { notif: !pb.notif }), pbNotifBg: pb && pb.notif ? '#1f5a36' : '#c9d3c8', pbNotifX: pb && pb.notif ? '23px' : '3px', audCount: fmtN(audN),
+      pubAct, pubActL, pubActOp: pb && pb.t.trim() ? 1 : 0.5, pubActIcon: canPub ? 'ph-bold ph-paper-plane-tilt' : 'ph-bold ph-arrow-bend-up-right',
+      pubDraft: () => { updP(s.pubSel, { st: pb.st === 'Publié' ? 'Publié' : 'Brouillon' }); this.flash('Brouillon enregistré'); },
+      pubCanReject: !!(pb && canPub && pb.st === 'À valider'), pubReject: () => { updP(s.pubSel, { st: 'Brouillon' }); this.flash("Renvoyé à l'auteur avec vos remarques"); },
+      pubNote: canPub ? 'Vous pouvez publier directement. Les publications rédigées par la communication arrivent ici avec le statut « À valider ».' : 'Votre publication sera vérifiée par le pasteur avant d\'être diffusée aux fidèles.',
+      evRows: s.evs.map((x, i) => ({ ...x, i })).sort((a, b) => a.date.localeCompare(b.date)).map(x => ({ tt: x.t || 'Sans titre', h: x.h, lieu: x.lieu, live: x.live, insc: x.insc, n: x.n, cap: x.cap, st: x.st, sBg: stc(x.st)[0], sFg: stc(x.st)[1], op: x.st === 'Annulé' ? 0.5 : 1, wd: dt(x.date).toLocaleDateString('fr-FR', { weekday: 'short' }).replace('.', ''), day: dt(x.date).getDate(), bg: x.i === s.evSel ? '#e3eee5' : 'transparent', onClick: () => this.setState({ evSel: x.i }) })),
+      eb: { ...eb, capS: String(eb.cap || ''), sBg: stc(eb.st)[0], sFg: stc(eb.st)[1] },
+      onEvT: e => updE(s.evSel, { t: e.target.value }), onEvD: e => updE(s.evSel, { date: e.target.value }), onEvH: e => updE(s.evSel, { h: e.target.value }), onEvL: e => updE(s.evSel, { lieu: e.target.value }),
+      onEvCap: e => updE(s.evSel, { cap: parseInt(e.target.value.replace(/\D/g, '') || '0', 10) }),
+      evParis: plus1(eb.h),
+      toggleEvLive: () => updE(s.evSel, { live: !eb.live }), evLiveBg: eb.live ? '#1f5a36' : '#c9d3c8', evLiveX: eb.live ? '23px' : '3px',
+      toggleEvInsc: () => updE(s.evSel, { insc: !eb.insc }), evInscBg: eb.insc ? '#1f5a36' : '#c9d3c8', evInscX: eb.insc ? '23px' : '3px',
+      evFill: eb.cap ? Math.min(100, eb.n / eb.cap * 100).toFixed(1) + '%' : '0%',
+      evPubL: eb.st === 'Publié' ? 'Enregistrer' : 'Publier dans l\'agenda',
+      evPublish: () => { if (!eb.t.trim()) return this.flash('Ajoutez un titre'); updE(s.evSel, { st: 'Publié' }); this.flash(eb.st === 'Publié' ? 'Modifications enregistrées · fidèles inscrits prévenus' : 'Publié dans l\'agenda des fidèles'); },
+      evCancelL: eb.st === 'Annulé' ? 'Rétablir' : 'Annuler l\'événement',
+      evCancel: () => { updE(s.evSel, { st: eb.st === 'Annulé' ? 'Publié' : 'Annulé' }); this.flash(eb.st === 'Annulé' ? 'Événement rétabli' : 'Événement annulé · notification envoyée'); },
+      payKpis: [['Collecté (oct.)', fmtN(ok.reduce((a, x) => a + x.amt, 0)) + ' FCFA', ok.length + ' contributions', '#1f5a36'], ['En attente', String(pend.length), fmtN(pend.reduce((a, x) => a + x.amt, 0)) + ' FCFA à rapprocher', '#8a5a10'], ['Échecs', String(fail.length), 'Relance possible par SMS', '#8a2330'], ['Taux de réussite', Math.round(ok.length / txAll.length * 1000) / 10 + ' %', 'MTN MoMo et Orange Money', '#55665a']].map(k => ({ l: k[0], v: k[1], n: k[2], c: k[3] })),
+      manOpen: s.manOpen, mName: s.mName, onMName: e => this.setState({ mName: e.target.value }), mType: s.mType, onMType: e => this.setState({ mType: e.target.value }), mAmt: s.mAmt, onMAmt: e => this.setState({ mAmt: e.target.value }),
+      mModes: ['Espèces', 'Chèque', 'Virement'].map(l => ({ l, ...chip(s.mMode === l), onClick: () => this.setState({ mMode: l }) })),
+      saveMan, closeMan: () => this.setState({ manOpen: false }), manOp: manValid ? 1 : 0.45,
+      cq: s.cq, onCq: e => this.setState({ cq: e.target.value }),
+      payChips: ['Tous', 'Réussi', 'En attente', 'Échec', 'Manuel'].map(l => ({ l, ...chip(s.cf === l), onClick: () => this.setState({ cf: l }) })),
+      txRows: txs.map(x => ({ ...x, amtL: fmtN(x.amt), sBg: stc(x.st)[0], sFg: stc(x.st)[1], hasAct: x.st === 'En attente' || x.st === 'Échec', actL: x.st === 'En attente' ? 'Rapprocher' : 'Relancer', act: () => { if (x.st === 'En attente') { setTx(x.i, 'Réussi'); this.flash('Rapproché avec l\'opérateur · ' + x.ref); } else this.flash('SMS de relance envoyé à ' + x.who); } })),
+      isSerm: s.nav === 'sermons', isDocs: s.nav === 'docs', isNotif: s.nav === 'notif', isProj: s.nav === 'proj', isSettings: s.nav === 'settings',
+      serRows: s.sers.map((x, i) => ({ tt: x.t || 'Sans titre', p: x.p, ref: x.ref || '—', dl: dt(x.date).toLocaleDateString('fr-FR', { day: 'numeric', month: 'short' }), playsL: x.plays ? fmtN(x.plays) : '—', icon: x.type === 'Vidéo' ? 'ph ph-video-camera' : 'ph ph-headphones', st: x.st, sBg: stc(x.st)[0], sFg: stc(x.st)[1], bg: i === s.serSel ? '#e3eee5' : 'transparent', onClick: () => this.setState({ serSel: i }) })),
+      sb: { ...sb, sBg: stc(sb.st)[0], sFg: stc(sb.st)[1] },
+      onSbT: e => upd('sers', s.serSel, { t: e.target.value }), onSbP: e => upd('sers', s.serSel, { p: e.target.value }), onSbR: e => upd('sers', s.serSel, { ref: e.target.value }), onSbD: e => upd('sers', s.serSel, { date: e.target.value }),
+      sbTypes: ['Audio', 'Vidéo'].map(l => ({ l, ...chip(sb.type === l), onClick: () => upd('sers', s.serSel, { type: l, file: '', dur: '' }) })),
+      sbFileIcon: sb.file ? 'ph-fill ph-check-circle' : (sb.type === 'Vidéo' ? 'ph ph-film-strip' : 'ph ph-waveform'), sbFileBc: sb.file ? '#1f5a36' : '#d9d2c2',
+      sbFileL: sb.file || 'Aucun fichier', sbFileSub: sb.file ? sb.type + ' · ' + (sb.dur || '—') : (sb.type === 'Vidéo' ? 'MP4, 2 Go max.' : 'MP3, 200 Mo max.'),
+      sbUpL: sb.file ? 'Remplacer' : 'Importer', sbUpload: () => { upd('sers', s.serSel, { file: sb.type === 'Vidéo' ? 'culte-04-10.mp4' : 'predication-04-10.mp3', dur: '36 min' }); this.flash('Fichier importé'); },
+      toggleSbOff: () => upd('sers', s.serSel, { off: !sb.off }), sbOffBg: swv(sb.off).bg, sbOffX: swv(sb.off).x,
+      sbPublish, sbPubL: sb.st === 'Publié' ? 'Mettre à jour' : 'Publier', sbPubOp: sb.t.trim() && sb.file ? 1 : 0.5, sbDraft: () => this.flash('Brouillon enregistré'),
+      docForm: s.docForm, dName: s.dName, onDName: e => this.setState({ dName: e.target.value }), docCatNames: DOC_CATS, dCat: s.dCat, onDCat: e => this.setState({ dCat: e.target.value }),
+      dVisChips: VIS.map(l => ({ l, ...chip(s.dVis === l), onClick: () => this.setState({ dVis: l }) })),
+      dFileL: s.dFile ? 'document.pdf · 640 Ko' : 'Aucun fichier choisi', dFileBc: s.dFile ? '#1f5a36' : '#d9d2c2', dPick: () => this.setState({ dFile: true }), dSave, dOp: dValid ? 1 : 0.45, dCancel: () => this.setState({ docForm: false }),
+      docChips: ['Tous', ...DOC_CATS].map(l => ({ l, ...chip(s.df === l), onClick: () => this.setState({ df: l }) })),
+      docRows: s.docs.map((x, i) => ({ ...x, i })).filter(x => s.df === 'Tous' || x.c === s.df).map(x => ({ ...x, dlL: x.dl ? fmtN(x.dl) : '—', vBg: VISC[x.vis][0], vFg: VISC[x.vis][1], cycle: () => upd('docs', x.i, { vis: VIS[(VIS.indexOf(x.vis) + 1) % 3] }), remove: () => { this.setState(st => ({ docs: st.docs.filter((_, j) => j !== x.i) })); this.flash('Document retiré'); } })),
+      noDocs: s.docs.filter(x => s.df === 'Tous' || x.c === s.df).length === 0,
+      nT: s.nT, onNT: e => this.setState({ nT: e.target.value }), nM: s.nM, onNM: e => this.setState({ nM: e.target.value }), nCount: s.nM.length, nCountFg: s.nM.length > 160 ? '#8a2330' : '#55665a',
+      nAuds: AUDS.map(([l]) => ({ l, ...chip(s.nAud === l), onClick: () => this.setState({ nAud: l }) })),
+      nChs: [['Push', 'nPush'], ['SMS', 'nSms']].map(([l, k]) => ({ l, ...chip(s[k]), onClick: () => this.setState({ [k]: !s[k] }) })),
+      nWhens: [['now', 'Maintenant'], ['later', 'Programmer']].map(([k, l]) => ({ l, ...chip(s.nWhen === k), onClick: () => this.setState({ nWhen: k }) })),
+      nLater: s.nWhen === 'later', nDate: s.nDate, onNDate: e => this.setState({ nDate: e.target.value }),
+      nSummary: fmtN(audN2) + ' destinataires (' + s.nAud.toLowerCase() + ')' + (s.nSms ? ' · coût SMS estimé : ' + fmtN(audN2 * 15) + ' FCFA' : ' · notification push gratuite') + '.',
+      nSend, nSendL: s.nWhen === 'now' ? 'Envoyer maintenant' : 'Programmer l\'envoi', nOp: nValid ? 1 : 0.45,
+      notifRows: s.notifs.map(x => ({ ...x, icon: /SMS/.test(x.ch) && !/Push/.test(x.ch) ? 'ph ph-chat-text' : 'ph ph-bell-ringing', nL: fmtN(x.n), openL: x.open })),
+      prjRows: s.prjs.map((x, i) => { const pc = x.raised / x.goal * 100; return { tt: x.t, resp: x.resp, pctL: String(Math.round(pc * 10) / 10).replace('.', ',') + ' %', w: pc.toFixed(1) + '%', raisedL: mil(x.raised), goalL: mil(x.goal), openL: x.open ? 'Collecte ouverte' : 'Collecte fermée', bg: i === s.prjSel ? '#e3eee5' : '#fbf8f2', onClick: () => this.setState({ prjSel: i, pjUp: '' }) }; }),
+      pj, onPjT: e => upd('prjs', s.prjSel, { t: e.target.value }),
+      pjFacts: [['Objectif', mil(pj.goal) + ' FCFA'], ['Mobilisé', mil(pj.raised) + ' FCFA'], ['Échéance', pj.end]].map(f => ({ k: f[0], v: f[1] })),
+      togglePjOpen: () => upd('prjs', s.prjSel, { open: !pj.open }), pjOpenBg: swv(pj.open).bg, pjOpenX: swv(pj.open).x,
+      pjSteps: pj.steps.map((st, i) => ({ l: st[0], st: st[1] ? 'Terminé' : 'À faire', fw: st[1] ? 700 : 500, bg: st[1] ? '#1f5a36' : '#fbf8f2', bc: st[1] ? '#1f5a36' : '#c9d3c8', icon: st[1] ? 'ph-bold ph-check' : '', onClick: () => upd('prjs', s.prjSel, { steps: pj.steps.map((x, j) => j === i ? [x[0], !x[1]] : x) }) })),
+      pjUp: s.pjUp, onPjUp: e => this.setState({ pjUp: e.target.value }), pjPostOp: s.pjUp.trim() ? 1 : 0.45,
+      pjPost: () => { if (!s.pjUp.trim()) return; upd('prjs', s.prjSel, { ups: [['2 oct.', s.pjUp.trim()], ...pj.ups] }); this.setState({ pjUp: '' }); this.flash('Mise à jour publiée pour les contributeurs'); },
+      pjUps: pj.ups.map(u => ({ d: u[0], t: u[1] })),
+      stName: s.stName, onStName: e => this.setState({ stName: e.target.value }), stAddr: s.stAddr, onStAddr: e => this.setState({ stAddr: e.target.value }),
+      stLangs: [['Français', 'stFr'], ['English', 'stEn']].map(([l, k]) => ({ l, ...chip(s[k]), onClick: () => this.setState({ [k]: !s[k] }) })),
+      stTzs: ['Douala', 'Paris'].map(l => ({ l: l === 'Douala' ? 'Douala (UTC+1)' : 'Paris (UTC+2)', ...chip(s.stTz === l), onClick: () => this.setState({ stTz: l }) })),
+      stReceipt: s.stReceipt, onStReceipt: e => this.setState({ stReceipt: e.target.value }),
+      stTypes: s.stTypes.map((x, i) => ({ l: x[0], ...swv(x[1]), onClick: () => this.setState(st => ({ stTypes: st.stTypes.map((y, j) => j === i ? [y[0], !y[1]] : y) })) })),
+      stNew: s.stNew, onStNew: e => this.setState({ stNew: e.target.value }), stAdd: () => { if (!s.stNew.trim()) return; this.setState(st => ({ stTypes: [...st.stTypes, [st.stNew.trim(), true]], stNew: '' })); },
+      stOps: s.stOps.map((x, i) => ({ l: x[0], fee: x[1], ...swv(x[2]), onClick: () => this.setState(st => ({ stOps: st.stOps.map((y, j) => j === i ? [y[0], y[1], !y[2]] : y) })) })),
+      noTx: txs.length === 0, txCount: txs.length,
+      closeL: s.closed ? 'Septembre clôturé' : 'Clôturer septembre', closeMonth: () => { if (pend.length) return this.flash('Rapprochez d\'abord les ' + pend.length + ' transaction(s) en attente'); this.setState({ closed: true }); this.flash('Septembre clôturé · rapport transmis au consistoire'); }
+    };
+    return {
+      ...special,
+      roleIcon: RI[R.id], structName: R.crumbs[R.crumbs.length - 1],
+      roleChips: ROLES.map(r => { const on = r.id === R.id; return { label: r.label, icon: RI[r.id], bg: on ? '#1f5a36' : '#fbf8f2', fg: on ? '#f4efe6' : '#1c2a21', bc: on ? '#1f5a36' : '#c9dccd', onClick: () => this.setState({ role: r.id, nav: 'dash', sel: null, usel: null, addOpen: false, rScope: '', aStruct: '', pubSel: null, evSel: 0, manOpen: false }) }; }),
+      roleId: R.id, roleOpts: ROLES.map(r => ({ id: r.id, label: r.label })), onRole: e => this.setState({ role: e.target.value, nav: 'dash' }),
+      nav: R.nav.map(k => { const on = s.nav === k, b = R.badges[k]; return { icon: NAV[k][0], label: NAV[k][1], bg: on ? '#f4efe6' : 'transparent', fg: on ? '#133524' : '#dcebe1', fw: on ? 700 : 500, hasBadge: !!b, badge: b || '', onClick: () => this.setState({ nav: k }) }; }),
+      initials: name.split(' ').map(w => w[0]).slice(0, 2).join(''), userName: R.user, roleLabel: R.label, levelLabel: R.level,
+      crumbs: R.crumbs.map((c, i) => ({ label: c, sepOp: i ? 1 : 0, fw: i === R.crumbs.length - 1 ? 700 : 500, fg: i === R.crumbs.length - 1 ? '#1c2a21' : '#55665a' })),
+      pageTitle: s.nav === 'dash' ? 'Bonjour, ' + R.user.split(' ').slice(0, 2).join(' ') : NAV[s.nav][1], scopeNote: PAGE_NOTE[s.nav] || R.scope, primary: pg ? pg[0] : R.primary,
+      onPrimary: pg ? pg[2] : () => this.flash(R.primary + ' : formulaire ouvert'), onExport: () => this.flash('Rapport de septembre exporté (PDF)'),
+      kpis: R.kpis.map((k, i) => ({ label: k[0], value: k[1], note: k[2] || ' ', noteColor: /retard|manquant|écart|sans|vacant/i.test(k[0] + k[2]) ? '#8a2330' : /\+|réussi|validé/i.test(k[2]) ? '#1f5a36' : '#55665a' })),
+      chartTitle: R.chart[0], chartUnit: R.chart[1],
+      bars: R.chart[2].map((v, i) => ({ v: fmt(v), m: M[i], h: Math.round(v / max * 150) + 'px', c: i === 5 ? '#1f5a36' : '#c9dccd' })),
+      queue, pendingCount: pending, queueEmpty: queue.length === 0,
+      tableTitle: R.table[0], cols: R.table[1], rows: R.table[2].map(r => { const c = ST[r[3]] || ['#ece6d9', '#55665a']; return { a: r[0], b: r[1], c: r[2], d: r[3], sBg: c[0], sFg: c[1] }; }),
+      perms: R.perms.map(p => ({ ...p, fg: /Non/.test(p.v) ? '#8a2330' : '#1c2a21' })),
+      audit: AUDIT(R.user).map(a => ({ t: a[0], who: a[1], what: a[2] })),
+      hasToast: !!s.toast, toast: s.toast
+    };
+  }
+}
+</script>
+</body>
+</html>

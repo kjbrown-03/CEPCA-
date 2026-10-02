@@ -1,0 +1,208 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&family=Manrope:wght@400;500;600;700&display=swap" rel="stylesheet">
+<script src="https://unpkg.com/@phosphor-icons/web@2.1.1"></script>
+<script src="./image-slot.js"></script>
+<style>body{margin:0;background:#f4efe6;font-family:Manrope,system-ui,sans-serif}a{color:inherit;text-decoration:none}a:hover{color:inherit}button{font:inherit;color:inherit;background:none;border:0;padding:0;cursor:pointer;text-align:inherit}input,select,textarea{font:inherit;color:inherit}html{scroll-behavior:smooth}:focus-visible{outline:2px solid #e0a043;outline-offset:2px}
+[data-theme="light"]{color-scheme:light;--bg:#f4efe6;--paper:#fbf8f2;--ink:#1c2a21;--muted:#55665a;--rule:#d9d2c2;--indigo:#1f5a36;--indigo-deep:#164429;--ocre:#e0a043;--ocre-ink:#9a6414;--on-indigo:#f4efe6;--on-indigo-muted:#d6e6db}
+[data-theme="dark"]{color-scheme:dark;--bg:#0e1f15;--paper:#15291c;--ink:#f1ece2;--muted:#a9c4b2;--rule:#24452f;--indigo:#2f7a4c;--indigo-deep:#1f5a36;--ocre:#e0a043;--ocre-ink:#e8b665;--on-indigo:#f4efe6;--on-indigo-muted:#d6e6db}</style>
+</helmet>
+<div data-theme="{{ theme }}" style="min-height:100vh;background:var(--bg);color:var(--ink);transition:background .3s">
+
+<header style="position:sticky;top:0;z-index:20;background:color-mix(in srgb,var(--bg) 90%,transparent);backdrop-filter:blur(12px)">
+<div style="max-width:1320px;margin:0 auto;padding:0 32px;min-height:76px;display:flex;align-items:center;gap:40px;flex-wrap:wrap">
+<a href="#top" style="display:flex;align-items:center;gap:12px"><span style="width:38px;height:38px;border-radius:10px;background:var(--indigo);color:var(--on-indigo);display:grid;place-items:center;font-size:18px"><i class="ph ph-cross"></i></span><span style="font:30px/1 'Instrument Serif',serif;letter-spacing:.01em">CEPCA</span></a>
+<nav style="display:flex;gap:30px;flex-wrap:wrap;font-size:15px;font-weight:500;flex:1;color:var(--muted)">
+<a href="#eglises" style-hover="color:var(--ink)">Églises membres</a>
+<a href="#actualites" style-hover="color:var(--ink)">Actualités</a>
+<a href="#contact" style-hover="color:var(--ink)">Contact</a>
+</nav>
+<div style="display:flex;align-items:center;gap:10px">
+<button onClick="{{ toggleTheme }}" aria-label="Changer de thème" style="width:42px;height:42px;border-radius:50%;display:grid;place-items:center;font-size:18px;box-shadow:inset 0 0 0 1px var(--rule)" style-hover="box-shadow:inset 0 0 0 1px var(--ink)"><i class="{{ themeIcon }}"></i></button>
+<a href="#" style="height:44px;padding:0 22px;border-radius:999px;background:var(--indigo);color:var(--on-indigo);display:flex;align-items:center;gap:8px;font-size:15px;font-weight:600;white-space:nowrap" style-hover="color:var(--on-indigo);background:var(--indigo-deep)">Se connecter</a>
+</div>
+</div>
+</header>
+
+<section id="top" data-screen-label="Accueil" style="padding:0 20px">
+<div style="position:relative;max-width:1400px;margin:0 auto;height:min(88vh,800px);min-height:600px;border-radius:32px;overflow:hidden;background:var(--indigo-deep)">
+<sc-for list="{{ slides }}" as="sl" hint-placeholder-count="1"><div style="position:absolute;inset:0;opacity:{{ sl.op }};transition:opacity 1.6s ease"><image-slot id="{{ sl.id }}" shape="rect" src="{{ sl.src }}" credit="{{ sl.credit }}" credit-href="{{ sl.href }}" placeholder="Photo d'accueil"></image-slot></div></sc-for>
+<div style="position:absolute;inset:0;pointer-events:none;background:linear-gradient(100deg,rgba(16,42,28,.94) 0%,rgba(16,42,28,.78) 34%,rgba(16,42,28,.15) 70%,transparent 100%)"></div>
+<div style="position:absolute;left:0;right:0;bottom:88px;padding:0 clamp(28px,5vw,72px);pointer-events:none;display:flex;flex-direction:column;gap:26px;color:#f4efe6">
+<span style="display:flex;align-items:center;gap:12px;font-size:13px;font-weight:600;letter-spacing:.16em;text-transform:uppercase;color:#e0a043"><span style="width:32px;height:2px;background:#e0a043"></span>Conseil des Églises Protestantes du Cameroun</span>
+<h1 style="margin:0;max-width:760px;font:400 clamp(44px,6.4vw,92px)/.98 'Instrument Serif',serif;letter-spacing:-.015em;text-wrap:balance">Des Églises diverses, <em style="color:#f2c77a">une même</em> maison.</h1>
+<p style="margin:0;max-width:520px;font-size:clamp(16px,1.4vw,19px);line-height:1.6;color:#e6efe8;text-wrap:pretty">Chaque confession membre garde son autonomie et son organisation. Le CEPCA offre un espace commun pour s'informer, se retrouver et agir ensemble.</p>
+<div style="display:flex;align-items:center;gap:28px;flex-wrap:wrap;pointer-events:auto">
+<a href="#eglises" style="display:flex;align-items:center;gap:10px;font-size:16px;font-weight:600;color:#f4efe6;padding-bottom:4px;box-shadow:0 1.5px 0 #e0a043" style-hover="color:#f2c77a">Les Églises membres<i class="ph ph-arrow-down"></i></a>
+<div style="display:flex;gap:8px"><sc-for list="{{ slides }}" as="sl" hint-placeholder-count="4"><button onClick="{{ sl.go }}" aria-label="Photo suivante" style="width:{{ sl.w }};height:4px;border-radius:2px;background:{{ sl.dot }};transition:width .4s,background .4s"></button></sc-for></div>
+</div>
+</div>
+</div>
+</section>
+
+<section data-screen-label="Mission" style="max-width:1320px;margin:0 auto;padding:clamp(72px,9vw,128px) 32px;display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,460px),1fr));gap:clamp(40px,6vw,96px);align-items:center">
+<div style="display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:16px;align-items:end">
+<div style="height:440px"><image-slot id="v3-m1" shape="rounded" radius="200" src="https://images.unsplash.com/photo-1647957902647-0337913440fc?auto=format&amp;fit=crop&amp;w=900&amp;q=80" credit="Photo by Andile Mnothoza on Unsplash" credit-href="https://unsplash.com/@mnotho_zar" placeholder="Photo : louange"></image-slot></div>
+<div style="height:340px;margin-bottom:-48px"><image-slot id="v3-m2" shape="rounded" radius="24" src="https://images.unsplash.com/photo-1738744655193-706236bd4480?auto=format&amp;fit=crop&amp;w=900&amp;q=80" credit="Photo by Muhammad Asim on Unsplash" credit-href="https://unsplash.com/@gamergeni" placeholder="Photo : famille au culte"></image-slot></div>
+</div>
+<div style="display:flex;flex-direction:column;gap:28px">
+<span style="font-size:13px;font-weight:600;letter-spacing:.16em;text-transform:uppercase;color:var(--ocre-ink)">Notre raison d'être</span>
+<p style="margin:0;font:400 clamp(30px,3.4vw,46px)/1.15 'Instrument Serif',serif;text-wrap:pretty">Relier les confessions, les paroisses et les fidèles, <em style="color:var(--ocre-ink)">au Cameroun comme dans la diaspora</em>, sans rien retirer à l'identité de chacun.</p>
+<div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(160px,1fr));gap:20px;padding-top:8px">
+<div style="display:flex;flex-direction:column;gap:8px"><i class="ph ph-church" style="font-size:26px;color:#2f7a4c"></i><span style="font-size:15px;font-weight:600">S'informer</span><span style="font-size:14px;line-height:1.5;color:var(--muted)">Actualités, communiqués et agenda des Églises membres.</span></div>
+<div style="display:flex;flex-direction:column;gap:8px"><i class="ph ph-hands-praying" style="font-size:26px;color:#2f7a4c"></i><span style="font-size:15px;font-weight:600">Se retrouver</span><span style="font-size:14px;line-height:1.5;color:var(--muted)">Cultes, prédications et activités, en présence ou à distance.</span></div>
+<div style="display:flex;flex-direction:column;gap:8px"><i class="ph ph-hand-heart" style="font-size:26px;color:#2f7a4c"></i><span style="font-size:15px;font-weight:600">Agir ensemble</span><span style="font-size:14px;line-height:1.5;color:var(--muted)">Projets communs et actions sociales suivis en toute transparence.</span></div>
+</div>
+</div>
+</section>
+
+<section id="eglises" data-screen-label="Églises membres" style="background:var(--paper);scroll-margin-top:76px">
+<div style="max-width:1320px;margin:0 auto;padding:clamp(72px,8vw,112px) 32px;display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,380px),1fr));gap:clamp(40px,5vw,80px)">
+<div style="display:flex;flex-direction:column;gap:22px;max-width:440px">
+<h2 style="margin:0;font:400 clamp(40px,4.6vw,64px)/1 'Instrument Serif',serif">Églises <em>membres</em></h2>
+<p style="margin:0;font-size:16px;line-height:1.6;color:var(--muted)">Sélectionnez une confession pour filtrer les actualités et accéder à son espace.</p>
+<div style="position:relative"><i class="ph ph-magnifying-glass" style="position:absolute;left:18px;top:17px;color:var(--muted);pointer-events:none"></i><input value="{{ q }}" onChange="{{ onQ }}" placeholder="Rechercher une confession" style="width:100%;box-sizing:border-box;height:52px;border-radius:999px;border:0;background:var(--bg);box-shadow:inset 0 0 0 1px var(--rule);padding:0 18px 0 46px;font-size:15px;outline:none" style-focus="box-shadow:inset 0 0 0 1.5px var(--indigo)"></div>
+<div style="height:260px;margin-top:10px"><image-slot id="v3-church" shape="rounded" radius="24" src="https://images.unsplash.com/photo-1708267062168-38fdffccde95?auto=format&amp;fit=crop&amp;w=900&amp;q=80" credit="Photo by Micah Camper on Unsplash" credit-href="https://unsplash.com/@m_camper" placeholder="Photo : temple"></image-slot></div>
+</div>
+<div style="display:flex;flex-direction:column">
+<div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(min(100%,300px),1fr));column-gap:40px">
+<sc-for list="{{ confs }}" as="c" hint-placeholder-count="8"><button onClick="{{ c.onClick }}" style="display:flex;align-items:center;gap:18px;padding:22px 4px;box-shadow:0 1px 0 var(--rule);color:{{ c.fg }}" style-hover="padding-left:12px">
+<span style="font:34px/1 'Instrument Serif',serif;width:84px;flex:none">{{ c.id }}</span>
+<span style="flex:1;font-size:14px;line-height:1.4;color:var(--muted)">{{ c.name }}</span>
+<i class="{{ c.icon }}" style="font-size:18px;color:{{ c.iconColor }}"></i>
+</button></sc-for>
+</div>
+<sc-if value="{{ noConf }}" hint-placeholder-val="{{ false }}"><div style="padding:24px 0;font-size:15px;color:var(--muted)">Aucune confession ne correspond à cette recherche.</div></sc-if>
+<sc-if value="{{ hasSel }}" hint-placeholder-val="{{ false }}"><div style="margin-top:28px;padding:22px 26px;border-radius:22px;background:var(--indigo);color:var(--on-indigo);display:flex;align-items:center;gap:18px;flex-wrap:wrap">
+<div style="flex:1;min-width:220px"><div style="font-size:12px;letter-spacing:.12em;text-transform:uppercase;color:#e0a043">Confession sélectionnée</div><div style="font:26px/1.2 'Instrument Serif',serif;margin-top:4px">{{ selName }}</div></div>
+<a href="#" style="height:46px;padding:0 20px;border-radius:999px;background:#e0a043;color:#1c2a21;display:flex;align-items:center;gap:8px;font-size:14px;font-weight:700;white-space:nowrap" style-hover="color:#1c2a21">Accéder à son espace<i class="ph-bold ph-arrow-up-right"></i></a>
+<button onClick="{{ clearSel }}" aria-label="Retirer la sélection" style="width:46px;height:46px;border-radius:50%;display:grid;place-items:center;box-shadow:inset 0 0 0 1px rgba(244,239,230,.4)"><i class="ph ph-x"></i></button>
+</div></sc-if>
+<div style="margin-top:20px;font-size:12px;color:var(--muted)">Liste et logos à valider par le secrétariat du CEPCA.</div>
+</div>
+</div>
+</section>
+
+<section id="actualites" data-screen-label="Actualités" style="max-width:1320px;margin:0 auto;padding:clamp(72px,8vw,112px) 32px;display:flex;flex-direction:column;gap:36px;scroll-margin-top:76px">
+<div style="display:flex;align-items:flex-end;justify-content:space-between;gap:20px;flex-wrap:wrap">
+<div style="display:flex;flex-direction:column;gap:10px"><h2 style="margin:0;font:400 clamp(40px,4.6vw,64px)/1 'Instrument Serif',serif">Actualités</h2><sc-if value="{{ hasSel }}" hint-placeholder-val="{{ false }}"><span style="font-size:14px;color:var(--muted)">Filtré sur {{ selId }} et le CEPCA</span></sc-if></div>
+<div style="display:flex;gap:8px;flex-wrap:wrap"><sc-for list="{{ newsFilters }}" as="f" hint-placeholder-count="3"><button onClick="{{ f.onClick }}" style="height:42px;padding:0 18px;border-radius:999px;background:{{ f.bg }};color:{{ f.fg }};box-shadow:inset 0 0 0 1px {{ f.bc }};font-size:14px;font-weight:600">{{ f.label }}</button></sc-for></div>
+</div>
+<sc-if value="{{ hasNews }}" hint-placeholder-val="{{ true }}">
+<div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,440px),1fr));gap:clamp(28px,4vw,56px)">
+<a href="#" style="display:flex;flex-direction:column;gap:18px" style-hover="color:inherit">
+<div style="height:clamp(280px,32vw,440px)"><image-slot id="{{ feat.slot }}" shape="rounded" radius="26" src="{{ feat.img }}" credit="{{ feat.credit }}" credit-href="{{ feat.href }}" placeholder="Photo de l'article"></image-slot></div>
+<span style="display:flex;gap:10px;font-size:12px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:var(--ocre-ink)"><span>{{ feat.kindLabel }}</span><span>·</span><span>{{ feat.src }}</span><span>·</span><span>{{ feat.date }}</span></span>
+<span style="font:400 clamp(28px,2.8vw,38px)/1.12 'Instrument Serif',serif;text-wrap:pretty">{{ feat.title }}</span>
+<span style="font-size:16px;line-height:1.6;color:var(--muted);text-wrap:pretty">{{ feat.excerpt }}</span>
+<sc-if value="{{ feat.pdf }}" hint-placeholder-val="{{ false }}"><span style="display:flex;align-items:center;gap:8px;font-size:14px;font-weight:600"><i class="ph ph-file-pdf" style="font-size:20px;color:var(--ocre-ink)"></i>Télécharger le PDF</span></sc-if>
+</a>
+<div style="display:flex;flex-direction:column">
+<sc-for list="{{ rest }}" as="n" hint-placeholder-count="3"><a href="#" style="display:grid;grid-template-columns:132px minmax(0,1fr);gap:20px;align-items:center;padding:20px 0;box-shadow:0 1px 0 var(--rule)" style-hover="color:inherit">
+<div style="height:132px"><image-slot id="{{ n.slot }}" shape="rounded" radius="18" src="{{ n.img }}" credit="{{ n.credit }}" credit-href="{{ n.href }}" placeholder="Photo"></image-slot></div>
+<div style="display:flex;flex-direction:column;gap:8px"><span style="display:flex;gap:8px;font-size:11px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:var(--ocre-ink)"><span>{{ n.src }}</span><span>·</span><span>{{ n.date }}</span></span><span style="font:400 23px/1.18 'Instrument Serif',serif;text-wrap:pretty">{{ n.title }}</span></div>
+</a></sc-for>
+<a href="#" style="margin-top:22px;display:flex;align-items:center;gap:8px;font-size:15px;font-weight:600" style-hover="color:var(--ocre-ink)">Toutes les actualités<i class="ph-bold ph-arrow-right"></i></a>
+</div>
+</div>
+</sc-if>
+<sc-if value="{{ noNews }}" hint-placeholder-val="{{ false }}"><div style="padding:40px 0;font-size:16px;color:var(--muted)">Aucune publication pour ce filtre.</div></sc-if>
+</section>
+
+<section id="contact" data-screen-label="Contact" style="max-width:1320px;margin:0 auto;padding:clamp(72px,8vw,112px) 32px;display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,400px),1fr));gap:clamp(40px,6vw,96px);scroll-margin-top:76px">
+<div style="display:flex;flex-direction:column;gap:24px">
+<h2 style="margin:0;font:400 clamp(40px,4.6vw,64px)/1 'Instrument Serif',serif">Nous <em>écrire</em></h2>
+<p style="margin:0;font-size:16px;line-height:1.6;color:var(--muted);max-width:420px">Le secrétariat répond aux demandes d'information, aux Églises souhaitant adhérer et à la presse.</p>
+<div style="display:flex;flex-direction:column;gap:16px;font-size:15px">
+<span style="display:flex;gap:14px;align-items:flex-start"><i class="ph ph-map-pin" style="font-size:22px;color:var(--ocre-ink)"></i><span>Secrétariat général du CEPCA<br><span style="color:var(--muted)">Yaoundé, Cameroun</span></span></span>
+<span style="display:flex;gap:14px;align-items:center"><i class="ph ph-envelope-simple" style="font-size:22px;color:var(--ocre-ink)"></i>contact@cepca.org</span>
+<span style="display:flex;gap:14px;align-items:center"><i class="ph ph-phone" style="font-size:22px;color:var(--ocre-ink)"></i>+237 2 22 00 00 00</span>
+</div>
+<div style="font-size:12px;color:var(--muted)">Coordonnées à confirmer.</div>
+</div>
+<div style="padding:clamp(28px,4vw,44px);border-radius:28px;background:var(--paper)">
+<sc-if value="{{ notSent }}" hint-placeholder-val="{{ true }}"><div style="display:flex;flex-direction:column;gap:16px">
+<div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:14px">
+<label style="display:flex;flex-direction:column;gap:8px;font-size:13px;font-weight:600">Nom<input value="{{ cName }}" onChange="{{ onCName }}" style="height:50px;border-radius:14px;border:0;background:var(--bg);box-shadow:inset 0 0 0 1px var(--rule);padding:0 16px;font-size:15px;font-weight:400;outline:none" style-focus="box-shadow:inset 0 0 0 1.5px var(--indigo)"></label>
+<label style="display:flex;flex-direction:column;gap:8px;font-size:13px;font-weight:600">E-mail<input type="email" value="{{ cMail }}" onChange="{{ onCMail }}" style="height:50px;border-radius:14px;border:0;background:var(--bg);box-shadow:inset 0 0 0 1px var(--rule);padding:0 16px;font-size:15px;font-weight:400;outline:none" style-focus="box-shadow:inset 0 0 0 1.5px var(--indigo)"></label>
+</div>
+<label style="display:flex;flex-direction:column;gap:8px;font-size:13px;font-weight:600">Objet<select value="{{ cSubj }}" onChange="{{ onCSubj }}" style="height:50px;border-radius:14px;border:0;background:var(--bg);box-shadow:inset 0 0 0 1px var(--rule);padding:0 14px;font-size:15px;font-weight:400;outline:none"><option value="info">Demande d'information</option><option value="adhesion">Adhésion d'une Église</option><option value="presse">Presse</option><option value="autre">Autre</option></select></label>
+<label style="display:flex;flex-direction:column;gap:8px;font-size:13px;font-weight:600">Message<textarea value="{{ cMsg }}" onChange="{{ onCMsg }}" rows="5" style="border-radius:14px;border:0;background:var(--bg);box-shadow:inset 0 0 0 1px var(--rule);padding:14px 16px;font-size:15px;font-weight:400;resize:vertical;outline:none" style-focus="box-shadow:inset 0 0 0 1.5px var(--indigo)"></textarea></label>
+<button onClick="{{ send }}" disabled="{{ sendDisabled }}" style="align-self:flex-start;height:54px;padding:0 28px;border-radius:999px;background:var(--indigo);color:var(--on-indigo);font-size:15px;font-weight:700;display:flex;align-items:center;gap:10px;opacity:{{ sendOpacity }}">Envoyer<i class="ph-bold ph-paper-plane-right"></i></button>
+</div></sc-if>
+<sc-if value="{{ sent }}" hint-placeholder-val="{{ false }}"><div style="display:flex;flex-direction:column;gap:16px;align-items:flex-start;padding:24px 0">
+<i class="ph-fill ph-check-circle" style="font-size:44px;color:var(--ocre-ink)"></i>
+<span style="font:400 34px/1.1 'Instrument Serif',serif">Merci, {{ cName }}.</span>
+<span style="font-size:15px;color:var(--muted);line-height:1.6">Votre message a bien été transmis au secrétariat. Une réponse vous sera envoyée à {{ cMail }}.</span>
+<button onClick="{{ reset }}" style="font-size:14px;font-weight:600;box-shadow:0 1px 0 currentColor">Écrire un autre message</button>
+</div></sc-if>
+</div>
+</section>
+
+<footer style="background:#102a1c;color:#d6e6db">
+<div style="max-width:1320px;margin:0 auto;padding:56px 32px 40px;display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:40px">
+<div style="display:flex;flex-direction:column;gap:14px"><span style="font:34px/1 'Instrument Serif',serif;color:#f4efe6">CEPCA</span><span style="font-size:14px;line-height:1.6">Conseil des Églises Protestantes du Cameroun</span></div>
+<div style="display:flex;flex-direction:column;gap:10px;font-size:14px"><span style="font-size:12px;font-weight:700;letter-spacing:.12em;text-transform:uppercase;color:#e0a043">Plateforme</span><a href="#eglises" style-hover="color:#f4efe6">Églises membres</a><a href="#actualites" style-hover="color:#f4efe6">Actualités</a></div>
+<div style="display:flex;flex-direction:column;gap:10px;font-size:14px"><span style="font-size:12px;font-weight:700;letter-spacing:.12em;text-transform:uppercase;color:#e0a043">Informations</span><a href="#contact" style-hover="color:#f4efe6">Contact</a><a href="#" style-hover="color:#f4efe6">Mentions légales</a><a href="#" style-hover="color:#f4efe6">Confidentialité</a></div>
+</div>
+<div style="max-width:1320px;margin:0 auto;padding:20px 32px 32px;font-size:12px;box-shadow:0 -1px 0 #24452f">© 2026 CEPCA · Photos d'illustration Unsplash, à remplacer par vos photos.</div>
+</footer>
+</div></x-dc>
+<script type="text/x-dc" data-dc-script data-props="{&quot;theme&quot;:{&quot;editor&quot;:&quot;enum&quot;,&quot;options&quot;:[&quot;light&quot;,&quot;dark&quot;],&quot;default&quot;:&quot;light&quot;,&quot;tsType&quot;:&quot;'light'|'dark'&quot;,&quot;section&quot;:&quot;Affichage&quot;}}">
+const CONFS = [
+{id:'EEC',name:'Église Évangélique du Cameroun'},{id:'EPC',name:'Église Presbytérienne Camerounaise'},
+{id:'PCC',name:'Presbyterian Church in Cameroon'},{id:'EELC',name:'Église Évangélique Luthérienne au Cameroun'},
+{id:'UEBC',name:'Union des Églises Baptistes du Cameroun'},{id:'CBC',name:'Cameroon Baptist Convention'},
+{id:'EFLC',name:'Église Fraternelle Luthérienne du Cameroun'},{id:'EPA',name:'Église Protestante Africaine'}];
+const U = (id, w) => `https://images.unsplash.com/${id}?auto=format&fit=crop&w=${w}&q=80`;
+const NEWS = [
+{kind:'com',src:'CEPCA',date:'28 sept. 2026',title:'Communiqué du Conseil sur la rentrée scolaire dans les écoles protestantes',excerpt:"Le Conseil rappelle que les inscriptions dans les établissements scolaires protestants restent ouvertes jusqu'au 16 octobre et invite les familles en difficulté à se rapprocher de leur paroisse.",img:U('photo-1594386479412-fa62932f4cdc',1400),credit:'Photo by Edouard TAMBA on Unsplash',href:'https://unsplash.com/@tamba',pdf:true},
+{kind:'act',src:'EEC',date:'26 sept. 2026',title:'Semaine de prière du 5 au 9 octobre dans les paroisses du Littoral',excerpt:"Cinq soirées de prière et de méditation autour du thème « Veillez et priez », retransmises en direct dans l'application.",img:U('photo-1738744655193-706236bd4480',900),credit:'Photo by Muhammad Asim on Unsplash',href:'https://unsplash.com/@gamergeni'},
+{kind:'act',src:'CEPCA',date:'22 sept. 2026',title:'CEPCA Digital : une plateforme commune pour les Églises membres',excerpt:"Chaque confession disposera de son propre espace, administré par ses responsables.",img:U('photo-1608560938854-96a63d9214a8',900),credit:'Photo by Vincent Lockhart on Unsplash',href:'https://unsplash.com/@vincentlockhart'},
+{kind:'com',src:'CEPCA',date:'15 sept. 2026',title:"Convocation à l'Assemblée générale ordinaire du CEPCA",excerpt:"Les délégués des confessions membres sont convoqués. L'ordre du jour est joint.",img:U('photo-1615463669098-521a22047a1e',900),credit:'Photo by Edouard TAMBA on Unsplash',href:'https://unsplash.com/@tamba',pdf:true},
+{kind:'act',src:'UEBC',date:'12 sept. 2026',title:'Forum jeunesse inter-confessionnel à Douala',excerpt:"Ateliers, louange et échanges sur l'orientation professionnelle.",img:U('photo-1647957902647-0337913440fc',900),credit:'Photo by Andile Mnothoza on Unsplash',href:'https://unsplash.com/@mnotho_zar'},
+{kind:'act',src:'EPC',date:'9 sept. 2026',title:'Campagne de soutien aux familles déplacées',excerpt:"Collecte de vivres, de fournitures scolaires et de fonds, coordonnée par les paroisses.",img:U('photo-1604072366376-63d46248927e',900),credit:'Photo by Danique Godwin on Unsplash',href:'https://unsplash.com/@daniquegodwin'}];
+const HERO = [
+{src:U('photo-1604072424771-7300bc5de457',2000),credit:'Photo by Danique Godwin on Unsplash',href:'https://unsplash.com/@daniquegodwin'},
+{src:U('photo-1738744655193-706236bd4480',2000),credit:'Photo by Muhammad Asim on Unsplash',href:'https://unsplash.com/@gamergeni'},
+{src:U('photo-1647957902647-0337913440fc',2000),credit:'Photo by Andile Mnothoza on Unsplash',href:'https://unsplash.com/@mnotho_zar'},
+{src:U('photo-1608560938854-96a63d9214a8',2000),credit:'Photo by Vincent Lockhart on Unsplash',href:'https://unsplash.com/@vincentlockhart'}];
+class Component extends DCLogic {
+  componentDidMount() { this.t = setInterval(() => this.setState(s => ({ hi: (s.hi + 1) % HERO.length })), 6000); }
+  componentWillUnmount() { clearInterval(this.t); }
+  state = { hi: 0, theme: this.props.theme ?? 'light', q: '', sel: null, nf: 'all', cName: '', cMail: '', cSubj: 'info', cMsg: '', sent: false };
+  componentDidUpdate(pp) { if (pp.theme !== this.props.theme && this.props.theme) this.setState({ theme: this.props.theme }); }
+  renderVals() {
+    const s = this.state, ql = s.q.trim().toLowerCase();
+    const chip = on => ({ bg: on ? 'var(--indigo)' : 'transparent', fg: on ? 'var(--on-indigo)' : 'var(--ink)', bc: on ? 'var(--indigo)' : 'var(--rule)' });
+    const confs = CONFS.filter(c => !ql || (c.id + ' ' + c.name).toLowerCase().includes(ql)).map(c => { const on = s.sel === c.id; return { ...c, fg: on ? 'var(--ocre-ink)' : 'var(--ink)', icon: on ? 'ph-fill ph-check-circle' : 'ph ph-arrow-up-right', iconColor: on ? 'var(--ocre-ink)' : 'var(--muted)', onClick: () => this.setState({ sel: on ? null : c.id }) }; });
+    const selC = CONFS.find(c => c.id === s.sel);
+    const news = NEWS.filter(n => (s.nf === 'all' || n.kind === s.nf) && (!s.sel || n.src === s.sel || n.src === 'CEPCA')).map((n, i) => ({ ...n, kindLabel: n.kind === 'com' ? 'Communiqué' : 'Actualité', pdf: !!n.pdf, slot: 'v3-news-' + NEWS.indexOf(n) }));
+    const valid = s.cName.trim().length > 1 && /.+@.+\..+/.test(s.cMail) && s.cMsg.trim().length > 4;
+    const slides = HERO.map((h, i) => ({ ...h, id: 'v3-hero-' + i, op: i === s.hi ? 1 : 0, w: i === s.hi ? '32px' : '12px', dot: i === s.hi ? '#e0a043' : 'rgba(244,239,230,.45)', go: () => { clearInterval(this.t); this.setState({ hi: i }); this.componentDidMount(); } }));
+    return {
+      slides,
+      theme: s.theme, themeIcon: s.theme === 'dark' ? 'ph ph-sun' : 'ph ph-moon', toggleTheme: () => this.setState({ theme: s.theme === 'dark' ? 'light' : 'dark' }),
+      q: s.q, onQ: e => this.setState({ q: e.target.value }), confs, noConf: confs.length === 0,
+      hasSel: !!selC, selId: selC ? selC.id : '', selName: selC ? selC.name : '', clearSel: () => this.setState({ sel: null }),
+      newsFilters: [['all', 'Tout'], ['act', 'Actualités'], ['com', 'Communiqués']].map(([k, label]) => ({ label, ...chip(s.nf === k), onClick: () => this.setState({ nf: k }) })),
+      hasNews: news.length > 0, noNews: news.length === 0, feat: news[0] || {}, rest: news.slice(1, 4),
+      notSent: !s.sent, sent: s.sent,
+      cName: s.cName, onCName: e => this.setState({ cName: e.target.value }), cMail: s.cMail, onCMail: e => this.setState({ cMail: e.target.value }),
+      cSubj: s.cSubj, onCSubj: e => this.setState({ cSubj: e.target.value }), cMsg: s.cMsg, onCMsg: e => this.setState({ cMsg: e.target.value }),
+      sendDisabled: !valid, sendOpacity: valid ? 1 : 0.5, send: () => valid && this.setState({ sent: true }), reset: () => this.setState({ sent: false, cMsg: '' })
+    };
+  }
+}
+</script>
+</body>
+</html>

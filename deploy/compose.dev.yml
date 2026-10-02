@@ -1,0 +1,26 @@
+# Services de développement. Ports liés à 127.0.0.1 uniquement.
+name: cepca-dev
+services:
+  db:
+    image: postgres:16-alpine
+    environment:
+      POSTGRES_USER: cepca
+      POSTGRES_PASSWORD: cepca_dev
+      POSTGRES_DB: cepca
+    ports: ["127.0.0.1:5434:5432"]
+    volumes: [db:/var/lib/postgresql/data, ./init-test-db.sql:/docker-entrypoint-initdb.d/init-test-db.sql:ro]
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U cepca"]
+      interval: 5s
+      retries: 10
+  minio:
+    image: minio/minio:latest
+    command: server /data --console-address ":9001"
+    environment:
+      MINIO_ROOT_USER: cepca
+      MINIO_ROOT_PASSWORD: cepca_dev_minio
+    ports: ["127.0.0.1:9100:9000", "127.0.0.1:9101:9001"]
+    volumes: [minio:/data]
+volumes:
+  db:
+  minio:

@@ -1,0 +1,227 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&family=Manrope:wght@400;500;600;700&display=swap" rel="stylesheet">
+<script src="https://unpkg.com/@phosphor-icons/web@2.1.1"></script>
+<style>body{margin:0;background:#dfe6dc;font-family:Manrope,system-ui,sans-serif;color:#1c2a21}a{color:#1f5a36}a:hover{color:#164429}button{font:inherit;color:inherit;background:none;border:0;padding:0;cursor:pointer;text-align:inherit}input{font:inherit;color:inherit}:focus-visible{outline:2px solid #e0a043;outline-offset:2px}</style>
+</helmet>
+<div style="padding:48px;display:flex;flex-direction:column;gap:32px">
+<div style="display:flex;flex-direction:column;gap:8px;max-width:820px">
+<span style="font-size:12px;font-weight:700;letter-spacing:.14em;text-transform:uppercase;color:#1f5a36">Étape 3 · App mobile</span>
+<h1 style="margin:0;font:400 44px/1.05 'Instrument Serif',serif">Espace fidèle : écrans complémentaires</h1>
+<p style="margin:0;font-size:15px;line-height:1.6;color:#55665a">Ma chapelle et sa hiérarchie, groupes, « Je participe », documents et messages pastoraux, espace jeunes et actions sociales (avec le bouton « Donner »), mes projets et mes activités, recherche. Les boutons, onglets et la recherche fonctionnent.</p>
+</div>
+<div style="display:flex;gap:32px;align-items:flex-start;flex-wrap:wrap">
+
+<div style="display:flex;flex-direction:column;gap:12px"><span style="font-size:13px;font-weight:700">1 · Ma chapelle</span>
+<div data-screen-label="Ma chapelle" style="width:350px;height:740px;border-radius:42px;overflow:hidden;background:#f4efe6;box-shadow:0 0 0 8px #102a1c,0 24px 50px rgba(16,42,28,.3);display:flex;flex-direction:column">
+<div style="height:42px;flex:none;display:flex;align-items:center;justify-content:space-between;padding:0 26px;font-size:13px;font-weight:600"><span>9:41</span><span style="display:flex;gap:5px"><i class="ph-bold ph-cell-signal-high"></i><i class="ph-bold ph-battery-high"></i></span></div>
+<div style="flex:1;overflow:hidden;padding:4px 20px 0;display:flex;flex-direction:column;gap:16px">
+<span style="font:30px/1.05 'Instrument Serif',serif">Mon Église</span>
+<div style="padding:16px;border-radius:22px;background:#fbf8f2;box-shadow:inset 0 0 0 1px #dde3d8;display:flex;flex-direction:column">
+<sc-for list="{{ hier }}" as="h" hint-placeholder-count="5"><div style="display:flex;gap:12px;align-items:stretch">
+<div style="width:14px;display:flex;flex-direction:column;align-items:center"><span style="width:12px;height:12px;border-radius:50%;margin-top:4px;background:{{ h.dot }};box-shadow:inset 0 0 0 2px #1f5a36"></span><span style="flex:1;width:2px;background:{{ h.line }}"></span></div>
+<div style="padding-bottom:12px;flex:1"><div style="font-size:11px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:#55665a">{{ h.lvl }}</div><div style="font-size:{{ h.fs }};font-weight:{{ h.fw }};line-height:1.3">{{ h.name }}</div></div>
+</div></sc-for>
+</div>
+<div style="display:flex;flex-direction:column;gap:8px">
+<div style="display:flex;align-items:center;gap:12px;padding:12px 0;box-shadow:0 1px 0 #dde3d8"><i class="ph ph-user-circle" style="font-size:22px;color:#1f5a36"></i><div style="flex:1"><div style="font-size:14px;font-weight:600">Ancien Thomas Ekambi</div><div style="font-size:12px;color:#55665a">Responsable de la chapelle</div></div><i class="ph ph-chat-circle" style="font-size:20px"></i></div>
+<div style="display:flex;align-items:center;gap:12px;padding:12px 0;box-shadow:0 1px 0 #dde3d8"><i class="ph ph-clock" style="font-size:22px;color:#1f5a36"></i><div style="flex:1"><div style="font-size:14px;font-weight:600">Culte : dimanche 8:00</div><div style="font-size:12px;color:#55665a">Rue Bonamoussadi, carrefour Kotto</div></div><i class="ph ph-map-pin" style="font-size:20px"></i></div>
+</div>
+<button onClick="{{ toggleFollow }}" style="height:50px;border-radius:999px;background:{{ followBg }};color:{{ followFg }};box-shadow:inset 0 0 0 1.5px #1f5a36;font-size:14px;font-weight:700;display:flex;align-items:center;justify-content:center;gap:8px"><i class="{{ followIcon }}"></i>{{ followLabel }}</button>
+</div>
+<div style="height:76px;flex:none;display:grid;grid-template-columns:repeat(5,1fr);padding:6px 8px 16px;background:#fbf8f2;box-shadow:0 -1px 0 #dde3d8;color:#55665a">
+<div style="display:flex;flex-direction:column;align-items:center;justify-content:center;gap:3px;font-size:10px"><i class="ph ph-house" style="font-size:23px"></i>Accueil</div>
+<div style="display:flex;flex-direction:column;align-items:center;justify-content:center;gap:3px;font-size:10px;font-weight:700;color:#1f5a36"><i class="ph-fill ph-church" style="font-size:23px"></i>Mon Église</div>
+<div style="display:flex;flex-direction:column;align-items:center;justify-content:center;gap:3px;font-size:10px"><i class="ph ph-hand-heart" style="font-size:23px"></i>Contribuer</div>
+<div style="display:flex;flex-direction:column;align-items:center;justify-content:center;gap:3px;font-size:10px"><i class="ph ph-calendar-blank" style="font-size:23px"></i>Agenda</div>
+<div style="display:flex;flex-direction:column;align-items:center;justify-content:center;gap:3px;font-size:10px"><i class="ph ph-user" style="font-size:23px"></i>Profil</div>
+</div>
+</div></div>
+
+<div style="display:flex;flex-direction:column;gap:12px"><span style="font-size:13px;font-weight:700">2 · Groupes</span>
+<div data-screen-label="Groupes" style="width:350px;height:740px;border-radius:42px;overflow:hidden;background:#f4efe6;box-shadow:0 0 0 8px #102a1c,0 24px 50px rgba(16,42,28,.3);display:flex;flex-direction:column">
+<div style="height:42px;flex:none;display:flex;align-items:center;justify-content:space-between;padding:0 26px;font-size:13px;font-weight:600"><span>9:41</span><span style="display:flex;gap:5px"><i class="ph-bold ph-cell-signal-high"></i><i class="ph-bold ph-battery-high"></i></span></div>
+<div style="flex:1;overflow:hidden;padding:4px 20px 0;display:flex;flex-direction:column;gap:14px">
+<span style="font:30px/1.05 'Instrument Serif',serif">Groupes</span>
+<span style="font-size:13px;color:#55665a;line-height:1.5">Rejoignez un groupe de votre paroisse. Le responsable valide votre demande.</span>
+<sc-for list="{{ groups }}" as="g" hint-placeholder-count="5"><div style="display:flex;align-items:center;gap:12px;padding:12px;border-radius:18px;background:#fbf8f2;box-shadow:inset 0 0 0 1px #dde3d8">
+<span style="width:44px;height:44px;flex:none;border-radius:14px;background:#e3eee5;color:#1f5a36;display:grid;place-items:center;font-size:21px"><i class="{{ g.icon }}"></i></span>
+<div style="flex:1;min-width:0"><div style="font-size:14px;font-weight:700">{{ g.name }}</div><div style="font-size:12px;color:#55665a">{{ g.meta }}</div></div>
+<button onClick="{{ g.onClick }}" style="height:34px;padding:0 12px;border-radius:999px;font-size:12px;font-weight:700;white-space:nowrap;background:{{ g.bg }};color:{{ g.fg }};box-shadow:inset 0 0 0 1.5px #1f5a36">{{ g.cta }}</button>
+</div></sc-for>
+</div>
+</div></div>
+
+<div style="display:flex;flex-direction:column;gap:12px"><span style="font-size:13px;font-weight:700">3 · Je participe</span>
+<div data-screen-label="Je participe" style="width:350px;height:740px;border-radius:42px;overflow:hidden;background:#f4efe6;box-shadow:0 0 0 8px #102a1c,0 24px 50px rgba(16,42,28,.3);display:flex;flex-direction:column">
+<div style="height:42px;flex:none;display:flex;align-items:center;justify-content:space-between;padding:0 26px;font-size:13px;font-weight:600"><span>9:41</span><span style="display:flex;gap:5px"><i class="ph-bold ph-cell-signal-high"></i><i class="ph-bold ph-battery-high"></i></span></div>
+<div style="flex:1;overflow:hidden;padding:4px 20px 0;display:flex;flex-direction:column;gap:16px">
+<span style="font:30px/1.05 'Instrument Serif',serif">Je participe</span>
+<span style="font-size:13px;color:#55665a;line-height:1.5">Indiquez vos compétences et vos disponibilités. Les responsables d'activités et de projets pourront vous solliciter.</span>
+<div style="display:flex;flex-direction:column;gap:8px"><span style="font-size:12px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:#55665a">Mes compétences</span>
+<div style="display:flex;flex-wrap:wrap;gap:6px"><sc-for list="{{ skills }}" as="s" hint-placeholder-count="8"><button onClick="{{ s.onClick }}" style="height:34px;padding:0 12px;border-radius:999px;font-size:12px;font-weight:600;display:flex;align-items:center;gap:6px;background:{{ s.bg }};color:{{ s.fg }};box-shadow:inset 0 0 0 1px {{ s.bc }}"><i class="{{ s.icon }}"></i>{{ s.l }}</button></sc-for></div></div>
+<div style="display:flex;flex-direction:column;gap:8px"><span style="font-size:12px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:#55665a">Mes disponibilités</span>
+<div style="display:grid;grid-template-columns:repeat(7,1fr);gap:4px;text-align:center"><sc-for list="{{ days }}" as="d" hint-placeholder-count="7"><button onClick="{{ d.onClick }}" style="height:52px;border-radius:12px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:2px;font-size:11px;font-weight:700;background:{{ d.bg }};color:{{ d.fg }};box-shadow:inset 0 0 0 1px {{ d.bc }}">{{ d.l }}<i class="{{ d.icon }}" style="font-size:12px"></i></button></sc-for></div></div>
+<div style="padding:14px;border-radius:18px;background:#e3eee5;display:flex;gap:12px;align-items:center"><i class="ph ph-hand-waving" style="font-size:24px;color:#1f5a36"></i><div style="flex:1;font-size:13px;line-height:1.4"><strong>{{ matchCount }} besoins</strong> correspondent à votre profil cette semaine.</div></div>
+</div>
+<div style="padding:14px 20px 26px"><button onClick="{{ saveProfile }}" style="width:100%;height:54px;border-radius:999px;background:#1f5a36;color:#f4efe6;font-size:15px;font-weight:700;text-align:center">{{ saveLabel }}</button></div>
+</div></div>
+
+<div style="display:flex;flex-direction:column;gap:12px"><span style="font-size:13px;font-weight:700">4 · Documents et messages pastoraux</span>
+<div data-screen-label="Documents" style="width:350px;height:740px;border-radius:42px;overflow:hidden;background:#f4efe6;box-shadow:0 0 0 8px #102a1c,0 24px 50px rgba(16,42,28,.3);display:flex;flex-direction:column">
+<div style="height:42px;flex:none;display:flex;align-items:center;justify-content:space-between;padding:0 26px;font-size:13px;font-weight:600"><span>9:41</span><span style="display:flex;gap:5px"><i class="ph-bold ph-cell-signal-high"></i><i class="ph-bold ph-battery-high"></i></span></div>
+<div style="flex:1;overflow:hidden;padding:4px 20px 0;display:flex;flex-direction:column;gap:14px">
+<span style="font:30px/1.05 'Instrument Serif',serif">Lire et méditer</span>
+<div style="display:flex;gap:6px;padding:4px;border-radius:999px;background:#e6ebe2"><sc-for list="{{ docTabs }}" as="t" hint-placeholder-count="3"><button onClick="{{ t.onClick }}" style="flex:1;height:36px;border-radius:999px;font-size:12px;font-weight:700;text-align:center;background:{{ t.bg }};color:{{ t.fg }}">{{ t.l }}</button></sc-for></div>
+<sc-if value="{{ isMsg }}" hint-placeholder-val="{{ false }}"><div style="padding:18px;border-radius:22px;background:#133524;color:#f4efe6;display:flex;flex-direction:column;gap:10px"><span style="font-size:11px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:#e0a043">Message du pasteur · 30 sept.</span><span style="font:24px/1.15 'Instrument Serif',serif">« Veillez et priez » : préparons ensemble la semaine de prière</span><span style="font-size:13px;line-height:1.55;color:#d6e6db">Chers frères et sœurs, du 5 au 9 octobre, nous nous retrouverons chaque soir à 18:30…</span><span style="font-size:12px;font-weight:600">Pasteur Élise Moukoko</span></div></sc-if>
+<sc-for list="{{ docs }}" as="d" hint-placeholder-count="4"><div style="display:flex;align-items:center;gap:12px;padding:12px 0;box-shadow:0 1px 0 #dde3d8">
+<span style="width:42px;height:50px;flex:none;border-radius:8px;background:#fbf8f2;box-shadow:inset 0 0 0 1px #d6dfd3;display:grid;place-items:center;font-size:20px;color:#1f5a36"><i class="{{ d.icon }}"></i></span>
+<div style="flex:1;min-width:0"><div style="font-size:14px;font-weight:600;line-height:1.3">{{ d.t }}</div><div style="font-size:12px;color:#55665a">{{ d.m }}</div></div>
+<button onClick="{{ d.onClick }}" aria-label="Télécharger" style="width:38px;height:38px;border-radius:50%;display:grid;place-items:center;font-size:18px;box-shadow:inset 0 0 0 1px #d6dfd3;color:{{ d.fg }}"><i class="{{ d.dl }}"></i></button>
+</div></sc-for>
+</div>
+</div></div>
+
+<div style="display:flex;flex-direction:column;gap:12px"><span style="font-size:13px;font-weight:700">5 · Espace jeunes et actions sociales</span>
+<div data-screen-label="Jeunes et social" style="width:350px;height:740px;border-radius:42px;overflow:hidden;background:#f4efe6;box-shadow:0 0 0 8px #102a1c,0 24px 50px rgba(16,42,28,.3);display:flex;flex-direction:column;position:relative">
+<sc-if value="{{ giveOpen }}" hint-placeholder-val="{{ false }}"><div style="position:absolute;inset:0;z-index:5;background:rgba(16,42,28,.45);display:flex;flex-direction:column;justify-content:flex-end">
+<button onClick="{{ closeGive }}" aria-label="Fermer" style="flex:1"></button>
+<div style="background:#f4efe6;border-radius:28px 28px 0 0;padding:12px 20px 28px;display:flex;flex-direction:column;gap:14px">
+<span style="align-self:center;width:40px;height:4px;border-radius:2px;background:#c9d3c8"></span>
+<sc-if value="{{ giveForm }}" hint-placeholder-val="{{ true }}"><div style="display:flex;flex-direction:column;gap:14px">
+<div><div style="font-size:12px;color:#55665a">Je donne pour</div><div style="font:24px/1.15 'Instrument Serif',serif">{{ giveTitle }}</div></div>
+<div style="display:grid;grid-template-columns:repeat(4,1fr);gap:6px"><sc-for list="{{ amounts }}" as="m" hint-placeholder-count="4"><button onClick="{{ m.onClick }}" style="height:40px;border-radius:12px;font-size:13px;font-weight:700;text-align:center;background:{{ m.bg }};color:{{ m.fg }};box-shadow:inset 0 0 0 1px {{ m.bc }}">{{ m.l }}</button></sc-for></div>
+<div style="display:flex;flex-direction:column;gap:6px"><sc-for list="{{ ops }}" as="o" hint-placeholder-count="2"><button onClick="{{ o.onClick }}" style="height:52px;border-radius:14px;padding:0 14px;display:flex;align-items:center;gap:12px;background:#fbf8f2;box-shadow:inset 0 0 0 {{ o.bw }} #1f5a36"><span style="width:36px;height:24px;border-radius:6px;background:{{ o.c }};display:grid;place-items:center;font-size:9px;font-weight:800;color:#1c2a21">{{ o.k }}</span><span style="flex:1;font-size:14px;font-weight:600">{{ o.l }}</span><i class="{{ o.icon }}" style="font-size:20px;color:#1f5a36"></i></button></sc-for></div>
+<button onClick="{{ confirmGive }}" style="height:54px;border-radius:999px;background:#1f5a36;color:#f4efe6;font-size:15px;font-weight:700;text-align:center">Payer {{ giveTotal }} FCFA</button>
+<span style="font-size:11px;color:#55665a;text-align:center">Frais opérateur inclus (1,5 %) · reçu envoyé par SMS</span>
+</div></sc-if>
+<sc-if value="{{ giveDone }}" hint-placeholder-val="{{ false }}"><div style="display:flex;flex-direction:column;gap:12px;align-items:center;text-align:center;padding:12px 0">
+<i class="ph-fill ph-check-circle" style="font-size:52px;color:#1f5a36"></i>
+<span style="font:26px/1.15 'Instrument Serif',serif">Merci pour votre don</span>
+<span style="font-size:13px;color:#55665a;line-height:1.5">{{ giveAmountL }} FCFA pour « {{ giveTitle }} ». Confirmez sur votre téléphone avec votre code {{ giveOp }}.</span>
+<button onClick="{{ closeGive }}" style="height:48px;padding:0 28px;border-radius:999px;box-shadow:inset 0 0 0 1.5px #1f5a36;font-size:14px;font-weight:700">Fermer</button>
+</div></sc-if>
+</div></div></sc-if>
+<div style="flex:none;background:#1f5a36;color:#f4efe6;border-radius:0 0 28px 28px">
+<div style="height:42px;display:flex;align-items:center;justify-content:space-between;padding:0 26px;font-size:13px;font-weight:600"><span>9:41</span><span style="display:flex;gap:5px"><i class="ph-bold ph-cell-signal-high"></i><i class="ph-bold ph-battery-high"></i></span></div>
+<div style="padding:4px 20px 22px;display:flex;flex-direction:column;gap:6px"><span style="font:32px/1.05 'Instrument Serif',serif">Espace <em style="color:#f2c77a">jeunes</em></span><span style="font-size:13px;color:#d6e6db">Forum inter-confessionnel · Douala · sam. 10 oct.</span>
+<button onClick="{{ toggleForum }}" style="margin-top:8px;align-self:flex-start;height:42px;padding:0 18px;border-radius:999px;background:#e0a043;color:#102a1c;font-size:13px;font-weight:700;display:flex;align-items:center;gap:8px"><i class="{{ forumIcon }}"></i>{{ forumLabel }}</button></div>
+</div>
+<div style="flex:1;overflow:hidden;padding:18px 20px 0;display:flex;flex-direction:column;gap:12px">
+<span style="font:24px 'Instrument Serif',serif">Pour vous</span>
+<div style="display:grid;grid-template-columns:1fr 1fr;gap:8px">
+<div style="padding:12px;border-radius:16px;background:#fbf8f2;box-shadow:inset 0 0 0 1px #dde3d8;display:flex;flex-direction:column;gap:6px"><i class="ph ph-briefcase" style="font-size:22px;color:#1f5a36"></i><span style="font-size:13px;font-weight:700">Orientation et emploi</span><span style="font-size:11px;color:#55665a">3 ateliers</span></div>
+<div style="padding:12px;border-radius:16px;background:#fbf8f2;box-shadow:inset 0 0 0 1px #dde3d8;display:flex;flex-direction:column;gap:6px"><i class="ph ph-music-notes" style="font-size:22px;color:#1f5a36"></i><span style="font-size:13px;font-weight:700">Louange jeunesse</span><span style="font-size:11px;color:#55665a">Ven. 18:00</span></div>
+</div>
+<span style="font:24px 'Instrument Serif',serif;margin-top:4px">Actions sociales</span>
+<sc-for list="{{ social }}" as="a" hint-placeholder-count="2"><div style="padding:12px 14px;border-radius:18px;background:#fbf8f2;box-shadow:inset 0 0 0 1px #dde3d8;display:flex;flex-direction:column;gap:8px">
+<div style="display:flex;justify-content:space-between;gap:8px"><span style="font-size:14px;font-weight:700;line-height:1.3">{{ a.t }}</span><span style="font-size:11px;font-weight:700;color:#1f5a36;white-space:nowrap">{{ a.pct }}</span></div>
+<div style="height:6px;border-radius:3px;background:#e3e8df"><div style="height:100%;border-radius:3px;background:#1f5a36;width:{{ a.pctCss }}"></div></div>
+<div style="display:flex;gap:6px"><button onClick="{{ a.give }}" style="flex:1;height:34px;border-radius:999px;background:#1f5a36;color:#f4efe6;font-size:12px;font-weight:700;text-align:center">Donner</button><button onClick="{{ a.help }}" style="flex:1;height:34px;border-radius:999px;box-shadow:inset 0 0 0 1.5px #1f5a36;font-size:12px;font-weight:700;text-align:center">{{ a.helpL }}</button></div>
+</div></sc-for>
+</div>
+</div></div>
+
+<div style="display:flex;flex-direction:column;gap:12px"><span style="font-size:13px;font-weight:700">6 · Mes projets et activités</span>
+<div data-screen-label="Mes projets et activités" style="width:350px;height:740px;border-radius:42px;overflow:hidden;background:#f4efe6;box-shadow:0 0 0 8px #102a1c,0 24px 50px rgba(16,42,28,.3);display:flex;flex-direction:column">
+<div style="height:42px;flex:none;display:flex;align-items:center;justify-content:space-between;padding:0 26px;font-size:13px;font-weight:600"><span>9:41</span><span style="display:flex;gap:5px"><i class="ph-bold ph-cell-signal-high"></i><i class="ph-bold ph-battery-high"></i></span></div>
+<div style="flex:1;overflow:auto;padding:4px 20px 20px;display:flex;flex-direction:column;gap:14px">
+<span style="font:30px/1.05 'Instrument Serif',serif">Mon engagement</span>
+<div style="display:flex;gap:6px;padding:4px;border-radius:999px;background:#e6ebe2;flex:none"><sc-for list="{{ myTabs }}" as="t" hint-placeholder-count="2"><button onClick="{{ t.onClick }}" style="flex:1;height:36px;border-radius:999px;font-size:12px;font-weight:700;text-align:center;background:{{ t.bg }};color:{{ t.fg }}">{{ t.l }}</button></sc-for></div>
+<sc-if value="{{ isProj }}" hint-placeholder-val="{{ true }}"><div style="display:flex;flex-direction:column;gap:10px">
+<div style="padding:14px;border-radius:18px;background:#133524;color:#f4efe6;display:flex;justify-content:space-between;align-items:center"><div><div style="font-size:11px;color:#a9c4b2">Mes dons aux projets en 2026</div><div style="font:30px/1.05 'Instrument Serif',serif">215 000 FCFA</div></div><i class="ph ph-receipt" style="font-size:24px;color:#e0a043"></i></div>
+<sc-for list="{{ myProjects }}" as="p" hint-placeholder-count="3"><div style="padding:12px 14px;border-radius:18px;background:#fbf8f2;box-shadow:inset 0 0 0 1px #dde3d8;display:flex;flex-direction:column;gap:8px">
+<div style="display:flex;justify-content:space-between;gap:8px"><span style="font-size:14px;font-weight:700;line-height:1.3">{{ p.t }}</span><span style="font-size:11px;font-weight:700;color:#1f5a36;white-space:nowrap">{{ p.pct }}</span></div>
+<div style="height:6px;border-radius:3px;background:#e3e8df"><div style="height:100%;border-radius:3px;background:#1f5a36;width:{{ p.w }}"></div></div>
+<div style="display:flex;justify-content:space-between;font-size:11px;color:#55665a"><span>{{ p.role }}</span><span>{{ p.mine }}</span></div>
+</div></sc-for>
+</div></sc-if>
+<sc-if value="{{ isAct }}" hint-placeholder-val="{{ false }}"><div style="display:flex;flex-direction:column">
+<sc-for list="{{ myActs }}" as="a" hint-placeholder-count="4"><div style="display:flex;align-items:center;gap:12px;padding:12px 0;box-shadow:0 1px 0 #dde3d8">
+<div style="width:46px;flex:none;text-align:center;border-radius:12px;background:#e3eee5;padding:6px 0"><div style="font-size:10px;font-weight:700;text-transform:uppercase;color:#1f5a36">{{ a.mo }}</div><div style="font:22px/1 'Instrument Serif',serif">{{ a.d }}</div></div>
+<div style="flex:1;min-width:0"><div style="font-size:14px;font-weight:600;line-height:1.3">{{ a.t }}</div><div style="font-size:12px;color:#55665a">{{ a.m }}</div></div>
+<button onClick="{{ a.onClick }}" style="height:32px;padding:0 10px;border-radius:999px;font-size:11px;font-weight:700;white-space:nowrap;background:{{ a.bg }};color:{{ a.fg }};box-shadow:inset 0 0 0 1.5px #1f5a36">{{ a.cta }}</button>
+</div></sc-for>
+</div></sc-if>
+</div>
+</div></div>
+
+<div style="display:flex;flex-direction:column;gap:12px"><span style="font-size:13px;font-weight:700">7 · Recherche</span>
+<div data-screen-label="Recherche" style="width:350px;height:740px;border-radius:42px;overflow:hidden;background:#f4efe6;box-shadow:0 0 0 8px #102a1c,0 24px 50px rgba(16,42,28,.3);display:flex;flex-direction:column">
+<div style="height:42px;flex:none;display:flex;align-items:center;justify-content:space-between;padding:0 26px;font-size:13px;font-weight:600"><span>9:41</span><span style="display:flex;gap:5px"><i class="ph-bold ph-cell-signal-high"></i><i class="ph-bold ph-battery-high"></i></span></div>
+<div style="flex:1;overflow:auto;padding:4px 20px 20px;display:flex;flex-direction:column;gap:14px">
+<div style="position:relative;flex:none"><i class="ph ph-magnifying-glass" style="position:absolute;left:16px;top:16px;font-size:18px;color:#55665a"></i><input value="{{ q }}" onChange="{{ onQ }}" placeholder="Prédication, paroisse, projet…" style="width:100%;box-sizing:border-box;height:52px;border-radius:999px;border:0;background:#fbf8f2;box-shadow:inset 0 0 0 1.5px #1f5a36;padding:0 16px 0 44px;font-size:15px;outline:none"></div>
+<div style="display:flex;gap:6px;flex-wrap:wrap"><sc-for list="{{ cats }}" as="c" hint-placeholder-count="5"><button onClick="{{ c.onClick }}" style="height:32px;padding:0 12px;border-radius:999px;font-size:12px;font-weight:600;background:{{ c.bg }};color:{{ c.fg }};box-shadow:inset 0 0 0 1px {{ c.bc }}">{{ c.l }}</button></sc-for></div>
+<span style="font-size:12px;color:#55665a">{{ resCount }} résultat(s)</span>
+<sc-for list="{{ results }}" as="r" hint-placeholder-count="5"><div style="display:flex;align-items:center;gap:12px;padding:10px 0;box-shadow:0 1px 0 #dde3d8">
+<span style="width:40px;height:40px;flex:none;border-radius:12px;background:#e3eee5;color:#1f5a36;display:grid;place-items:center;font-size:19px"><i class="{{ r.icon }}"></i></span>
+<div style="flex:1;min-width:0"><div style="font-size:14px;font-weight:600;line-height:1.3">{{ r.t }}</div><div style="font-size:12px;color:#55665a">{{ r.kind }} · {{ r.m }}</div></div><i class="ph ph-caret-right" style="color:#55665a"></i>
+</div></sc-for>
+<sc-if value="{{ noRes }}" hint-placeholder-val="{{ false }}"><div style="padding:24px 0;font-size:14px;color:#55665a;text-align:center">Aucun résultat. Essayez un autre mot.</div></sc-if>
+</div>
+</div></div>
+
+</div>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script>
+const HIER = [['Confession','Église Évangélique du Cameroun'],['Synode','Synode du Littoral'],['Consistoire','Douala-Centre'],['Paroisse','Paroisse de Deïdo'],['Chapelle','Chapelle de Bonamoussadi']];
+const GROUPS = [['ph ph-music-notes','Chorale paroissiale','42 membres · répétition mer. 18:00'],['ph ph-gender-female','Union des femmes','86 membres · réunion 1er sam.'],['ph ph-users-three','Jeunesse (UCJ)','64 membres · ven. 17:30'],['ph ph-gender-male','Union des hommes','51 membres · 2e dim.'],['ph ph-baby','École du dimanche','Moniteurs · dim. 9:00']];
+const SKILLS = [['ph ph-music-notes','Chant'],['ph ph-hammer','Bâtiment'],['ph ph-first-aid','Santé'],['ph ph-chalkboard-teacher','Enseignement'],['ph ph-camera','Photo/vidéo'],['ph ph-calculator','Comptabilité'],['ph ph-car','Transport'],['ph ph-cooking-pot','Cuisine']];
+const DAYS = ['Lun','Mar','Mer','Jeu','Ven','Sam','Dim'];
+const DOCS = {
+ med:[['ph ph-book-open','Méditation du jour : Jean 15, 1-8','2 min de lecture'],['ph ph-file-pdf','Méditations d\'octobre','PDF · 1,2 Mo'],['ph ph-headphones','Méditation audio : la confiance','6 min']],
+ etu:[['ph ph-file-pdf','Étude biblique : l\'Évangile de Marc (1/6)','PDF · 840 Ko'],['ph ph-file-pdf','Guide de l\'animateur','PDF · 2,1 Mo'],['ph ph-file-pdf','Catéchisme des adultes','PDF · 3,4 Mo']],
+ msg:[['ph ph-envelope-open','Lettre pastorale de rentrée','15 sept. · Pasteur É. Moukoko'],['ph ph-envelope-open','Message du Synode du Littoral','2 sept. · Rév. A. Din']]};
+const SOCIAL = [['Soutien aux familles déplacées','72 %','Je donne du temps'],['Fournitures pour l\'école de Bonamoussadi','45 %','Je donne du temps']];
+const IDX = [['ph ph-microphone-stage','Prédication','Demeurer dans la vigne','Pasteur É. Moukoko · 38 min'],['ph ph-microphone-stage','Prédication','La foi qui agit','Rév. A. Din · 41 min'],['ph ph-church','Paroisse','Paroisse de Deïdo','Douala-Centre'],['ph ph-church','Paroisse','Paroisse d\'Akwa','Douala-Centre'],['ph ph-buildings','Projet','Chapelle de Bépanda','62,5 % mobilisé'],['ph ph-buildings','Projet','Forage de Bonamoussadi','88 % mobilisé'],['ph ph-calendar-blank','Événement','Semaine de prière','5–9 oct.'],['ph ph-calendar-blank','Événement','Forum jeunesse','Sam. 10 oct.'],['ph ph-file-pdf','Document','Méditations d\'octobre','PDF']];
+const MYP = [['Chapelle de Bépanda',62.5,'Contributeur · bénévole bâtiment','Mes dons : 150 000'],['Forage de Bonamoussadi',88,'Contributeur','Mes dons : 50 000'],['Soutien aux familles déplacées',72,'Bénévole','Mes dons : 15 000']];
+const MYA = [['Oct','3','Nettoyage de la chapelle','Sam. 8:00 · Bonamoussadi'],['Oct','5','Semaine de prière','Chaque soir 18:30 · Deïdo'],['Oct','7','Répétition chorale','Mer. 18:00 · Deïdo'],['Oct','10','Forum jeunesse','Sam. 9:00 · Douala']];
+const AMT = [5000, 10000, 25000, 50000];
+const CATS = ['Tout','Prédication','Paroisse','Projet','Événement','Document'];
+class Component extends DCLogic {
+  state = { follow: true, joined: { 0: 'ok' }, skills: { 0: 1, 3: 1 }, days: { 2: 1, 5: 1, 6: 1 }, saved: false, tab: 'med', dl: {}, forum: false, help: {}, q: '', cat: 'Tout', give: null, amt: 10000, op: 'mtn', gaveOk: false, myTab: 'proj', actOn: { 0: 1, 2: 1 } };
+  renderVals() {
+    const s = this.state, on = (b) => ({ bg: b ? '#1f5a36' : '#fbf8f2', fg: b ? '#f4efe6' : '#1c2a21', bc: b ? '#1f5a36' : '#d6dfd3' });
+    const ql = s.q.trim().toLowerCase();
+    const results = IDX.filter(r => (s.cat === 'Tout' || r[1] === s.cat) && (!ql || (r[2] + ' ' + r[3]).toLowerCase().includes(ql))).map(r => ({ icon: r[0], kind: r[1], t: r[2], m: r[3] }));
+    const nSk = Object.values(s.skills).filter(Boolean).length, nD = Object.values(s.days).filter(Boolean).length;
+    return {
+      hier: HIER.map((h, i) => ({ lvl: h[0], name: h[1], dot: i === 4 ? '#1f5a36' : '#fbf8f2', line: i === 4 ? 'transparent' : '#c9dccd', fs: i === 4 ? '17px' : '14px', fw: i === 4 ? 700 : 500 })),
+      toggleFollow: () => this.setState({ follow: !s.follow }), followLabel: s.follow ? 'Ma chapelle de rattachement' : 'Choisir comme chapelle', followIcon: s.follow ? 'ph-bold ph-check' : 'ph-bold ph-plus', followBg: s.follow ? '#1f5a36' : 'transparent', followFg: s.follow ? '#f4efe6' : '#1f5a36',
+      groups: GROUPS.map((g, i) => { const st = s.joined[i]; return { icon: g[0], name: g[1], meta: g[2], cta: st === 'ok' ? 'Membre' : st === 'wait' ? 'En attente' : 'Rejoindre', bg: st === 'ok' ? '#1f5a36' : 'transparent', fg: st === 'ok' ? '#f4efe6' : '#1f5a36', onClick: () => this.setState({ joined: { ...s.joined, [i]: st ? undefined : 'wait' } }) }; }),
+      skills: SKILLS.map((k, i) => ({ icon: k[0], l: k[1], ...on(s.skills[i]), onClick: () => this.setState({ skills: { ...s.skills, [i]: !s.skills[i] }, saved: false }) })),
+      days: DAYS.map((d, i) => ({ l: d, icon: s.days[i] ? 'ph-bold ph-check' : 'ph ph-minus', ...on(s.days[i]), onClick: () => this.setState({ days: { ...s.days, [i]: !s.days[i] }, saved: false }) })),
+      matchCount: Math.min(nSk * nD, 9), saveProfile: () => this.setState({ saved: true }), saveLabel: s.saved ? 'Profil enregistré' : 'Enregistrer mon profil',
+      docTabs: [['med', 'Méditations'], ['etu', 'Études'], ['msg', 'Messages']].map(([k, l]) => ({ l, bg: s.tab === k ? '#1f5a36' : 'transparent', fg: s.tab === k ? '#f4efe6' : '#1c2a21', onClick: () => this.setState({ tab: k }) })),
+      isMsg: s.tab === 'msg',
+      docs: DOCS[s.tab].map((d, i) => { const k = s.tab + i, ok = s.dl[k]; return { icon: d[0], t: d[1], m: d[2], dl: ok ? 'ph-bold ph-check' : 'ph ph-download-simple', fg: ok ? '#1f5a36' : '#1c2a21', onClick: () => this.setState({ dl: { ...s.dl, [k]: true } }) }; }),
+      toggleForum: () => this.setState({ forum: !s.forum }), forumLabel: s.forum ? 'Inscrit(e)' : 'Je m\'inscris', forumIcon: s.forum ? 'ph-bold ph-check' : 'ph-bold ph-plus',
+      social: SOCIAL.map((a, i) => ({ t: a[0], pct: a[1], pctCss: a[1].replace(' ', ''), helpL: s.help[i] ? 'Bénévole ✓' : a[2], give: () => this.setState({ give: i, gaveOk: false }), help: () => this.setState({ help: { ...s.help, [i]: !s.help[i] } }) })),
+      giveOpen: s.give !== null, giveForm: !s.gaveOk, giveDone: s.gaveOk, giveTitle: s.give !== null ? SOCIAL[s.give][0] : '',
+      closeGive: () => this.setState({ give: null }), confirmGive: () => this.setState({ gaveOk: true }),
+      amounts: AMT.map(a => ({ l: a.toLocaleString('fr-FR'), ...on(s.amt === a), onClick: () => this.setState({ amt: a }) })),
+      ops: [['mtn', 'MTN', 'MTN Mobile Money', '#ffcb05'], ['om', 'OM', 'Orange Money', '#ff7900']].map(o => ({ k: o[1], l: o[2], c: o[3], bw: s.op === o[0] ? '2px' : '1px', icon: s.op === o[0] ? 'ph-fill ph-check-circle' : 'ph ph-circle', onClick: () => this.setState({ op: o[0] }) })),
+      giveTotal: Math.round(s.amt * 1.015).toLocaleString('fr-FR'), giveAmountL: s.amt.toLocaleString('fr-FR'), giveOp: s.op === 'mtn' ? 'MoMo' : 'Orange Money',
+      myTabs: [['proj', 'Mes projets'], ['act', 'Mes activités']].map(([k, l]) => ({ l, bg: s.myTab === k ? '#1f5a36' : 'transparent', fg: s.myTab === k ? '#f4efe6' : '#1c2a21', onClick: () => this.setState({ myTab: k }) })),
+      isProj: s.myTab === 'proj', isAct: s.myTab === 'act',
+      myProjects: MYP.map(p => ({ t: p[0], pct: String(p[1]).replace('.', ',') + ' %', w: p[1] + '%', role: p[2], mine: p[3] })),
+      myActs: MYA.map((a, i) => { const ok = !!s.actOn[i]; return { mo: a[0], d: a[1], t: a[2], m: a[3], cta: ok ? 'Inscrit ✓' : "S'inscrire", bg: ok ? '#1f5a36' : 'transparent', fg: ok ? '#f4efe6' : '#1f5a36', onClick: () => this.setState({ actOn: { ...s.actOn, [i]: !ok } }) }; }),
+      q: s.q, onQ: e => this.setState({ q: e.target.value }),
+      cats: CATS.map(c => ({ l: c, ...on(s.cat === c), onClick: () => this.setState({ cat: c }) })),
+      results, resCount: results.length, noRes: results.length === 0
+    };
+  }
+}
+</script>
+</body>
+</html>

@@ -1,0 +1,2430 @@
+CAHIER DES CHARGES FONCTIONNEL
+
+PROJET DE CONCEPTION ET DE DÉVELOPPEMENT D’UNE PLATEFORME NUMÉRIQUE FÉDÉRATRICE DES ÉGLISES MEMBRES DU CEPCA
+
+Conseil des Églises Protestantes du Cameroun
+
+Version : 1.0
+
+Document destiné à la consultation des développeurs / agences digitales
+
+---
+
+1. IDENTIFICATION DU PROJET
+
+1.1. Nom provisoire
+
+CEPCA DIGITAL
+
+Nom définitif à déterminer par le CEPCA.
+
+1.2. Porteur du projet
+
+Conseil des Églises Protestantes du Cameroun – CEPCA
+
+1.3. Nature du projet
+
+Développement d'une plateforme numérique fédératrice permettant aux Églises membres du CEPCA de disposer d'un environnement numérique commun, tout en conservant leur autonomie institutionnelle, organisationnelle et fonctionnelle.
+
+1.4. Nature du présent document
+
+Le présent document constitue le cahier des charges fonctionnel destiné à :
+
+- définir les besoins du CEPCA ;
+- définir les utilisateurs ;
+- décrire les fonctionnalités attendues ;
+- définir les règles de gestion ;
+- permettre aux développeurs de proposer une solution ;
+- permettre la comparaison des offres techniques et financières ;
+- servir de base à la conception, au développement, aux tests et à la recette.
+
+---
+
+2. VISION DU PROJET
+
+Le projet vise à mettre en place une plateforme permettant de connecter :
+
+CEPCA → Confessions → Structures ecclésiales → Responsables → Fidèles
+
+La plateforme doit permettre simultanément :
+
+- l'information ;
+- la communication ;
+- la diffusion des contenus spirituels ;
+- l'interaction avec les fidèles ;
+- la participation aux activités ;
+- la mobilisation des ressources ;
+- les contributions financières ;
+- le suivi des projets ;
+- la production de rapports ;
+- l'administration des différentes structures ;
+- la gouvernance numérique.
+
+Le principe fondamental est :
+
+«Fédérer sans uniformiser.»
+
+La plateforme doit donc être commune sur le plan technologique, mais configurable selon l'organisation propre à chaque confession membre du CEPCA.
+
+---
+
+3. PROBLÉMATIQUE À RÉSOUDRE
+
+La solution devra contribuer à répondre aux problématiques suivantes :
+
+P1 – Communication
+
+Comment permettre à chaque Église de communiquer efficacement avec ses fidèles ?
+
+P2 – Distance
+
+Comment maintenir le lien avec un fidèle absent de sa paroisse ou vivant à l'étranger ?
+
+P3 – Participation
+
+Comment transformer le fidèle en acteur de la vie de son Église ?
+
+P4 – Jeunesse
+
+Comment renforcer l'implication des jeunes dans la vie ecclésiale ?
+
+P5 – Diaspora
+
+Comment maintenir le lien entre les Églises et leurs membres vivant hors de leur communauté locale ou à l'étranger ?
+
+P6 – Contributions
+
+Comment permettre à un fidèle de soutenir facilement son Église à distance ?
+
+P7 – Traçabilité
+
+Comment assurer une meilleure traçabilité des contributions ?
+
+P8 – Projets
+
+Comment permettre aux Églises de présenter et suivre leurs projets ?
+
+P9 – Gouvernance
+
+Comment fournir aux responsables des outils adaptés à leur niveau de responsabilité ?
+
+P10 – Mutualisation
+
+Comment permettre aux confessions de bénéficier d'une infrastructure commune sans perdre leur autonomie ?
+
+---
+
+4. OBJECTIFS FONCTIONNELS
+
+La plateforme devra permettre :
+
+OF1. de créer un espace institutionnel pour le CEPCA ;
+
+OF2. de créer un espace numérique indépendant pour chaque confession participante ;
+
+OF3. de reproduire l'organisation interne de chaque confession ;
+
+OF4. de gérer les utilisateurs et leurs droits ;
+
+OF5. de créer les profils des fidèles ;
+
+OF6. de publier des informations ;
+
+OF7. de diffuser des contenus spirituels ;
+
+OF8. de gérer les activités et événements ;
+
+OF9. de permettre les inscriptions ;
+
+OF10. de faciliter les interactions ;
+
+OF11. de permettre les contributions financières ;
+
+OF12. de générer des reçus numériques ;
+
+OF13. de suivre les projets ;
+
+OF14. de produire des rapports ;
+
+OF15. de gérer les jeunes ;
+
+OF16. de gérer la diaspora ;
+
+OF17. de gérer les bénévoles ;
+
+OF18. de fournir des tableaux de bord ;
+
+OF19. de sécuriser les données et transactions ;
+
+OF20. de permettre l'évolution future de la plateforme.
+
+---
+
+5. PRINCIPES DIRECTEURS DU SYSTÈME
+
+Le développeur devra respecter les principes suivants.
+
+5.1. Architecture multi-confessions
+
+Une seule plateforme devra pouvoir héberger plusieurs confessions.
+
+5.2. Autonomie
+
+Chaque confession doit pouvoir administrer son espace sans accéder aux données privées des autres confessions.
+
+5.3. Configuration
+
+L'organisation interne de chaque confession doit pouvoir être paramétrée.
+
+5.4. Hiérarchie
+
+Les droits d'accès doivent respecter la structure organisationnelle.
+
+5.5. Sécurité
+
+Les données sensibles et transactions financières doivent être protégées.
+
+5.6. Traçabilité
+
+Les opérations sensibles doivent être journalisées.
+
+5.7. Évolutivité
+
+De nouvelles confessions et de nouveaux modules doivent pouvoir être ajoutés.
+
+5.8. Simplicité
+
+L'application doit être utilisable par des personnes ayant des niveaux différents de maîtrise du numérique.
+
+---
+
+6. ARCHITECTURE FONCTIONNELLE GÉNÉRALE
+
+Le système devra être organisé autour de trois grands niveaux.
+
+NIVEAU 1 – CEPCA
+
+Fonctions communes :
+
+- présentation du CEPCA ;
+- actualités ;
+- événements ;
+- communiqués ;
+- ressources ;
+- projets communs ;
+- confessions membres ;
+- statistiques agrégées autorisées.
+
+NIVEAU 2 – CONFESSION
+
+Chaque confession dispose de son propre espace.
+
+Exemple :
+
+Confession A
+
+→ structures
+
+→ responsables
+
+→ fidèles
+
+→ activités
+
+→ contenus
+
+→ projets
+
+→ contributions
+
+→ rapports.
+
+NIVEAU 3 – UTILISATEUR
+
+Le fidèle accède à un espace personnalisé.
+
+---
+
+7. STRUCTURE ORGANISATIONNELLE PARAMÉTRABLE
+
+Le système devra permettre de définir une hiérarchie propre à chaque confession.
+
+Exemple pour une confession donnée :
+
+ASSEMBLÉE GÉNÉRALE
+        ↓
+CONGRÈS DES GROUPES STATUTAIRES
+        ↓
+SYNODE
+        ↓
+CONSISTOIRE
+        ↓
+PAROISSE
+        ↓
+CHAPELLE
+        ↓
+FIDÈLE
+
+Mais cette hiérarchie ne doit pas être codée en dur.
+
+Le système devra permettre à l'administrateur autorisé de définir :
+
+- le nom du niveau ;
+- son rang ;
+- son niveau parent ;
+- ses responsabilités ;
+- ses administrateurs ;
+- les données accessibles ;
+- les fonctionnalités autorisées.
+
+Cela permettra d'adapter la plateforme aux différentes confessions membres du CEPCA.
+
+---
+
+8. PROFILS UTILISATEURS
+
+La plateforme devra prévoir plusieurs catégories d'utilisateurs.
+
+8.1. Administrateur CEPCA
+
+Accès au niveau fédérateur.
+
+Fonctions :
+
+- gérer les confessions ;
+- gérer les contenus CEPCA ;
+- gérer les événements communs ;
+- gérer les utilisateurs CEPCA ;
+- gérer les statistiques autorisées ;
+- gérer les paramètres généraux.
+
+---
+
+8.2. Administrateur de confession
+
+Gère uniquement sa confession.
+
+Fonctions :
+
+- structures ;
+- responsables ;
+- utilisateurs ;
+- contenus ;
+- activités ;
+- projets ;
+- contributions ;
+- rapports.
+
+---
+
+8.3. Administrateur de structure
+
+Selon l'organisation de la confession :
+
+- synode ;
+- consistoire ;
+- paroisse ;
+- chapelle ;
+- ou autre niveau.
+
+---
+
+8.4. Pasteur / responsable religieux
+
+Fonctions possibles :
+
+- publier une prédication ;
+- publier un message ;
+- annoncer une activité ;
+- communiquer avec les membres ;
+- consulter certaines statistiques ;
+- gérer les activités pastorales.
+
+---
+
+8.5. Responsable financier
+
+Accès aux fonctionnalités financières autorisées.
+
+---
+
+8.6. Responsable de projet
+
+Peut :
+
+- créer un projet ;
+- définir son budget ;
+- publier son état d'avancement ;
+- enregistrer les informations validées ;
+- produire les rapports.
+
+---
+
+8.7. Responsable jeunesse
+
+Accès au module jeunesse.
+
+---
+
+8.8. Responsable communication
+
+Gestion :
+
+- actualités ;
+- annonces ;
+- événements ;
+- contenus.
+
+---
+
+8.9. Fidèle
+
+Accès à son espace personnel.
+
+---
+
+8.10. Visiteur
+
+Accès aux contenus publics sans compte.
+
+---
+
+9. MODULE 1 – PORTAIL PUBLIC CEPCA
+
+Le portail public constitue la vitrine du système.
+
+Il devra comporter notamment :
+
+Accueil
+
+- présentation ;
+- actualités ;
+- événements ;
+- informations importantes.
+
+Présentation du CEPCA
+
+- historique ;
+- mission ;
+- vision ;
+- organisation ;
+- instances.
+
+Églises membres
+
+Liste des confessions participantes.
+
+Pour chaque confession :
+
+- nom ;
+- présentation ;
+- logo ;
+- coordonnées ;
+- site/espace numérique ;
+- informations publiques.
+
+Actualités
+
+Publication d'articles et informations.
+
+Agenda
+
+Calendrier des événements publics.
+
+Contact
+
+Formulaire de contact.
+
+---
+
+10. MODULE 2 – ESPACE DE CHAQUE CONFESSION
+
+Chaque confession disposera d'une interface personnalisée.
+
+Elle pourra définir :
+
+- logo ;
+- couleurs ;
+- nom ;
+- présentation ;
+- contacts ;
+- organisation ;
+- contenus ;
+- règles de fonctionnement.
+
+Chaque confession pourra administrer son environnement indépendamment.
+
+---
+
+11. MODULE 3 – GESTION DE L'ORGANISATION
+
+Ce module constitue une fonctionnalité fondamentale.
+
+Il permettra de créer :
+
+- niveaux institutionnels ;
+- structures ;
+- sous-structures ;
+- responsables ;
+- rattachements.
+
+Exemple :
+
+Confession
+    ↓
+Synode
+    ↓
+Consistoire
+    ↓
+Paroisse
+    ↓
+Chapelle
+
+Le système devra permettre de modifier cette architecture sans modifier le programme.
+
+---
+
+12. MODULE 4 – GESTION DES FIDÈLES
+
+Le système devra permettre :
+
+Création de compte
+
+- nom ;
+- prénom ;
+- téléphone ;
+- adresse e-mail ;
+- pays ;
+- ville ;
+- confession ;
+- paroisse ;
+- chapelle ;
+- groupes éventuels.
+
+Authentification
+
+Possibilité d'utiliser :
+
+- téléphone ;
+- e-mail ;
+- mot de passe ;
+- code OTP.
+
+Profil
+
+Le fidèle pourra consulter et modifier les informations autorisées.
+
+---
+
+13. MODULE 5 – « MON ÉGLISE »
+
+Le fidèle devra disposer d'une page personnalisée.
+
+Exemple :
+
+MON ÉGLISE
+
+Ma confession
+     ↓
+Ma structure
+     ↓
+Ma paroisse
+     ↓
+Ma chapelle
+
+Actualités
+Prédications
+Événements
+Groupes
+Projets
+Contributions
+Reçus
+Messages
+
+---
+
+14. MODULE 6 – ACTUALITÉS ET PUBLICATIONS
+
+Les administrateurs habilités pourront créer :
+
+- articles ;
+- annonces ;
+- communiqués ;
+- informations ;
+- messages ;
+- alertes.
+
+Chaque publication devra comporter :
+
+- titre ;
+- auteur ;
+- date ;
+- contenu ;
+- image ;
+- pièce jointe ;
+- niveau de diffusion.
+
+Niveau de diffusion
+
+Une publication pourra être destinée :
+
+- à tout le CEPCA ;
+- à une confession ;
+- à un synode ;
+- à un consistoire ;
+- à une paroisse ;
+- à une chapelle ;
+- à un groupe ;
+- à certains utilisateurs.
+
+---
+
+15. MODULE 7 – CONTENUS SPIRITUELS
+
+Types de contenus :
+
+- prédication ;
+- méditation ;
+- étude biblique ;
+- enseignement ;
+- message pastoral ;
+- conférence ;
+- audio ;
+- vidéo ;
+- document PDF.
+
+Fonctions :
+
+- publier ;
+- modifier ;
+- supprimer ;
+- archiver ;
+- rechercher ;
+- catégoriser ;
+- partager.
+
+---
+
+16. MODULE 8 – AUDIO ET VIDÉO
+
+La plateforme devra permettre :
+
+- téléchargement ;
+- lecture ;
+- classement ;
+- recherche ;
+- diffusion de contenus autorisés.
+
+Le système devra idéalement pouvoir intégrer des liens ou services de stockage vidéo/audio externes lorsque cela est techniquement et juridiquement approprié.
+
+---
+
+17. MODULE 9 – CALENDRIER ET ÉVÉNEMENTS
+
+Création d'événements :
+
+- culte ;
+- conférence ;
+- séminaire ;
+- formation ;
+- réunion ;
+- concert ;
+- activité jeunesse ;
+- activité sociale ;
+- campagne ;
+- événement CEPCA.
+
+Informations :
+
+- titre ;
+- date ;
+- heure ;
+- lieu ;
+- description ;
+- responsable ;
+- nombre de places ;
+- modalités d'inscription.
+
+---
+
+18. MODULE 10 – INSCRIPTION AUX ACTIVITÉS
+
+Le fidèle pourra :
+
+Consulter → S'inscrire → Recevoir confirmation → Recevoir rappel → Participer
+
+Le responsable pourra connaître :
+
+- nombre d'inscrits ;
+- liste des participants ;
+- places restantes ;
+- statistiques.
+
+---
+
+19. MODULE 11 – NOTIFICATIONS
+
+Notifications :
+
+- nouvelles publications ;
+- annonces ;
+- événements ;
+- rappels ;
+- confirmation de paiement ;
+- reçu ;
+- changement de programme ;
+- messages importants.
+
+Canaux possibles :
+
+- notification mobile ;
+- e-mail ;
+- SMS ;
+- autres canaux selon faisabilité.
+
+---
+
+20. MODULE 12 – CONTRIBUTIONS FINANCIÈRES
+
+Ce module devra être développé avec une attention particulière.
+
+Le fidèle devra pouvoir sélectionner :
+
+Type de contribution
+
+- offrande ;
+- don ;
+- cotisation ;
+- contribution spéciale ;
+- soutien à un projet ;
+- contribution à une œuvre ;
+- autre catégorie définie par la confession.
+
+Destination
+
+- chapelle ;
+- paroisse ;
+- consistoire ;
+- synode ;
+- confession ;
+- projet spécifique ;
+- œuvre sociale.
+
+---
+
+21. PARCOURS D'UNE CONTRIBUTION
+
+Le parcours fonctionnel sera :
+
+FIDÈLE
+   ↓
+Choisit la destination
+   ↓
+Choisit le type de contribution
+   ↓
+Saisit le montant
+   ↓
+Choisit le moyen de paiement
+   ↓
+Confirmation
+   ↓
+Paiement
+   ↓
+Validation par le prestataire
+   ↓
+Enregistrement
+   ↓
+Reçu électronique
+   ↓
+Rapprochement
+   ↓
+Reporting
+
+---
+
+22. MOYENS DE PAIEMENT
+
+Le développeur devra prévoir une architecture permettant l'intégration de plusieurs moyens de paiement.
+
+À étudier notamment :
+
+- Mobile Money ;
+- carte bancaire ;
+- virement bancaire ;
+- autres solutions agréées.
+
+Le choix définitif des prestataires devra être effectué lors de la phase de conception.
+
+---
+
+23. REÇU NUMÉRIQUE
+
+Après confirmation d'une contribution, le système devra générer un reçu.
+
+Le reçu devra comporter notamment :
+
+- numéro unique ;
+- date ;
+- montant ;
+- type de contribution ;
+- destination ;
+- référence transaction ;
+- identité du contributeur selon les règles applicables ;
+- confession ;
+- structure concernée.
+
+Le reçu devra pouvoir être :
+
+- consulté ;
+- téléchargé ;
+- envoyé par e-mail ;
+- retrouvé dans l'historique.
+
+---
+
+24. ANNULATION / ÉCHEC DE TRANSACTION
+
+Le système devra distinguer :
+
+- paiement réussi ;
+- paiement en attente ;
+- paiement échoué ;
+- paiement annulé ;
+- paiement remboursé.
+
+Aucune contribution ne devra être considérée comme définitivement enregistrée tant que le statut de paiement approprié n'est pas confirmé.
+
+---
+
+25. MODULE 13 – PROJETS ET CAMPAGNES
+
+Une Église pourra créer un projet.
+
+Exemple :
+
+Construction d'une chapelle
+
+Informations :
+
+- nom ;
+- description ;
+- localisation ;
+- budget ;
+- objectif financier ;
+- durée ;
+- responsable ;
+- bénéficiaires ;
+- documents ;
+- photos ;
+- état d'avancement.
+
+---
+
+26. SUIVI FINANCIER D'UN PROJET
+
+Le système pourra afficher :
+
+OBJECTIF
+40 000 000 FCFA
+
+MOBILISÉ
+25 000 000 FCFA
+
+SOLDE
+15 000 000 FCFA
+
+TAUX DE MOBILISATION
+62,5 %
+
+Les données publiées devront être validées par les responsables habilités.
+
+---
+
+27. MODULE 14 – « JE PARTICIPE »
+
+Le fidèle pourra déclarer :
+
+- son intérêt pour un projet ;
+- sa disponibilité ;
+- ses compétences ;
+- son souhait de bénévolat ;
+- sa participation à une activité.
+
+Exemple :
+
+Je suis disponible comme :
+
+- informaticien ;
+- enseignant ;
+- médecin ;
+- comptable ;
+- juriste ;
+- ingénieur ;
+- communicant ;
+- bénévole.
+
+Cette fonctionnalité devra rester facultative.
+
+---
+
+28. MODULE 15 – JEUNES
+
+Fonctions :
+
+- inscription aux activités ;
+- événements ;
+- contenus ;
+- formations ;
+- groupes ;
+- bénévolat ;
+- projets ;
+- communication.
+
+Les administrateurs jeunesse devront pouvoir gérer leurs propres contenus selon leurs droits.
+
+---
+
+29. MODULE 16 – DIASPORA
+
+Le fidèle vivant hors de son lieu de rattachement pourra :
+
+- conserver son profil ;
+- suivre sa paroisse ;
+- consulter les contenus ;
+- participer à distance aux activités proposées ;
+- contribuer ;
+- soutenir des projets ;
+- recevoir les communications.
+
+Le système devra prévoir le champ :
+
+Pays de résidence
+
+sans rendre obligatoire une information qui n'est pas nécessaire au service demandé.
+
+---
+
+30. MODULE 17 – ACTIONS SOCIALES
+
+Création de campagnes :
+
+- aide aux familles ;
+- soutien scolaire ;
+- aide médicale ;
+- aide alimentaire ;
+- catastrophes ;
+- assistance aux personnes vulnérables ;
+- autres œuvres sociales.
+
+Workflow :
+
+Identification du besoin
+        ↓
+Validation
+        ↓
+Création de campagne
+        ↓
+Mobilisation
+        ↓
+Intervention
+        ↓
+Rapport
+
+---
+
+31. MODULE 18 – MESSAGERIE
+
+La plateforme pourra prévoir :
+
+Messages institutionnels
+
+Administrateur → groupe d'utilisateurs.
+
+Messages pastoraux
+
+Pasteur → membres autorisés.
+
+Notifications de service
+
+Système → utilisateur.
+
+La messagerie instantanée entre tous les utilisateurs ne devra être activée qu'après définition précise des règles de modération, de confidentialité et de sécurité.
+
+---
+
+32. MODULE 19 – CONSULTATIONS ET SONDAGES
+
+Les responsables habilités pourront créer des consultations.
+
+Exemple :
+
+«Quels horaires conviennent le mieux pour cette activité ?»
+
+Le système devra permettre :
+
+- création ;
+- ciblage ;
+- durée ;
+- réponses ;
+- clôture ;
+- statistiques.
+
+Les sondages ne devront pas être automatiquement assimilés à des décisions institutionnelles.
+
+---
+
+33. MODULE 20 – DOCUMENTOTHÈQUE
+
+Stockage de :
+
+- règlements ;
+- statuts ;
+- manuels ;
+- rapports ;
+- documents administratifs ;
+- études ;
+- documents spirituels ;
+- supports de formation.
+
+Gestion :
+
+- catégories ;
+- droits d'accès ;
+- téléchargement ;
+- version ;
+- archivage.
+
+---
+
+34. MODULE 21 – TABLEAUX DE BORD
+
+Dashboard CEPCA
+
+Indicateurs :
+
+- nombre de confessions ;
+- nombre de structures participantes ;
+- utilisateurs ;
+- activités ;
+- projets communs ;
+- statistiques agrégées autorisées.
+
+---
+
+Dashboard confession
+
+- membres ;
+- structures ;
+- utilisateurs ;
+- activités ;
+- contributions ;
+- projets ;
+- contenus ;
+- engagement.
+
+---
+
+Dashboard paroisse
+
+- fidèles ;
+- chapelles ;
+- activités ;
+- contributions ;
+- projets ;
+- participants.
+
+---
+
+Dashboard chapelle
+
+- membres ;
+- activités ;
+- contributions ;
+- projets ;
+- besoins.
+
+---
+
+35. MODULE 22 – RAPPORTING
+
+Le système devra pouvoir générer des rapports :
+
+Rapport utilisateurs
+
+- inscrits ;
+- actifs ;
+- nouveaux inscrits.
+
+Rapport financier
+
+- contributions ;
+- montant ;
+- destination ;
+- période ;
+- statut.
+
+Rapport projets
+
+- projets ;
+- budget ;
+- mobilisation ;
+- avancement.
+
+Rapport activités
+
+- activités ;
+- participants ;
+- taux de participation.
+
+Rapport communication
+
+- publications ;
+- consultations ;
+- interactions.
+
+Les rapports devront pouvoir être exportés, selon les droits :
+
+- PDF ;
+- Excel ;
+- CSV.
+
+---
+
+36. MODULE 23 – RECHERCHE
+
+La plateforme devra disposer d'un moteur de recherche.
+
+Recherche possible sur :
+
+- utilisateurs ;
+- structures ;
+- publications ;
+- prédications ;
+- événements ;
+- projets ;
+- documents.
+
+Les résultats devront respecter les droits d'accès.
+
+---
+
+37. MODULE 24 – ADMINISTRATION
+
+Le back-office devra permettre :
+
+- gestion des utilisateurs ;
+- gestion des rôles ;
+- gestion des structures ;
+- gestion des contenus ;
+- gestion des catégories ;
+- gestion des événements ;
+- gestion des projets ;
+- gestion des paiements ;
+- gestion des notifications ;
+- gestion des paramètres.
+
+---
+
+38. GESTION DES RÔLES ET AUTORISATIONS
+
+Le système devra utiliser une logique de type :
+
+Utilisateur → Rôle → Niveau → Permissions
+
+Exemple :
+
+Jean
+ ↓
+Responsable financier
+ ↓
+Paroisse X
+ ↓
+Peut consulter les contributions de Paroisse X
+ ↓
+Ne peut pas consulter celles d'une autre paroisse
+
+---
+
+39. MATRICE DES DROITS
+
+Une matrice détaillée devra être élaborée avant développement.
+
+Exemple :
+
+Fonction| CEPCA| Confession| Synode| Consistoire| Paroisse| Chapelle| Fidèle
+Actualités| C/R/V| C/R/V| C/R/V| C/R/V| C/R/V| C/R/V| C
+Fidèles| Global autorisé| Confession| Niveau| Niveau| Local| Local| Personnel
+Contributions| Agrégé| Oui| Oui| Oui| Oui| Selon règles| Personnel
+Projets| CEPCA| Confession| Oui| Oui| Oui| Oui| C
+Rapports| Oui| Oui| Oui| Oui| Oui| Selon droits| Personnel
+Paramétrage| Oui| Oui| Limité| Limité| Limité| Limité| Non
+
+C = consulter
+
+R = créer/modifier
+
+V = valider
+
+Cette matrice devra être finalisée avec le CEPCA et chaque confession pilote.
+
+---
+
+40. WORKFLOW DE PUBLICATION
+
+Une publication importante pourra suivre :
+
+Rédaction
+   ↓
+Soumission
+   ↓
+Validation
+   ↓
+Publication
+   ↓
+Archivage
+
+Pour les contenus simples, un workflow simplifié pourra être autorisé.
+
+---
+
+41. WORKFLOW FINANCIER
+
+Pour les opérations nécessitant une validation institutionnelle :
+
+Création
+   ↓
+Validation
+   ↓
+Paiement
+   ↓
+Confirmation
+   ↓
+Rapprochement
+   ↓
+Comptabilisation
+   ↓
+Reporting
+
+La plateforme ne devra pas être considérée comme un logiciel comptable complet, sauf décision ultérieure du CEPCA.
+
+Elle doit en revanche pouvoir fournir les données nécessaires au rapprochement et au reporting.
+
+---
+
+42. SÉCURITÉ
+
+Le développeur devra proposer au minimum :
+
+- chiffrement des communications ;
+- gestion sécurisée des mots de passe ;
+- authentification forte pour les profils sensibles ;
+- gestion des sessions ;
+- contrôle des accès ;
+- journalisation ;
+- sauvegardes ;
+- restauration ;
+- protection contre les accès non autorisés ;
+- mécanismes anti-fraude pour les paiements.
+
+---
+
+43. JOURNAL D'AUDIT
+
+Les opérations sensibles devront être journalisées.
+
+Exemples :
+
+- connexion administrateur ;
+- modification d'un rôle ;
+- modification d'un montant ;
+- validation d'une contribution ;
+- remboursement ;
+- suppression d'un contenu ;
+- modification d'un projet.
+
+Le journal devra enregistrer notamment :
+
+- utilisateur ;
+- date ;
+- action ;
+- objet ;
+- résultat.
+
+---
+
+44. PROTECTION DES DONNÉES
+
+Le système devra prévoir :
+
+- consentement lorsque nécessaire ;
+- politique de confidentialité ;
+- gestion des droits d'accès ;
+- minimisation des données ;
+- conservation maîtrisée ;
+- suppression ou anonymisation lorsque requise ;
+- traçabilité des accès.
+
+Le développeur devra identifier les exigences réglementaires applicables au Cameroun et proposer leur prise en compte dans la conception.
+
+---
+
+45. SAUVEGARDE
+
+Le développeur devra proposer une politique comprenant :
+
+- sauvegarde régulière ;
+- sauvegarde des bases ;
+- sauvegarde des fichiers ;
+- stockage sécurisé ;
+- procédure de restauration ;
+- test périodique des sauvegardes.
+
+---
+
+46. APPLICATION MOBILE
+
+Le projet devra privilégier une expérience mobile.
+
+Deux approches pourront être étudiées :
+
+Option A
+
+Application Android + iOS.
+
+Option B
+
+Application multiplateforme permettant de réduire les coûts de développement et de maintenance.
+
+Le développeur devra justifier techniquement son choix.
+
+---
+
+47. VERSION WEB
+
+Une interface web devra être prévue pour :
+
+- CEPCA ;
+- administrateurs ;
+- responsables ;
+- gestion financière ;
+- gestion des contenus ;
+- reporting.
+
+---
+
+48. APPLICATION MOBILE DU FIDÈLE
+
+L'application mobile devra privilégier :
+
+- simplicité ;
+- rapidité ;
+- faible consommation de données ;
+- navigation intuitive ;
+- notifications ;
+- paiement ;
+- consultation des contenus ;
+- événements ;
+- profil.
+
+---
+
+49. ACCESSIBILITÉ
+
+L'interface devra être :
+
+- simple ;
+- lisible ;
+- adaptée aux écrans mobiles ;
+- adaptée aux personnes peu familières avec les outils numériques ;
+- disponible en français ;
+- extensible à l'anglais.
+
+Une stratégie d'internationalisation devra être prévue dès la conception.
+
+---
+
+50. PERFORMANCE
+
+Le développeur devra préciser les objectifs de performance.
+
+À titre indicatif :
+
+- chargement rapide ;
+- temps de réponse acceptable ;
+- capacité à supporter une montée en charge ;
+- optimisation des images ;
+- compression des contenus ;
+- gestion du cache.
+
+---
+
+51. MODE HORS CONNEXION
+
+Pour certains contenus, le système pourra prévoir :
+
+- téléchargement préalable ;
+- consultation hors connexion ;
+- synchronisation ultérieure.
+
+Cette fonctionnalité devra être étudiée en fonction des coûts et de la pertinence.
+
+---
+
+52. INTÉGRATIONS EXTERNES
+
+La plateforme devra être conçue pour pouvoir intégrer :
+
+- prestataires de paiement ;
+- SMS ;
+- e-mail ;
+- services de notification ;
+- stockage ;
+- éventuellement systèmes comptables ;
+- éventuellement systèmes d'identité.
+
+Les intégrations devront utiliser des API documentées lorsque disponibles.
+
+---
+
+53. GESTION DES PAIEMENTS : EXIGENCES PARTICULIÈRES
+
+Le développeur devra prévoir une couche d'abstraction permettant de changer de prestataire de paiement sans reconstruire toute l'application.
+
+Architecture souhaitée :
+
+PLATEFORME CEPCA
+       ↓
+MODULE PAIEMENT
+       ↓
+┌──────┼──────┐
+↓      ↓      ↓
+MM     Carte  Banque
+
+Cela évitera de dépendre d'un seul opérateur.
+
+---
+
+54. GESTION DES COMMISSIONS
+
+Le système devra pouvoir enregistrer :
+
+- montant brut ;
+- frais de transaction ;
+- montant net ;
+- référence ;
+- prestataire ;
+- destination.
+
+Les règles de comptabilisation et d'affectation devront être définies avec chaque confession et les prestataires concernés.
+
+---
+
+55. GESTION DES REMBOURSEMENTS
+
+Le système devra permettre de suivre :
+
+- demande ;
+- motif ;
+- validation ;
+- exécution ;
+- montant ;
+- référence du remboursement ;
+- statut.
+
+---
+
+56. GESTION DES PROJETS
+
+Chaque projet devra avoir un identifiant unique.
+
+Exemple :
+
+CEPCA-CONF01-PAR015-PROJ0007
+
+Cela facilitera le suivi et le reporting.
+
+---
+
+57. NOTATION INTERNE DES PROJETS
+
+À terme, le système pourrait permettre de classer les projets selon leur statut :
+
+- idée ;
+- proposé ;
+- en étude ;
+- validé ;
+- en financement ;
+- en exécution ;
+- achevé ;
+- clôturé.
+
+Cette fonctionnalité pourra être développée dans une phase ultérieure.
+
+---
+
+58. GESTION DES MEMBRES
+
+Le système devra permettre de distinguer :
+
+- membre actif ;
+- membre inactif ;
+- nouveau membre ;
+- membre transféré ;
+- membre décédé ;
+- membre dont le statut est à vérifier.
+
+Les catégories exactes devront être définies par chaque confession.
+
+---
+
+59. TRANSFERT D'UN FIDÈLE
+
+Une fonctionnalité pourra permettre de transférer un membre :
+
+Paroisse A → Paroisse B
+
+avec :
+
+- validation ;
+- date ;
+- historique ;
+- conservation des informations autorisées.
+
+---
+
+60. GESTION DES GROUPES
+
+Un fidèle pourra appartenir à plusieurs groupes :
+
+- jeunesse ;
+- femmes ;
+- hommes ;
+- chorale ;
+- étude biblique ;
+- association ;
+- comité ;
+- groupe de prière ;
+- autre groupe.
+
+Le système devra permettre de gérer ces appartenances.
+
+---
+
+61. GESTION DES RESPONSABLES
+
+Chaque responsable devra être rattaché à :
+
+- une fonction ;
+- une structure ;
+- une période de mandat lorsque pertinent.
+
+Exemple :
+
+Pasteur
+Paroisse X
+Mandat : 2026–2029
+
+Cela permettra de conserver un historique institutionnel.
+
+---
+
+62. MODULE « MES CONTRIBUTIONS »
+
+Le fidèle devra pouvoir consulter :
+
+Mes contributions
+
+Date | Objet | Montant | Destination | Statut | Reçu
+
+Il devra pouvoir rechercher par période.
+
+---
+
+63. MODULE « MES PROJETS »
+
+Le fidèle pourra suivre les projets qu'il soutient.
+
+Exemple :
+
+Construction Chapelle X
+Objectif : 30 000 000
+Mobilisé : 21 000 000
+Avancement : 70 %
+
+---
+
+64. MODULE « MES ACTIVITÉS »
+
+Historique :
+
+- événements auxquels il s'est inscrit ;
+- activités suivies ;
+- bénévolat ;
+- formations.
+
+---
+
+65. MODULE « MES NOTIFICATIONS »
+
+Le fidèle pourra :
+
+- consulter ;
+- marquer comme lu ;
+- supprimer certaines notifications ;
+- paramétrer certaines préférences.
+
+---
+
+66. ADMINISTRATION DES CONTENUS
+
+Le système devra permettre :
+
+- brouillon ;
+- publication ;
+- modification ;
+- archivage ;
+- suppression selon droits.
+
+Chaque contenu devra avoir un propriétaire institutionnel.
+
+---
+
+67. MODÉRATION
+
+Les commentaires ou interactions publiques, s'ils sont activés, devront disposer :
+
+- d'une fonction de signalement ;
+- d'une modération ;
+- d'une suppression ;
+- d'un historique ;
+- de règles d'utilisation.
+
+La messagerie ouverte entre utilisateurs ne devra pas être activée par défaut sans dispositif de modération.
+
+---
+
+68. MULTI-TENANT
+
+Le développeur devra préciser si la solution sera conçue selon une architecture multi-tenant.
+
+Le principe recherché est :
+
+UNE PLATEFORME
+       │
+ ┌─────┼─────┐
+ │     │     │
+EGLISE A EGLISE B EGLISE C
+ │     │     │
+DATA  DATA  DATA
+ISOLÉE ISOLÉE ISOLÉE
+
+Les données de chaque confession doivent être logiquement isolées.
+
+---
+
+69. ÉVOLUTIVITÉ
+
+La plateforme devra pouvoir intégrer ultérieurement :
+
+- formation en ligne ;
+- téléconsultation pastorale, si retenue ;
+- bibliothèque avancée ;
+- billetterie ;
+- e-commerce de contenus ou produits autorisés ;
+- gestion du patrimoine ;
+- gestion des écoles ;
+- gestion des œuvres sociales ;
+- gestion des missions ;
+- statistiques avancées ;
+- intelligence artificielle pour certains services non sensibles.
+
+Ces fonctionnalités ne font pas nécessairement partie du MVP.
+
+---
+
+70. VERSION MVP
+
+Pour éviter un projet trop lourd dès le départ, le développeur devra proposer un MVP – Minimum Viable Product.
+
+Le MVP devrait comprendre au minimum :
+
+Bloc institutionnel
+
+1. CEPCA ;
+2. confessions ;
+3. structures ;
+4. utilisateurs ;
+5. rôles.
+
+Bloc fidèle
+
+6. inscription ;
+7. profil ;
+8. ma confession ;
+9. ma paroisse ;
+10. ma chapelle.
+
+Bloc communication
+
+11. actualités ;
+12. annonces ;
+13. calendrier ;
+14. notifications.
+
+Bloc spirituel
+
+15. prédications ;
+16. audio ;
+17. vidéo ;
+18. documents.
+
+Bloc financier
+
+19. contributions ;
+20. paiement ;
+21. reçu ;
+22. historique.
+
+Bloc projets
+
+23. projets ;
+24. campagnes ;
+25. suivi de mobilisation.
+
+Bloc gouvernance
+
+26. tableaux de bord ;
+27. rapports ;
+28. journal d'audit.
+
+---
+
+71. FONCTIONNALITÉS À DÉVELOPPER EN PHASE 2
+
+- jeunesse avancée ;
+- diaspora avancée ;
+- bénévolat ;
+- actions sociales ;
+- sondages ;
+- messagerie ;
+- statistiques avancées ;
+- intégration comptable ;
+- gestion patrimoniale.
+
+---
+
+72. FONCTIONNALITÉS À ÉTUDIER EN PHASE 3
+
+- formation en ligne ;
+- marketplace ;
+- billetterie ;
+- services pastoraux numériques ;
+- intelligence artificielle ;
+- analyse prédictive ;
+- interconnexion avec d'autres systèmes.
+
+---
+
+73. EXIGENCES DE RECETTE
+
+Avant mise en production, chaque fonctionnalité devra être testée.
+
+Tests fonctionnels
+
+Vérifier que chaque fonctionnalité correspond au cahier des charges.
+
+Tests de sécurité
+
+- accès ;
+- authentification ;
+- permissions ;
+- données ;
+- paiements.
+
+Tests de paiement
+
+- succès ;
+- échec ;
+- annulation ;
+- remboursement ;
+- doublon ;
+- interruption.
+
+Tests de charge
+
+Tester la capacité du système à supporter un nombre important d'utilisateurs.
+
+Tests mobiles
+
+Tester différents modèles de téléphones.
+
+---
+
+74. CRITÈRES D'ACCEPTATION
+
+Une fonctionnalité sera considérée comme livrée lorsqu'elle :
+
+1. fonctionne conformément au cahier des charges ;
+2. a été testée ;
+3. ne présente pas de défaut critique ;
+4. respecte les droits d'accès ;
+5. est documentée ;
+6. est validée par le comité de projet.
+
+---
+
+75. LIVRABLES ATTENDUS DU DÉVELOPPEUR
+
+Le prestataire devra fournir au minimum :
+
+1. Cahier de conception détaillée
+
+2. Maquettes UX/UI
+
+3. Architecture fonctionnelle
+
+4. Architecture technique
+
+5. Code source
+
+6. Base de données documentée
+
+7. API documentées
+
+8. Application mobile
+
+9. Interface web
+
+10. Back-office
+
+11. Documentation utilisateur
+
+12. Documentation administrateur
+
+13. Documentation technique
+
+14. Procédure de déploiement
+
+15. Procédure de sauvegarde
+
+16. Procédure de restauration
+
+17. Rapport de tests
+
+18. Formation des administrateurs
+
+19. Formation des utilisateurs pilotes
+
+20. Support post-déploiement.
+
+---
+
+76. PROPRIÉTÉ INTELLECTUELLE
+
+Le contrat avec le développeur devra préciser clairement :
+
+- propriété du code source ;
+- propriété des bases de données ;
+- propriété des maquettes ;
+- propriété des contenus ;
+- droits d'utilisation ;
+- droits de modification ;
+- droits de maintenance ;
+- conditions de transfert à un autre prestataire.
+
+Il est recommandé que le CEPCA et/ou les entités désignées conservent la maîtrise des éléments stratégiques du système.
+
+---
+
+77. HÉBERGEMENT
+
+Le développeur devra proposer une solution d'hébergement précisant :
+
+- localisation ;
+- capacité ;
+- sécurité ;
+- disponibilité ;
+- sauvegarde ;
+- restauration ;
+- supervision ;
+- coûts récurrents.
+
+---
+
+78. SLA ET DISPONIBILITÉ
+
+Le prestataire devra proposer un niveau de service précisant notamment :
+
+- disponibilité ;
+- délai d'intervention ;
+- délai de résolution ;
+- sauvegardes ;
+- maintenance ;
+- support.
+
+---
+
+79. MAINTENANCE
+
+Le contrat devra distinguer :
+
+Maintenance corrective
+
+Correction des bugs.
+
+Maintenance préventive
+
+Prévention des incidents.
+
+Maintenance évolutive
+
+Ajout de nouvelles fonctionnalités.
+
+Maintenance de sécurité
+
+Mises à jour de sécurité.
+
+---
+
+80. FORMATION
+
+Le prestataire devra former :
+
+- administrateurs CEPCA ;
+- administrateurs des confessions ;
+- responsables locaux ;
+- responsables financiers ;
+- responsables communication ;
+- responsables projets.
+
+Un manuel utilisateur devra être remis.
+
+---
+
+81. SUPPORT UTILISATEURS
+
+Un mécanisme de support devra être prévu :
+
+Utilisateur → Support → Ticket → Traitement → Résolution → Clôture
+
+Un tableau de suivi des incidents devra être disponible.
+
+---
+
+82. DONNÉES ET PROPRIÉTÉ DES DONNÉES
+
+Les données des utilisateurs et des confessions devront rester sous le contrôle institutionnel défini par les parties.
+
+Le développeur ne devra pas pouvoir exploiter commercialement les données des fidèles sans autorisation explicite et conforme au cadre contractuel et réglementaire applicable.
+
+---
+
+83. INDICATEURS DE PERFORMANCE DU PROJET
+
+Après lancement, les indicateurs suivants pourront être suivis :
+
+Adoption
+
+- nombre de confessions ;
+- nombre de paroisses ;
+- nombre de chapelles ;
+- nombre de fidèles inscrits.
+
+Engagement
+
+- utilisateurs actifs ;
+- connexions ;
+- contenus consultés ;
+- événements.
+
+Finance
+
+- nombre de contributeurs ;
+- nombre de transactions ;
+- montant total ;
+- taux de réussite des transactions.
+
+Projets
+
+- projets actifs ;
+- montant mobilisé ;
+- taux de mobilisation.
+
+Satisfaction
+
+- taux de satisfaction ;
+- nombre de réclamations ;
+- délai moyen de traitement.
+
+---
+
+84. PARCOURS UTILISATEUR PRINCIPAL
+
+Le parcours idéal du nouveau fidèle sera :
+
+Téléchargement de l'application
+          ↓
+Création du compte
+          ↓
+Vérification téléphone/e-mail
+          ↓
+Choix de la confession
+          ↓
+Choix de la structure
+          ↓
+Choix paroisse / chapelle
+          ↓
+Création du profil
+          ↓
+Accueil personnalisé
+          ↓
+Mon Église
+          ↓
+Actualités / Prédications / Activités / Projets
+          ↓
+Participation
+          ↓
+Contribution éventuelle
+
+---
+
+85. EXEMPLE DE PARCOURS DE CONTRIBUTION
+
+Jean ouvre l'application
+        ↓
+« Je contribue »
+        ↓
+Choisit « Ma paroisse »
+        ↓
+Choisit « Projet construction »
+        ↓
+Saisit 50 000 FCFA
+        ↓
+Choisit Mobile Money
+        ↓
+Confirme
+        ↓
+Paiement confirmé
+        ↓
+Reçu N°XXXX
+        ↓
+Historique mis à jour
+        ↓
+Contribution intégrée au reporting
+
+---
+
+86. EXEMPLE DE PARCOURS D'UN RESPONSABLE
+
+Responsable paroisse
+        ↓
+Connexion
+        ↓
+Tableau de bord
+        ↓
+Contributions
+        ↓
+Projets
+        ↓
+Activités
+        ↓
+Fidèles
+        ↓
+Rapports
+
+Les données affichées dépendent des permissions.
+
+---
+
+87. EXEMPLE DE PARCOURS D'UN DIRIGEANT
+
+Dirigeant
+    ↓
+Dashboard
+    ↓
+Vue institutionnelle
+    ↓
+Structures
+    ↓
+Activités
+    ↓
+Projets
+    ↓
+Mobilisation
+    ↓
+Rapports
+
+---
+
+88. ARCHITECTURE FONCTIONNELLE SYNTHÉTIQUE
+
+                         CEPCA DIGITAL
+                              │
+       ┌──────────────────────┼───────────────────────┐
+       │                      │                       │
+     CEPCA              CONFESSIONS               FIDÈLES
+       │                      │                       │
+       │                Structures              Profil personnel
+       │                      │                       │
+       │              ┌───────┴───────┐               │
+       │              │               │               │
+       │           Gouvernance     Activités          │
+       │              │               │               │
+       │          Contributions     Contenus           │
+       │              │               │               │
+       │            Projets       Communication       │
+       │              │               │               │
+       └──────────────┴───────────────┴───────────────┘
+                              │
+                         SERVICES
+                              │
+                ┌─────────────┼──────────────┐
+                │             │              │
+             Paiement      Notifications   Reporting
+
+---
+
+89. BUDGET À DEMANDER AU DÉVELOPPEUR
+
+La consultation devra demander au prestataire de présenter séparément :
+
+A. Conception
+
+B. UX/UI
+
+C. Développement backend
+
+D. Développement web
+
+E. Développement mobile
+
+F. Intégration paiement
+
+G. Sécurité
+
+H. Hébergement
+
+I. Tests
+
+J. Déploiement
+
+K. Formation
+
+L. Maintenance
+
+M. Support
+
+N. Évolutions futures
+
+Cela permettra de comparer les propositions sur une base homogène.
+
+---
+
+90. PROPOSITION DE PHASAGE CONTRACTUEL
+
+Le projet pourrait être contractualisé selon les étapes suivantes :
+
+Lot 1 : Étude et conception
+
+↓
+
+Lot 2 : UX/UI et prototype
+
+↓
+
+Lot 3 : Développement MVP
+
+↓
+
+Lot 4 : Intégration paiement et sécurité
+
+↓
+
+Lot 5 : Tests et recette
+
+↓
+
+Lot 6 : Pilote
+
+↓
+
+Lot 7 : Déploiement
+
+↓
+
+Lot 8 : Maintenance et évolution
+
+Cette approche réduit le risque de payer immédiatement pour une plateforme complète avant d'avoir validé le fonctionnement du modèle avec les utilisateurs.
+
+---
+
+91. PROTOTYPE AVANT DÉVELOPPEMENT
+
+Avant le développement complet, le prestataire devra produire un prototype fonctionnel des principaux parcours :
+
+Prototype 1
+
+Inscription d'un fidèle.
+
+Prototype 2
+
+Accès à « Mon Église ».
+
+Prototype 3
+
+Consultation d'une prédication.
+
+Prototype 4
+
+Inscription à une activité.
+
+Prototype 5
+
+Contribution financière.
+
+Prototype 6
+
+Réception du reçu.
+
+Prototype 7
+
+Suivi d'un projet.
+
+Prototype 8
+
+Dashboard d'une paroisse.
+
+Prototype 9
+
+Dashboard d'une confession.
+
+Prototype 10
+
+Dashboard CEPCA.
+
+La validation de ces prototypes constituera un jalon avant le développement complet.
+
+---
+
+92. LIVRABLE FINAL ATTENDU
+
+À la fin du projet, le CEPCA devra disposer de :
+
+UNE PLATEFORME WEB
+
++ 
+
+UNE APPLICATION MOBILE
+
++ 
+
+UN BACK-OFFICE D'ADMINISTRATION
+
++ 
+
+UN SYSTÈME DE GESTION DES CONFESSIONS
+
++ 
+
+UN SYSTÈME DE GESTION DES STRUCTURES
+
++ 
+
+UN ESPACE FIDÈLE
+
++ 
+
+UN SYSTÈME DE CONTRIBUTION
+
++ 
+
+UN SYSTÈME DE PROJETS
+
++ 
+
+DES TABLEAUX DE BORD
+
++ 
+
+UN SYSTÈME DE REPORTING
+
++ 
+
+UN DISPOSITIF DE SÉCURITÉ ET D'AUDIT
+
+---
+
+93. CONCLUSION DU CAHIER DES CHARGES
+
+Le présent cahier des charges définit les besoins fonctionnels d'une plateforme numérique destinée à accompagner la transformation numérique des Églises membres du CEPCA.
+
+La particularité fondamentale du projet réside dans son caractère fédérateur et multi-confessionnel.
+
+La plateforme ne doit pas imposer une organisation unique aux Églises.
+
+Elle doit au contraire permettre :
+
+«une technologie commune, une gouvernance adaptée et des organisations configurables.»
+
+Le système devra donc être conçu autour de quatre principes :
+
+1. FÉDÉRER
+
+Le CEPCA dispose d'un environnement commun.
+
+2. RESPECTER
+
+Chaque confession conserve son identité et son autonomie.
+
+3. CONNECTER
+
+Chaque structure peut communiquer avec ses membres.
+
+4. ENGAGER
+
+Chaque fidèle peut être informé, participer, contribuer et suivre les initiatives de son Église.
+
+Le projet doit enfin être conçu comme un projet institutionnel de transformation numérique, et non comme le simple développement d'une application.
+
+Sa réussite sera mesurée non seulement par le nombre de fonctionnalités développées, mais surtout par sa capacité à produire une nouvelle relation :
+
+CEPCA → CONFESSIONS → STRUCTURES → FIDÈLES
+
+fondée sur :
+
+PROXIMITÉ + INFORMATION + PARTICIPATION + CONTRIBUTION + TRAÇABILITÉ + CONFIANCE.
+
+---
+
+ANNEXE 1 – CHECK-LIST DE CONSULTATION DU DÉVELOPPEUR
+
+Le candidat devra répondre aux questions suivantes :
+
+Question| Réponse du candidat
+Quelle architecture proposez-vous ?| 
+La solution est-elle multi-confessionnelle ?| 
+Peut-on paramétrer l'organisation de chaque confession ?| 
+Comment isolez-vous les données ?| 
+Quelle technologie mobile proposez-vous ?| 
+Quelle technologie web ?| 
+Quelle base de données ?| 
+Comment gérez-vous les API ?| 
+Quels moyens de paiement pouvez-vous intégrer ?| 
+Comment sécurisez-vous les paiements ?| 
+Comment gérez-vous les rôles ?| 
+Comment gérez-vous les sauvegardes ?| 
+Où seront hébergées les données ?| 
+Le code source sera-t-il remis ?| 
+Les API seront-elles documentées ?| 
+Quelle est la durée de développement ?| 
+Quel est le coût du MVP ?| 
+Quel est le coût du déploiement complet ?| 
+Quel est le coût annuel de maintenance ?| 
+Quelle garantie fournissez-vous ?| 
+Quel support fournissez-vous ?| 
+Quelle équipe affectez-vous au projet ?| 
+Avez-vous déjà réalisé des plateformes similaires ?| 
+Comment assurez-vous la continuité du service ?| 
+
+---
+
+ANNEXE 2 – CRITÈRES DE SÉLECTION DU DÉVELOPPEUR
+
+Les offres pourront être évaluées selon :
+
+Critère| Pondération indicative
+Compréhension du projet| 15 %
+Qualité de la proposition fonctionnelle| 15 %
+Architecture proposée| 10 %
+Expérience| 10 %
+Sécurité| 10 %
+Expérience paiement/API| 10 %
+UX/UI| 10 %
+Planning| 5 %
+Maintenance/support| 5 %
+Prix| 10 %
+Total| 100 %
+
+Les pondérations devront être validées par le comité de projet.
+
+---
+
+ANNEXE 3 – MVP PRIORITAIRE
+
+Pour éviter une première version trop complexe, le périmètre prioritaire est :
+
+                    MVP
+                     │
+       ┌─────────────┼──────────────┐
+       │             │              │
+    IDENTITÉ     COMMUNICATION    FIDÈLE
+       │             │              │
+   CEPCA         Actualités      Profil
+   Confession    Annonces        Mon Église
+   Structures    Événements      Notifications
+       │             │              │
+       └─────────────┼──────────────┘
+                     │
+              CONTENU SPIRITUEL
+                     │
+             Prédications
+             Audio / vidéo
+                     │
+              CONTRIBUTIONS
+                     │
+             Paiement / reçu
+                     │
+                 PROJETS
+                     │
+              Suivi campagnes
+                     │
+                REPORTING
+                     │
+               Dashboards
+
+Le MVP devra être validé avant l'extension vers les modules avancés.
+
+---
+
+ANNEXE 4 – FORMULE DIRECTRICE DU PROJET
+
+«Une plateforme commune pour plusieurs Églises, plusieurs organisations et des milliers de fidèles, permettant à chacun de rester connecté à sa communauté, de participer à sa vie et, lorsque cela est souhaité, de contribuer à ses œuvres de manière simple, sécurisée et traçable.»Ce que je vous recommande pour la prochaine étape
+
+À ce stade, vous avez la note conceptuelle et maintenant le cahier des charges fonctionnel. Pour passer réellement à la consultation d'un développeur, il manque encore un document très important : le dossier de conception fonctionnelle détaillée (SFD).
+
+Il devra transformer le cahier des charges en quelque chose que le programmeur peut presque directement convertir en code, notamment :
+
+1. les écrans un par un — écran d'accueil, inscription, profil, paroisse, contribution, reçu, projet, etc. ;
+
+
+2. les parcours utilisateurs détaillés ;
+
+
+3. les boutons et actions de chaque écran ;
+
+
+4. les champs de chaque formulaire ;
+
+
+5. les règles de gestion ;
+
+
+6. la matrice complète des droits par profil et par niveau ;
+
+
+7. le modèle de données — Fidèle, Confession, Synode, Consistoire, Paroisse, Chapelle, Contribution, Projet, Événement, etc. ;
+
+
+8. les workflows financiers détaillés ;
+
+
+9. les workflows de validation des publications et projets ;
+
+
+10. les spécifications des tableaux de bord ;
+
+
+11. les cas d'erreur et messages affichés à l'utilisateur ;
+
+
+12. les critères de recette de chaque fonctionnalité

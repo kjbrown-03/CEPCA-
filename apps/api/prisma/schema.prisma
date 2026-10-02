@@ -1,0 +1,936 @@
+// CEPCA Digital — modèle de données du MVP.
+// Conventions : identifiants cuid, dates en UTC, montants en entiers FCFA (le XAF n'a pas de centimes).
+// Toute ligne métier porte confessionId (locataire) et structureId (nœud propriétaire) : voir docs/ARCHITECTURE.md §3.
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+// ─────────────────────────────────────────────────────────────
+// Organisation : confessions, niveaux paramétrables, structures
+// ─────────────────────────────────────────────────────────────
+
+model Confession {
+  id           String   @id @default(cuid())
+  code         String   @unique // EEC, EPC… — sert au numéro de reçu et à l'identifiant de projet
+  name         String
+  shortCode    String // CONF01 dans CEPCA-CONF01-PAR015-PROJ0007
+  description  String?
+  logoKey      String?
+  primaryColor String? // personnalisation §10 ; à défaut, les couleurs CEPCA
+  contactEmail String?
+  contactPhone String?
+  website      String?
+  status       StructureStatus @default(CONFIGURATION)
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+
+  levelTypes        LevelType[]
+  structures        Structure[]
+  contributionTypes ContributionType[]
+  receiptSequences  ReceiptSequence[]
+}
+
+// Niveau institutionnel défini par la confession (§7) : nom, rang, parent.
+model LevelType {
+  id           String  @id @default(cuid())
+  confessionId String? // null = niveaux du CEPCA (Conseil, Confession)
+  key          String // "synode", "paroisse"… stable, pour le code
+  name         String // "Synode", "Région"…
+  rank         Int // 0 = CEPCA, 1 = Confession, puis croissant vers le local
+  parentId     String?
+  isMembership Boolean @default(false) // un fidèle peut s'y rattacher (paroisse, chapelle)
+
+  confession Confession? @relation(fields: [confessionId], references: [id])
+  parent     LevelType?  @relation("LevelParent", fields: [parentId], references: [id])
+  children   LevelType[] @relation("LevelParent")
+  structures Structure[]
+
+  @@unique([confessionId, key])
+}
+
+enum StructureStatus {
+  ACTIVE
+  CONFIGURATION
+  VACANT // « À pourvoir » : pas de responsable
+  SUSPENDED
+}
+
+// Nœud réel de l'arbre. path = "/cepca/eec/lit/dc/dei/" (slugs des ancêtres + soi).
+model Structure {
+  id           String          @id @default(cuid())
+  confessionId String? // null pour la racine CEPCA
+  levelTypeId  String
+  parentId     String?
+  slug         String // segment de chemin, unique parmi les frères
+  path         String          @unique
+  depth        Int
+  name         String
+  code         String // PAR015 dans l'identifiant de projet
+  status       StructureStatus @default(ACTIVE)
+  city         String?
+  address      String?
+  phone        String?
+  email        String?
+  // Horaire du culte principal, affiché dans « Ma chapelle » et « Prochain culte »
+  serviceSchedule String?
+  timezone     String          @default("Africa/Douala")
+  createdAt    DateTime        @default(now())
+  updatedAt    DateTime        @updatedAt
+
+  confession Confession? @relation(fields: [confessionId], references: [id])
+  levelType  LevelType   @relation(fields: [levelTypeId], references: [id])
+  parent     Structure?  @relation("StructureTree", fields: [parentId], references: [id])
+  children   Structure[] @relation("StructureTree")
+
+  memberships     Membership[]
+  roleAssignments RoleAssignment[]
+  groups          Group[]
+  publications    Publication[]    @relation("PublicationTarget")
+  events          Event[]
+  contents        SpiritualContent[]
+  documents       Document[]
+  projects        Project[]
+  contributions   Contribution[]
+
+  @@unique([parentId, slug])
+  @@index([confessionId])
+}
+
+// ─────────────────────────────────────────────────────────────
+// Utilisateurs, rattachement, groupes
+// ─────────────────────────────────────────────────────────────
+
+enum UserStatus {
+  ACTIVE
+  SUSPENDED
+  DELETED // anonymisé (§44)
+}
+
+enum Residence {
+  CAMEROON
+  DIASPORA
+}
+
+model User {
+  id               String     @id @default(cuid())
+  phone            String     @unique // E.164 : +237677123442
+  email            String?    @unique
+  fullName         String
+  passwordHash     String? // responsables uniquement (bcrypt 12)
+  residence        Residence  @default(CAMEROON)
+  countryCode      String? // pays de résidence, facultatif (§29)
+  city             String?
+  locale           String     @default("fr")
+  timezone         String     @default("Africa/Douala")
+  status           UserStatus @default(ACTIVE)
+  consentAt        DateTime? // consentement au traitement d'une donnée sensible (appartenance religieuse)
+  lastLoginAt      DateTime?
+  createdAt        DateTime   @default(now())
+  updatedAt        DateTime   @updatedAt
+
+  memberships        Membership[]       @relation("MemberUser")
+  validatedMembers   Membership[]       @relation("MemberValidator")
+  roleAssignments    RoleAssignment[]
+  refreshTokens      RefreshToken[]
+  groupMemberships   GroupMember[]
+  registrations      EventRegistration[]
+  notifications      Notification[]
+  pushTokens         PushToken[]
+  contributions      Contribution[]     @relation("Contributor")
+  recurringPlans     RecurringPlan[]
+  authoredPubs       Publication[]      @relation("PubAuthor")
+  validatedPubs      Publication[]      @relation("PubValidator")
+  projectsLed        Project[]
+  readPubs           PublicationRead[]
+  skills             VolunteerProfile?
+}
+
+enum MembershipStatus {
+  PENDING // en attente de validation par le pasteur
+  ACTIVE
+  REJECTED
+  TRANSFERRED // historique après transfert (§59)
+  INACTIVE
+  DECEASED
+  TO_VERIFY
+}
+
+// Rattachement d'un fidèle à une paroisse ou une chapelle, avec historique.
+// Règle : au plus un rattachement PENDING ou ACTIVE par utilisateur (index partiel en SQL).
+model Membership {
+  id            String           @id @default(cuid())
+  userId        String
+  structureId   String
+  confessionId  String
+  status        MembershipStatus @default(PENDING)
+  requestedAt   DateTime         @default(now())
+  validatedAt   DateTime?
+  validatedById String?
+  endedAt       DateTime?
+  note          String?
+
+  user        User      @relation("MemberUser", fields: [userId], references: [id])
+  structure   Structure @relation(fields: [structureId], references: [id])
+  validatedBy User?     @relation("MemberValidator", fields: [validatedById], references: [id])
+
+  @@index([structureId, status])
+  @@index([userId])
+}
+
+model Group {
+  id          String   @id @default(cuid())
+  structureId String
+  confessionId String
+  name        String // Jeunesse, Chorale, Femmes…
+  kind        String // youth | women | men | choir | bible | prayer | committee | other
+  description String?
+  openToJoin  Boolean  @default(true)
+  createdAt   DateTime @default(now())
+
+  structure Structure     @relation(fields: [structureId], references: [id])
+  members   GroupMember[]
+  publications Publication[]
+}
+
+enum GroupMemberStatus {
+  PENDING
+  ACTIVE
+}
+
+model GroupMember {
+  groupId   String
+  userId    String
+  status    GroupMemberStatus @default(PENDING)
+  joinedAt  DateTime          @default(now())
+
+  group Group @relation(fields: [groupId], references: [id])
+  user  User  @relation(fields: [userId], references: [id])
+
+  @@id([groupId, userId])
+}
+
+// « Je participe » (§27) — facultatif
+model VolunteerProfile {
+  userId       String   @id
+  skills       String[] // informaticien, enseignant, médecin…
+  availability Json // { lun: ["soir"], sam: ["matin","après-midi"] }
+  updatedAt    DateTime @updatedAt
+
+  user User @relation(fields: [userId], references: [id])
+}
+
+// ─────────────────────────────────────────────────────────────
+// Authentification
+// ─────────────────────────────────────────────────────────────
+
+enum OtpPurpose {
+  SIGNUP
+  LOGIN
+  ADMIN_2FA
+}
+
+model OtpChallenge {
+  id         String     @id @default(cuid())
+  phone      String
+  purpose    OtpPurpose
+  codeHash   String
+  attempts   Int        @default(0)
+  expiresAt  DateTime
+  consumedAt DateTime?
+  createdAt  DateTime   @default(now())
+  ip         String?
+
+  @@index([phone, createdAt])
+}
+
+model RefreshToken {
+  id         String    @id @default(cuid())
+  userId     String
+  tokenHash  String    @unique
+  family     String // rotation : la réutilisation d'un jeton déjà tourné révoque toute la famille
+  expiresAt  DateTime
+  revokedAt  DateTime?
+  createdAt  DateTime  @default(now())
+  userAgent  String?
+  ip         String?
+
+  user User @relation(fields: [userId], references: [id])
+
+  @@index([userId])
+}
+
+// ─────────────────────────────────────────────────────────────
+// Rôles et droits : Utilisateur → Rôle → Structure → Permissions (§38)
+// ─────────────────────────────────────────────────────────────
+
+model Role {
+  id           String  @id @default(cuid())
+  confessionId String? // null = rôle système commun à toutes les confessions
+  key          String // cepca_admin, conf_admin, synod_lead, pastor, finance, project, communication, youth, chapel_lead, member
+  label        String
+  description  String?
+  // Niveau où ce rôle s'attribue (facultatif : un pasteur s'attribue sur une paroisse)
+  levelKey     String?
+  isSystem     Boolean @default(true)
+  updatedAt    DateTime @updatedAt
+
+  permissions RolePermission[]
+  assignments RoleAssignment[]
+
+  @@unique([confessionId, key])
+}
+
+enum Module {
+  NEWS // Actualités et annonces
+  EVENTS
+  SERMONS // Prédications et contenus spirituels
+  DOCUMENTS
+  MEMBERS // Fidèles
+  CONTRIBUTIONS
+  PROJECTS
+  REPORTS
+  USERS_ROLES
+  SETTINGS
+  NOTIFICATIONS
+  AUDIT
+  STRUCTURES
+}
+
+// Une case de la matrice. aggregateOnly : le rôle ne voit que des totaux (CEPCA sur les contributions).
+model RolePermission {
+  roleId        String
+  module        Module
+  canRead       Boolean @default(false)
+  canWrite      Boolean @default(false)
+  canValidate   Boolean @default(false)
+  aggregateOnly Boolean @default(false)
+
+  role Role @relation(fields: [roleId], references: [id], onDelete: Cascade)
+
+  @@id([roleId, module])
+}
+
+model RoleAssignment {
+  id          String    @id @default(cuid())
+  userId      String
+  roleId      String
+  structureId String // périmètre = sous-arbre de cette structure
+  title       String? // libellé affiché : « Pasteur », « Trésorier »
+  startsAt    DateTime  @default(now())
+  endsAt      DateTime? // fin de mandat (§61)
+  revokedAt   DateTime?
+  createdById String?
+  createdAt   DateTime  @default(now())
+
+  user      User      @relation(fields: [userId], references: [id])
+  role      Role      @relation(fields: [roleId], references: [id])
+  structure Structure @relation(fields: [structureId], references: [id])
+
+  @@index([userId])
+  @@index([structureId])
+}
+
+// ─────────────────────────────────────────────────────────────
+// Communication : publications, événements, notifications
+// ─────────────────────────────────────────────────────────────
+
+enum PublicationKind {
+  ACTUALITE
+  ANNONCE
+  COMMUNIQUE
+  ALERTE
+}
+
+enum ContentStatus {
+  DRAFT
+  SUBMITTED // « À valider »
+  RETURNED // renvoyé à l'auteur
+  PUBLISHED
+  ARCHIVED
+}
+
+model Publication {
+  id               String          @id @default(cuid())
+  confessionId     String?
+  targetStructureId String // niveau de diffusion (§14)
+  groupId          String? // ciblage d'un groupe (Chorale, Jeunesse…)
+  kind             PublicationKind
+  title            String
+  body             String // paragraphes séparés par une ligne vide
+  imageKey         String?
+  attachmentKey    String?
+  status           ContentStatus   @default(DRAFT)
+  notify           Boolean         @default(false)
+  isPublic         Boolean         @default(true) // visible sur le portail sans compte
+  authorId         String
+  validatedById    String?
+  returnNote       String?
+  publishedAt      DateTime?
+  readCount        Int             @default(0)
+  createdAt        DateTime        @default(now())
+  updatedAt        DateTime        @updatedAt
+
+  target      Structure         @relation("PublicationTarget", fields: [targetStructureId], references: [id])
+  group       Group?            @relation(fields: [groupId], references: [id])
+  author      User              @relation("PubAuthor", fields: [authorId], references: [id])
+  validatedBy User?             @relation("PubValidator", fields: [validatedById], references: [id])
+  reads       PublicationRead[]
+
+  @@index([status, publishedAt])
+  @@index([targetStructureId])
+}
+
+model PublicationRead {
+  publicationId String
+  userId        String
+  readAt        DateTime @default(now())
+
+  publication Publication @relation(fields: [publicationId], references: [id], onDelete: Cascade)
+  user        User        @relation(fields: [userId], references: [id])
+
+  @@id([publicationId, userId])
+}
+
+enum EventKind {
+  CULTE
+  CONFERENCE
+  SEMINAIRE
+  FORMATION
+  REUNION
+  CONCERT
+  JEUNESSE
+  SOCIAL
+  CAMPAGNE
+  CEPCA
+  AUTRE
+}
+
+enum EventStatus {
+  DRAFT
+  PUBLISHED
+  CANCELLED
+}
+
+model Event {
+  id              String      @id @default(cuid())
+  confessionId    String?
+  structureId     String // organisateur = niveau de diffusion
+  kind            EventKind   @default(AUTRE)
+  title           String
+  description     String?
+  startsAt        DateTime
+  endsAt          DateTime?
+  place           String
+  isLive          Boolean     @default(false)
+  liveUrl         String?
+  registrationOpen Boolean    @default(false)
+  capacity        Int? // null = illimité
+  responsible     String?
+  imageKey        String?
+  isPublic        Boolean     @default(true)
+  status          EventStatus @default(DRAFT)
+  createdById     String
+  createdAt       DateTime    @default(now())
+  updatedAt       DateTime    @updatedAt
+
+  structure     Structure           @relation(fields: [structureId], references: [id])
+  registrations EventRegistration[]
+
+  @@index([structureId, startsAt])
+}
+
+model EventRegistration {
+  eventId   String
+  userId    String
+  createdAt DateTime @default(now())
+  cancelledAt DateTime?
+
+  event Event @relation(fields: [eventId], references: [id], onDelete: Cascade)
+  user  User  @relation(fields: [userId], references: [id])
+
+  @@id([eventId, userId])
+}
+
+enum NotificationKind {
+  LIVE
+  ANNOUNCEMENT
+  RECEIPT
+  SERMON
+  PROJECT
+  EVENT
+  MEMBERSHIP
+  PAYMENT
+  SYSTEM
+}
+
+// Boîte de réception du fidèle. link = { screen: "evt", id: "…" }
+model Notification {
+  id         String           @id @default(cuid())
+  userId     String
+  kind       NotificationKind
+  title      String
+  body       String
+  link       Json?
+  readAt     DateTime?
+  deletedAt  DateTime?
+  campaignId String?
+  createdAt  DateTime         @default(now())
+
+  user     User                  @relation(fields: [userId], references: [id])
+  campaign NotificationCampaign? @relation(fields: [campaignId], references: [id])
+
+  @@index([userId, createdAt])
+}
+
+enum Channel {
+  PUSH
+  SMS
+  EMAIL
+}
+
+enum CampaignStatus {
+  DRAFT
+  SCHEDULED
+  SENT
+  CANCELLED
+}
+
+model NotificationCampaign {
+  id               String         @id @default(cuid())
+  confessionId     String?
+  targetStructureId String
+  groupId          String?
+  title            String
+  message          String // ≤ 160 caractères si SMS
+  channels         Channel[]
+  scheduledAt      DateTime?
+  sentAt           DateTime?
+  recipients       Int            @default(0)
+  opened           Int            @default(0)
+  smsCostFcfa      Int            @default(0)
+  status           CampaignStatus @default(DRAFT)
+  createdById      String
+  createdAt        DateTime       @default(now())
+
+  notifications Notification[]
+}
+
+model PushToken {
+  token     String   @id
+  userId    String
+  platform  String
+  createdAt DateTime @default(now())
+
+  user User @relation(fields: [userId], references: [id])
+}
+
+// ─────────────────────────────────────────────────────────────
+// Contenus spirituels et documents
+// ─────────────────────────────────────────────────────────────
+
+enum SpiritualKind {
+  PREDICATION
+  MEDITATION
+  ETUDE_BIBLIQUE
+  ENSEIGNEMENT
+  MESSAGE_PASTORAL
+  CONFERENCE
+}
+
+enum MediaType {
+  AUDIO
+  VIDEO
+  TEXT
+  PDF
+}
+
+model SpiritualContent {
+  id            String        @id @default(cuid())
+  confessionId  String?
+  structureId   String
+  kind          SpiritualKind @default(PREDICATION)
+  mediaType     MediaType
+  title         String
+  speaker       String?
+  scriptureRef  String? // « Jean 15, 1-8 »
+  summary       String?
+  body          String? // texte des méditations
+  durationSec   Int?
+  mediaKey      String? // fichier dans le stockage objet
+  externalUrl   String? // YouTube, etc. (§16)
+  imageKey      String?
+  offlineAllowed Boolean      @default(true)
+  status        ContentStatus @default(DRAFT)
+  isPublic      Boolean       @default(true)
+  playCount     Int           @default(0)
+  recordedAt    DateTime?
+  publishedAt   DateTime?
+  createdById   String
+  createdAt     DateTime      @default(now())
+  updatedAt     DateTime      @updatedAt
+
+  structure Structure @relation(fields: [structureId], references: [id])
+
+  @@index([structureId, status, publishedAt])
+}
+
+enum DocVisibility {
+  PUBLIC
+  MEMBERS // Fidèles
+  LEADERS // Responsables
+}
+
+model Document {
+  id           String        @id @default(cuid())
+  confessionId String?
+  structureId  String
+  category     String // Méditations, Études bibliques, Lettres pastorales, Bulletins, Administratif
+  title        String
+  fileKey      String
+  mimeType     String
+  sizeBytes    Int
+  version      Int           @default(1)
+  visibility   DocVisibility @default(MEMBERS)
+  downloads    Int           @default(0)
+  archivedAt   DateTime?
+  createdById  String
+  createdAt    DateTime      @default(now())
+  updatedAt    DateTime      @updatedAt
+
+  structure Structure @relation(fields: [structureId], references: [id])
+
+  @@index([structureId])
+}
+
+// ─────────────────────────────────────────────────────────────
+// Projets et campagnes (§25–26, §56)
+// ─────────────────────────────────────────────────────────────
+
+enum ProjectStatus {
+  IDEA
+  PROPOSED
+  STUDY
+  VALIDATED
+  FUNDING // en financement / en cours
+  EXECUTION
+  COMPLETED // achevé
+  CLOSED
+}
+
+enum ProjectKind {
+  PROJECT
+  SOCIAL // action sociale / campagne
+}
+
+model Project {
+  id            String        @id @default(cuid())
+  code          String        @unique // CEPCA-CONF01-PAR015-PROJ0007
+  confessionId  String?
+  structureId   String
+  kind          ProjectKind   @default(PROJECT)
+  title         String
+  description   String
+  location      String?
+  beneficiaries String?
+  budget        Int? // FCFA
+  goalAmount    Int? // objectif financier ; null = campagne permanente
+  // Mobilisé : somme des contributions RÉUSSIES, tenue à jour dans la même transaction que la confirmation
+  raisedAmount  Int           @default(0)
+  contributorCount Int        @default(0)
+  startsAt      DateTime?
+  endsAt        DateTime?
+  endLabel      String? // « campagne permanente »
+  responsibleId String?
+  imageKey      String?
+  collectOpen   Boolean       @default(false)
+  status        ProjectStatus @default(PROPOSED)
+  // Les chiffres publiés doivent être validés (§26)
+  validatedById String?
+  validatedAt   DateTime?
+  createdAt     DateTime      @default(now())
+  updatedAt     DateTime      @updatedAt
+
+  structure     Structure       @relation(fields: [structureId], references: [id])
+  responsible   User?           @relation(fields: [responsibleId], references: [id])
+  steps         ProjectStep[]
+  updates       ProjectUpdate[]
+  contributions Contribution[]
+
+  @@index([structureId, status])
+}
+
+model ProjectStep {
+  id        String  @id @default(cuid())
+  projectId String
+  position  Int
+  label     String
+  done      Boolean @default(false)
+
+  project Project @relation(fields: [projectId], references: [id], onDelete: Cascade)
+}
+
+model ProjectUpdate {
+  id          String        @id @default(cuid())
+  projectId   String
+  title       String
+  body        String?
+  imageKey    String?
+  status      ContentStatus @default(PUBLISHED)
+  createdById String
+  createdAt   DateTime      @default(now())
+
+  project Project @relation(fields: [projectId], references: [id], onDelete: Cascade)
+}
+
+// ─────────────────────────────────────────────────────────────
+// Contributions et paiements (§20–24, §53–55)
+// ─────────────────────────────────────────────────────────────
+
+// Offrande, Dîme, Projet, Œuvre sociale… paramétrable par confession.
+model ContributionType {
+  id              String  @id @default(cuid())
+  confessionId    String
+  key             String // offrande, dime, projet, oeuvre_sociale
+  label           String
+  requiresProject Boolean @default(false)
+  active          Boolean @default(true)
+  position        Int     @default(0)
+
+  confession    Confession     @relation(fields: [confessionId], references: [id])
+  contributions Contribution[]
+
+  @@unique([confessionId, key])
+}
+
+enum PaymentChannel {
+  MTN_MOMO
+  ORANGE_MONEY
+  CARD
+  BANK
+  CASH // saisie manuelle
+  SANDBOX
+}
+
+enum ContributionStatus {
+  PENDING
+  SUCCEEDED
+  FAILED
+  CANCELLED
+  REFUNDED
+}
+
+model Contribution {
+  id             String             @id @default(cuid())
+  idempotencyKey String             @unique // fourni par l'app : un double appui ne crée pas deux paiements
+  confessionId   String
+  structureId    String // destination (chapelle, paroisse, consistoire…)
+  projectId      String?
+  typeId         String
+  userId         String? // null pour une saisie manuelle anonyme
+  payerLabel     String? // nom affiché pour une saisie manuelle
+  amount         Int // brut, FCFA
+  fee            Int                @default(0) // frais opérateur
+  net            Int // amount - part des frais à la charge de la structure (0 si le fidèle les paie)
+  totalCharged   Int // ce que le fidèle paie : amount + fee
+  channel        PaymentChannel
+  payerPhone     String?
+  status         ContributionStatus @default(PENDING)
+  statusReason   String?
+  receiptNumber  String?            @unique // EEC-2026-000123, attribué à la confirmation
+  recurringPlanId String?
+  manualEntryById String?
+  createdAt      DateTime           @default(now())
+  confirmedAt    DateTime?
+  updatedAt      DateTime           @updatedAt
+
+  structure     Structure            @relation(fields: [structureId], references: [id])
+  project       Project?             @relation(fields: [projectId], references: [id])
+  type          ContributionType     @relation(fields: [typeId], references: [id])
+  user          User?                @relation("Contributor", fields: [userId], references: [id])
+  recurringPlan RecurringPlan?       @relation(fields: [recurringPlanId], references: [id])
+  transactions  PaymentTransaction[]
+  refunds       Refund[]
+
+  @@index([structureId, status, createdAt])
+  @@index([userId, createdAt])
+  @@index([projectId, status])
+}
+
+enum TxStatus {
+  INITIATED
+  PENDING
+  SUCCEEDED
+  FAILED
+  EXPIRED
+}
+
+// Une tentative auprès d'un prestataire. Une contribution peut en avoir plusieurs (nouvel essai).
+model PaymentTransaction {
+  id             String         @id @default(cuid())
+  contributionId String
+  provider       PaymentChannel
+  providerRef    String? // X-Reference-Id MoMo, pay_token Orange…
+  status         TxStatus       @default(INITIATED)
+  providerStatus String? // statut brut renvoyé
+  amount         Int
+  fee            Int            @default(0)
+  requestedAt    DateTime       @default(now())
+  resolvedAt     DateTime?
+  lastCheckedAt  DateTime?
+  failureReason  String?
+  // Jeton secret de l'URL de rappel, haché : MTN ne signe pas ses rappels, le jeton authentifie l'appel
+  callbackTokenHash String?
+
+  contribution Contribution @relation(fields: [contributionId], references: [id])
+
+  @@unique([provider, providerRef])
+  @@index([status, requestedAt])
+}
+
+// Déduplication des webhooks : un même événement n'est traité qu'une fois.
+model PaymentWebhookEvent {
+  id          String         @id @default(cuid())
+  provider    PaymentChannel
+  eventKey    String
+  receivedAt  DateTime       @default(now())
+  processedAt DateTime?
+  outcome     String?
+
+  @@unique([provider, eventKey])
+}
+
+model ReceiptSequence {
+  confessionId String
+  year         Int
+  last         Int @default(0)
+
+  confession Confession @relation(fields: [confessionId], references: [id])
+
+  @@id([confessionId, year])
+}
+
+enum RecurringStatus {
+  ACTIVE
+  PAUSED
+  CANCELLED
+}
+
+model RecurringPlan {
+  id          String          @id @default(cuid())
+  userId      String
+  structureId String
+  projectId   String?
+  typeId      String
+  amount      Int
+  channel     PaymentChannel
+  payerPhone  String
+  dayOfMonth  Int             @default(1)
+  nextRunAt   DateTime
+  status      RecurringStatus @default(ACTIVE)
+  createdAt   DateTime        @default(now())
+
+  user          User           @relation(fields: [userId], references: [id])
+  contributions Contribution[]
+}
+
+enum RefundStatus {
+  REQUESTED
+  VALIDATED
+  EXECUTED
+  REJECTED
+}
+
+model Refund {
+  id             String       @id @default(cuid())
+  contributionId String
+  amount         Int
+  reason         String
+  status         RefundStatus @default(REQUESTED)
+  requestedById  String
+  validatedById  String?
+  executedAt     DateTime?
+  providerRef    String?
+  createdAt      DateTime     @default(now())
+
+  contribution Contribution @relation(fields: [contributionId], references: [id])
+}
+
+// Clôture mensuelle d'une structure (refusée s'il reste des paiements en attente).
+model PeriodClosing {
+  id          String   @id @default(cuid())
+  structureId String
+  year        Int
+  month       Int
+  total       Int
+  txCount     Int
+  closedById  String
+  closedAt    DateTime @default(now())
+
+  @@unique([structureId, year, month])
+}
+
+// ─────────────────────────────────────────────────────────────
+// Gouvernance : audit, contact, paramètres
+// ─────────────────────────────────────────────────────────────
+
+enum AuditCategory {
+  CONNEXION
+  VALIDATION
+  PAIEMENT
+  DROITS
+  EXPORT
+  PUBLICATION
+  SUPPRESSION
+  PARAMETRAGE
+}
+
+// Ajout seul : un déclencheur refuse UPDATE et DELETE (voir la migration).
+model AuditLog {
+  id          String        @id @default(cuid())
+  at          DateTime      @default(now())
+  actorId     String? // null = Système
+  actorLabel  String // nom affiché figé au moment de l'action
+  category    AuditCategory
+  action      String // phrase : « A validé 38 contributions »
+  entityType  String?
+  entityId    String?
+  structureId String?
+  structurePath String? // pour filtrer le journal par périmètre
+  ip          String?
+  success     Boolean       @default(true)
+  metadata    Json?
+
+  @@index([structurePath, at])
+  @@index([at])
+}
+
+enum ContactStatus {
+  NEW
+  HANDLED
+}
+
+model ContactMessage {
+  id        String        @id @default(cuid())
+  name      String
+  email     String
+  subject   String?
+  message   String
+  status    ContactStatus @default(NEW)
+  ip        String?
+  createdAt DateTime      @default(now())
+}
+
+model Setting {
+  structureId String
+  key         String
+  value       Json
+  updatedAt   DateTime @updatedAt
+
+  @@id([structureId, key])
+}
