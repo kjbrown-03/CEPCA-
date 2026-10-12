@@ -32,10 +32,19 @@ function refreshSession(): Promise<boolean> {
   return refreshing
 }
 
+/** Écrans de l'application des fidèles accessibles sans session. */
+const APP_PUBLIC = /^\/app\/(bienvenue|compte|code|hors-ligne)(\/|$)/
+
 /** Session perdue : retour à l'écran de connexion, en gardant la page demandée. */
 export function toLogin() {
   if (typeof window === 'undefined') return
-  if (window.location.pathname.startsWith('/admin/connexion')) return
+  const path = window.location.pathname
+  // Application des fidèles : retour à l'accueil de l'app (connexion par code e-mail)
+  if (path === '/app' || path.startsWith('/app/')) {
+    if (!APP_PUBLIC.test(path)) window.location.assign('/app/bienvenue')
+    return
+  }
+  if (path.startsWith('/admin/connexion')) return
   const next = encodeURIComponent(window.location.pathname + window.location.search)
   window.location.assign(`/admin/connexion?next=${next}`)
 }
@@ -84,7 +93,7 @@ export const api = {
   post: <T>(path: string, body: unknown = {}) => send('POST', path, body).then((r) => json<T>(r)),
   put: <T>(path: string, body: unknown) => send('PUT', path, body).then((r) => json<T>(r)),
   patch: <T>(path: string, body: unknown) => send('PATCH', path, body).then((r) => json<T>(r)),
-  del: <T>(path: string) => send('DELETE', path).then((r) => json<T>(r)),
+  del: <T>(path: string, body?: unknown) => send('DELETE', path, body).then((r) => json<T>(r)),
   upload: <T>(path: string, form: FormData) => send('POST', path, form).then((r) => json<T>(r)),
 }
 

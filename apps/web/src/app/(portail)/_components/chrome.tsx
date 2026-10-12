@@ -19,8 +19,12 @@ export function PortalHeader({ theme }: { theme: 'light' | 'dark' }) {
         </nav>
         <div className="p-actions">
           <ThemeToggle initial={theme} />
-          <Link href="/admin/connexion" className="p-cta">
-            Se connecter
+          <Link href="/admin/connexion" className="p-signin">
+            Espace responsables
+          </Link>
+          {/* Application des fidèles (PWA) : installable depuis le navigateur du téléphone */}
+          <Link href="/app" className="p-cta">
+            Application
           </Link>
         </div>
       </div>

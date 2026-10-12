@@ -27,6 +27,8 @@ export const verifyOtpSchema = z.strictObject({
   code: z.string().regex(/^\d{4}$/, 'Le code compte 4 chiffres'),
   fullName: z.string().trim().min(2).max(120).optional(),
   phone: phoneE164.optional(),
+  // Application web (PWA) : la session est posée en cookies httpOnly, les jetons ne passent pas par la page
+  cookie: z.literal(true).optional(),
 })
 export type VerifyOtpInput = z.infer<typeof verifyOtpSchema>
 
@@ -111,3 +113,18 @@ export const paginationSchema = z.object({
   cursor: z.string().max(40).optional(),
   limit: z.coerce.number().int().min(1).max(100).default(20),
 })
+
+/**
+ * Abonnement Web Push d'un navigateur. L'adresse doit appartenir à un service push connu
+ * (Google, Mozilla, Apple, Microsoft) : le serveur ne contacte jamais une adresse arbitraire.
+ */
+export const PUSH_HOSTS = /(^|\.)(fcm\.googleapis\.com|push\.services\.mozilla\.com|push\.apple\.com|notify\.windows\.com)$/
+export const pushSubscriptionSchema = z.strictObject({
+  endpoint: z
+    .url({ protocol: /^https$/ })
+    .max(1000)
+    .refine((u) => PUSH_HOSTS.test(new URL(u).hostname), 'Service de notification inconnu'),
+  keys: z.strictObject({ p256dh: z.string().min(20).max(200), auth: z.string().min(8).max(100) }),
+})
+export const pushUnsubscribeSchema = z.strictObject({ endpoint: z.string().max(1000) })
+

@@ -28,6 +28,18 @@ describe('Authentification', () => {
     expect(me.body.membership).toBeNull()
   })
 
+  it('application web : la session part en cookies httpOnly, jamais dans la réponse', async () => {
+    const email = newEmail('pwa')
+    await request(ctx.server).post('/api/auth/otp/request').send({ email, purpose: 'SIGNUP' }).expect(200)
+    const v = await request(ctx.server).post('/api/auth/otp/verify').send({ email, code: ctx.mail.codes.get(email), fullName: 'Fidèle Web', phone: newPhone(), cookie: true }).expect(200)
+    expect(v.body).toEqual({ created: true })
+    const cookies = ([] as string[]).concat(v.headers['set-cookie'] ?? [])
+    expect(cookies.join(';')).toMatch(/cepca_at=.*HttpOnly/i)
+    const at = cookies.find((c) => c.startsWith('cepca_at='))!.split(';')[0]
+    const me = await request(ctx.server).get('/api/me').set('Cookie', at).expect(200)
+    expect(me.body.fullName).toBe('Fidèle Web')
+  })
+
   it('un numéro déjà pris par un autre compte est refusé à l’inscription', async () => {
     const w = await buildWorld(ctx.prisma)
     const email = newEmail('doublon')

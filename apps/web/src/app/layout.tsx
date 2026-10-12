@@ -4,7 +4,7 @@ import '@cepca/tokens/tokens.css'
 import './globals.css'
 
 const serif = Instrument_Serif({ subsets: ['latin'], weight: '400', style: ['normal', 'italic'], variable: '--font-serif', display: 'swap' })
-const sans = Manrope({ subsets: ['latin'], weight: ['400', '500', '600', '700'], variable: '--font-sans', display: 'swap' })
+const sans = Manrope({ subsets: ['latin'], weight: ['400', '500', '600', '700', '800'], variable: '--font-sans', display: 'swap' })
 
 export const metadata: Metadata = {
   title: { default: 'CEPCA — Conseil des Églises Protestantes du Cameroun', template: '%s · CEPCA' },

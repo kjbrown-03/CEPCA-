@@ -46,6 +46,10 @@ const schema = z.object({
   MAIL_FROM: z.string().default('CEPCA <no-reply@cepca.org>'),
   // 1 : notifications push envoyées par Expo Push ; sinon affichées dans le terminal
   EXPO_PUSH: z.enum(['0', '1']).default('0'),
+  // Notifications push de l'application web (PWA). Clés : npx web-push generate-vapid-keys. Vides : envoi simulé.
+  VAPID_PUBLIC_KEY: z.string().default(''),
+  VAPID_PRIVATE_KEY: z.string().default(''),
+  VAPID_SUBJECT: z.string().default('mailto:contact@cepca.org'),
 })
 
 export type Env = z.infer<typeof schema> & { trustProxy: boolean | string }
@@ -67,6 +71,7 @@ function load(): Env {
     if (/sandbox/.test(e.FAPSHI_BASE_URL) || /^FAK_TEST/.test(e.FAPSHI_API_KEY)) weak.push('Fapshi en bac à sable')
     if (e.FAPSHI_WEBHOOK_SECRET.length < 16) weak.push('FAPSHI_WEBHOOK_SECRET')
     if (e.MAIL_MODE !== 'smtp') weak.push('MAIL_MODE=console en production (aucun e-mail ne partirait)')
+    if (!e.VAPID_PUBLIC_KEY || !e.VAPID_PRIVATE_KEY) weak.push('VAPID_PUBLIC_KEY / VAPID_PRIVATE_KEY (notifications push de l’application)')
     if (weak.length) {
       console.error('Refus de démarrer en production — secrets absents, faibles ou mode bac à sable :', weak.join(', '))
       process.exit(1)

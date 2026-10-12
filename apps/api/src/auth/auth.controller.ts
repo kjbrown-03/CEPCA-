@@ -65,7 +65,7 @@ export class AuthController {
   /** Étape 2 : vérification du code. Crée le compte à la première vérification (nom et téléphone obligatoires). */
   @Post('otp/verify')
   @HttpCode(200)
-  async verifyOtp(@Body(new ZodPipe(verifyOtpSchema)) body: VerifyOtpInput, @Req() req: Request) {
+  async verifyOtp(@Body(new ZodPipe(verifyOtpSchema)) body: VerifyOtpInput, @Req() req: Request, @Res({ passthrough: true }) res: Response) {
     let user = await this.prisma.user.findUnique({ where: { email: body.email } })
     // Contrôlé avant le code : une inscription incomplète ne consomme pas d'essai
     if (!user) {
@@ -90,6 +90,10 @@ export class AuthController {
     if (user.status !== 'ACTIVE') throw new AppError(403, 'ACCOUNT_DISABLED', 'Ce compte est suspendu. Contactez votre paroisse.')
     await this.prisma.user.update({ where: { id: user.id }, data: { lastLoginAt: new Date() } })
     const tokens = await this.tokens.issue(user.id, this.meta(req))
+    if (body.cookie) {
+      this.setCookies(res, tokens)
+      return { created }
+    }
     return { ...tokens, created }
   }
 

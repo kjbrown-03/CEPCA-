@@ -5,20 +5,21 @@ Document de conception. Il traduit le cahier des charges (`design_handoff_cepca/
 ## 1. Vue d'ensemble
 
 ```
-                    ┌──────────────────────────┐        ┌───────────────────────────┐
-  Fidèles ────────► │  apps/mobile  (Expo)     │        │  apps/web  (Next.js)      │ ◄──── Visiteurs
-  Responsables      │  fidèle + espaces resp.  │        │  /        portail public  │ ◄──── Administrateurs
-                    └────────────┬─────────────┘        │  /admin   back-office     │
-                                 │ HTTPS + Bearer       └────────────┬──────────────┘
-                                 │                                   │ HTTPS + cookie httpOnly
-                                 ▼                                   ▼ (même origine via /api)
+                    ┌───────────────────────────────────────┐
+  Visiteurs ──────► │  apps/web  (Next.js)                  │
+  Fidèles ────────► │  /        portail public              │
+  (PWA installée)   │  /app     application des fidèles     │
+  Responsables ───► │  /admin   back-office                 │
+                    └───────────────────┬───────────────────┘
+                                        │ HTTPS + cookie httpOnly
+                                        ▼ (même origine via /api)
                     ┌─────────────────────────────────────────────────────────────────┐
                     │  apps/api  (NestJS + Prisma)                                    │
                     │  auth · structures · droits · publications · agenda · contenus │
                     │  contributions · paiements · projets · rapports · audit        │
                     │                                                                 │
                     │  ┌─ PaymentProvider ─┐  ┌─ MailService ─┐ ┌─ PushSender ─┐       │
-                    │  │ MTN MoMo · Orange │  │ console/SMTP  │ │ Expo push    │       │
+                    │  │ MTN MoMo · Orange │  │ console/SMTP  │ │ Web Push     │       │
                     │  │ Money · Bac à sable│ └──────────────┘  └──────────────┘       │
                     │  └───────────────────┘   ┌─ Storage (S3) ─┐                     │
                     └──────────┬───────────────┴────────────────┴─────────────────────┘
@@ -33,8 +34,8 @@ Monorepo npm workspaces :
 CEPCA/
 ├── apps/
 │   ├── api/       NestJS, Prisma, PostgreSQL           port 4000
-│   ├── web/       Next.js App Router (portail + /admin) port 3000
-│   └── mobile/    Expo + expo-router                   Metro 8081
+│   ├── web/       Next.js App Router (portail, /app, /admin) port 3000
+│   └── mobile/    Expo : première version de l'app des fidèles, remplacée par la PWA /app (gelée)
 ├── packages/
 │   ├── tokens/    design tokens du README (TS + CSS)  → web et mobile
 │   └── shared/    schémas zod, types, formatage FCFA/€/heures, codes d'erreur
@@ -50,7 +51,7 @@ CEPCA/
 | ORM | Prisma 6 | Migrations versionnées, client typé. Contraintes non exprimables (journal non modifiable, index de préfixe) ajoutées en SQL dans les migrations. |
 | Validation | zod, schémas partagés (`packages/shared`) | Un seul schéma pour le formulaire mobile, le formulaire web et l'API. Objets stricts : un champ inconnu (`role`, `status`…) est rejeté. |
 | Web | Next.js App Router | Portail en rendu serveur (référencement, premier affichage rapide) ; back-office en composants client derrière authentification. |
-| Mobile | Expo (React Native), expo-router | Une seule base Android + iOS (option B du cahier §46), mises à jour OTA, push via Expo. |
+| Application des fidèles | PWA dans le site Next (`/app`) : manifeste, service worker, Web Push (VAPID) | Installée depuis le navigateur (« Ajouter à l'écran d'accueil »), sans store ni compte développeur payant ; mises à jour immédiates ; une seule base de code et un seul déploiement. Le dossier `apps/mobile` (Expo) reste comme référence, il n'est plus développé. |
 | Icônes | Phosphor (`@phosphor-icons/react`, `phosphor-react-native`) | Celles des maquettes. |
 | Polices | Instrument Serif + Manrope (`next/font/google`, `@expo-google-fonts/*`) | Celles du README, embarquées (pas de dépendance réseau à l'exécution sur mobile). |
 | Données distantes | TanStack Query (web et mobile) | Cache, reprise, états chargement/erreur uniformes. |
@@ -86,17 +87,25 @@ Les filtres de l'app (Paroisse / Confession / CEPCA) se traduisent en niveau du 
 
 | Public | Facteurs | Détail |
 |---|---|---|
-| Fidèle (mobile) | e-mail + code à 4 chiffres reçu par e-mail | Seul le fidèle s'inscrit : nom, e-mail et téléphone obligatoires (le téléphone sert au paiement Mobile Money). Code haché, valable 10 min, 5 essais, puis nouveau code. Limiteur dédié par adresse et par IP. |
+| Fidèle (application `/app`) | e-mail + code à 4 chiffres reçu par e-mail | Seul le fidèle s'inscrit : nom, e-mail et téléphone obligatoires (le téléphone sert au paiement Mobile Money). Code haché, valable 10 min, 5 essais, puis nouveau code. Limiteur dédié par adresse et par IP. |
 | Responsable (back-office, espaces responsables) | e-mail + mot de passe + mandat choisi (rôle, puis structure en cascade) + code à 6 chiffres reçu par e-mail | « Authentification forte pour les profils sensibles » (§42). Le serveur vérifie que la personne détient ce rôle sur cette structure ; ce mandat devient le mandat actif. |
 
 - **Aucun SMS** (coût par message) : codes, nominations et notifications partent par e-mail (nodemailer ; `MAIL_MODE=console` en dev, `smtp` en production) ou par notification push.
 - Connexion du back-office : le rôle choisi fixe le niveau de la cascade Confession → Synode → Consistoire → Paroisse → Chapelle (niveaux propres à chaque confession) ; les niveaux plus locaux que celui du rôle sont grisés. Les listes viennent de `GET /auth/admin/options` et `GET /auth/admin/structures?parentId=` (publics, sans donnée personnelle).
-- Un responsable peut détenir deux rôles : fidèle (rattachement à une paroisse) et un ou plusieurs mandats. L'app mobile lui proposera de passer de l'un à l'autre (parcours 4).
+- Un responsable peut détenir deux rôles : fidèle (rattachement à une paroisse) et un ou plusieurs mandats. L'application `/app` lui proposera de passer de l'un à l'autre (parcours 4).
 - L'adresse e-mail identifie le compte : elle n'est pas modifiable depuis le profil (une faute de frappe le rendrait inaccessible).
 
 - Jeton d'accès JWT 15 min ; jeton de rafraîchissement 30 jours, **haché en base**, à rotation, révoqué à la déconnexion et à la suspension.
-- Mobile : jetons dans `expo-secure-store`. Web : cookies `httpOnly`, `Secure`, `SameSite=Lax` ; Next.js relaie `/api/*` vers l'API, d'où une seule origine et pas de CORS ouvert.
+- Web (portail, `/app`, `/admin`) : cookies `httpOnly`, `Secure`, `SameSite=Lax`, aucun jeton lisible par la page (`cookie: true` à la vérification du code) ; Next.js relaie `/api/*` vers l'API, d'où une seule origine et pas de CORS ouvert.
 - Le rattachement à une paroisse est **en attente** jusqu'à validation par le pasteur (maquette « bienvenue »). En attente, le fidèle lit les contenus publics de la paroisse, mais n'apparaît pas dans les effectifs.
+
+## 5 bis. Application des fidèles (PWA)
+
+- **Adresse** : `/app` sur le site (`cepca.org/app`). Le portail y mène (bouton « Application »). `app/manifest.ts` déclare `start_url /app`, `scope /app/`, affichage `standalone`, icônes 192/512 et « maskable ».
+- **Installation** : Android (Chrome) propose l'installation, relayée par un bandeau dans l'accueil ; iPhone : Safari, Partager, « Sur l'écran d'accueil » (expliqué dans l'app). HTTPS obligatoire en production.
+- **Service worker** (`public/sw.js`, portée `/app/`) : fichiers `/_next/static` en cache, pages en réseau d'abord avec la dernière version vue ou la page « hors ligne » ; aucune donnée `/api` en cache (personnelle). Prédications téléchargées gardées dans Cache Storage (`cepca-sermons`) et lues hors connexion.
+- **Notifications push** : interrupteur dans « Notifications ». Sur iPhone, seulement pour l'app ajoutée à l'écran d'accueil (iOS 16.4 et plus). Désabonnement à la déconnexion.
+- **Fichiers** : documents, pièces jointes et reçus PDF téléchargés via le relais `/api` (cookie de session) ; « Ajouter à mon calendrier » produit un fichier `.ics`.
 
 ## 6. Paiements (§20–24, §53–55)
 
@@ -154,7 +163,7 @@ Table `AuditLog` en **ajout seul** : un déclencheur PostgreSQL refuse `UPDATE` 
 
 ## 10. Notifications (§19)
 
-`Notification` (boîte de réception de l'app : lu/non lu, lien vers l'écran) + `NotificationCampaign` (envoi par un responsable : audience, canaux Push/E-mail, programmation). Push via Expo Push, e-mail via `MailService` (console en dev). Plus aucun SMS : la colonne `smsCostFcfa` ne garde que l'historique.
+`Notification` (boîte de réception de l'app : lu/non lu, lien vers l'écran) + `NotificationCampaign` (envoi par un responsable : audience, canaux Push/E-mail, programmation). Push par Web Push (VAPID) vers les navigateurs abonnés (`PushToken`, plateforme `web` ; abonnements limités aux services push de Google, Mozilla, Apple et Microsoft ; un abonnement expiré, 404/410, est supprimé), e-mail via `MailService` (console en dev). Plus aucun SMS : la colonne `smsCostFcfa` ne garde que l'historique.
 
 ## 11. Déploiement
 
@@ -174,7 +183,7 @@ Selon le skill DevOps du projet :
 | 5 | Back-office | tableau de bord par rôle, structures, utilisateurs, rôles et droits, publications (validation), événements, prédications, documents, notifications, projets, contributions, rapports, audit, paramètres |
 | 1 | Portail public | accueil hero, mission, Églises membres, actualités, contact |
 | 3 | App fidèle — compléments | ma chapelle, groupes, je participe, lire et méditer, jeunes et actions sociales, mon engagement, recherche |
-| 4 | Espaces responsables (mobile) | pasteur, financier, projet, communication |
+| 4 | Espaces responsables (dans `/app`) | pasteur, financier, projet, communication |
 
 ## 13. Hors MVP (rappel §71–72)
 

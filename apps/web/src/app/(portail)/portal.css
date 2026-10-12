@@ -135,6 +135,20 @@ html {
 .p-cta:hover {
   background: var(--green-deep);
 }
+.portal a.p-signin {
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--muted);
+  white-space: nowrap;
+}
+.portal a.p-signin:hover {
+  color: var(--green);
+}
+@media (max-width: 640px) {
+  .portal a.p-signin {
+    display: none; /* toujours dans le pied de page */
+  }
+}
 
 /* ── Hero ── */
 

@@ -22,6 +22,7 @@ import { ContributionsController, RecurringController, WebhooksController } from
 import { FapshiProvider, SandboxProvider } from './payments/providers'
 import { ContactController } from './public/contact.controller'
 import { PortalController } from './public/portal.controller'
+import { PushController } from './member/push.controller'
 import { AdminScope, StaffGuard } from './admin/admin-common'
 import { AudienceService, PushService } from './admin/audience.service'
 import { ReportsService } from './admin/reports.service'
@@ -60,6 +61,7 @@ import { AdminSettingsController } from './admin/settings.controller'
     WebhooksController,
     ContactController,
     PortalController,
+    PushController,
     // Back-office
     AdminRolesController,
     AdminDashboardController,

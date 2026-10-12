@@ -41,6 +41,9 @@ export function Hero() {
           </h1>
           <p>Chaque confession membre garde son autonomie et son organisation. Le CEPCA offre un espace commun pour s’informer, se retrouver et agir ensemble.</p>
           <div className="row">
+            <a href="/app" className="hero-link">
+              L’application des fidèles
+            </a>
             <a href="#eglises" className="hero-link">
               Les Églises membres
               <ArrowDown size={16} />
