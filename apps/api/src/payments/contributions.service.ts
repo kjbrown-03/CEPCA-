@@ -1,7 +1,7 @@
 import { Injectable, Logger } from '@nestjs/common'
 import { Cron, CronExpression } from '@nestjs/schedule'
 import type { PaymentChannel, Prisma } from '@prisma/client'
-import { createHash, randomBytes } from 'node:crypto'
+import { timingSafeEqual } from 'node:crypto'
 import { dayMonth, fmtFcfa, maskPhone, operatorFee, type CreateContributionInput } from '@cepca/shared'
 import { env } from '../config/env'
 import { PrismaService } from '../prisma/prisma.service'
@@ -9,9 +9,7 @@ import { AuditService } from '../audit/audit.service'
 import { AppError, NotFound } from '../common/http'
 import type { Principal } from '../access/access.service'
 import { MemberContextService } from '../member/member-context.service'
-import { MtnMomoProvider, OrangeMoneyProvider, ProviderError, SandboxProvider, type PaymentProvider, type ProviderStatus } from './providers'
-
-const sha256 = (s: string) => createHash('sha256').update(s).digest('hex')
+import { FapshiProvider, ProviderError, SandboxProvider, fapshiPhone, type PaymentProvider, type ProviderStatus } from './providers'
 
 /** Au-delà, une transaction toujours en attente n'est plus interrogée : elle part en rapprochement manuel. */
 const RECONCILE_WINDOW_MS = 48 * 3600 * 1000
@@ -26,6 +24,17 @@ export function nextMonthlyRun(from: Date, dayOfMonth = 1): Date {
   return new Date(Date.UTC(douala.getUTCFullYear(), douala.getUTCMonth() + 1, dayOfMonth, 5, 0, 0))
 }
 
+/** Séquence par confession et par année, sans trou ni doublon (verrou de ligne de l'UPSERT) : EEC-2026-000123 */
+export async function nextReceiptNumber(tx: Tx, confessionId: string, at: Date): Promise<string> {
+  const conf = await tx.confession.findUniqueOrThrow({ where: { id: confessionId }, select: { code: true } })
+  const year = Number(new Intl.DateTimeFormat('en', { year: 'numeric', timeZone: 'Africa/Douala' }).format(at))
+  const [{ last }] = await tx.$queryRaw<{ last: number }[]>`
+    INSERT INTO "ReceiptSequence" ("confessionId", "year", "last") VALUES (${confessionId}, ${year}, 1)
+    ON CONFLICT ("confessionId", "year") DO UPDATE SET "last" = "ReceiptSequence"."last" + 1
+    RETURNING "last"`
+  return `${conf.code}-${year}-${String(last).padStart(6, '0')}`
+}
+
 @Injectable()
 export class ContributionsService {
   private readonly log = new Logger('Contributions')
@@ -35,20 +44,20 @@ export class ContributionsService {
     private readonly audit: AuditService,
     private readonly ctx: MemberContextService,
     private readonly sandbox: SandboxProvider,
-    private readonly momo: MtnMomoProvider,
-    private readonly orange: OrangeMoneyProvider,
+    private readonly fapshi: FapshiProvider,
   ) {}
 
-  /** En bac à sable, les deux canaux passent par le simulateur ; la contribution garde le canal choisi par le fidèle. */
+  /** MTN MoMo et Orange Money passent tous deux par Fapshi ; la contribution garde le canal choisi par le fidèle. */
   providerFor(channel: PaymentChannel): PaymentProvider {
-    if (env.PAYMENT_MODE === 'SANDBOX') return this.sandbox
-    if (channel === 'MTN_MOMO') return this.momo
-    if (channel === 'ORANGE_MONEY') return this.orange
-    throw new AppError(400, 'CHANNEL_UNAVAILABLE', 'Ce moyen de paiement n’est pas disponible.')
+    if (channel !== 'MTN_MOMO' && channel !== 'ORANGE_MONEY') throw new AppError(400, 'CHANNEL_UNAVAILABLE', 'Ce moyen de paiement n’est pas disponible.')
+    return env.PAYMENT_PROVIDER === 'fapshi' ? this.fapshi : this.sandbox
   }
 
-  private providerByTxChannel(provider: PaymentChannel): PaymentProvider {
-    return provider === 'SANDBOX' ? this.sandbox : this.providerFor(provider)
+  /** Prestataire d'une transaction déjà créée (le réglage peut avoir changé depuis). */
+  private providerOfTx(provider: PaymentChannel): PaymentProvider {
+    if (provider === 'SANDBOX') return this.sandbox
+    if (provider === 'FAPSHI') return this.fapshi
+    throw new Error(`Aucun prestataire pour ${provider}`)
   }
 
   async types(p: Principal) {
@@ -104,8 +113,10 @@ export class ContributionsService {
     }
 
     const fee = operatorFee(input.amount)
-    const callbackToken = randomBytes(24).toString('base64url')
     const provider = this.providerFor(input.channel)
+    if (provider.channel === 'FAPSHI' && !fapshiPhone(input.payerPhone)) {
+      throw new AppError(400, 'PHONE_NOT_MOBILE_MONEY', 'Le paiement Mobile Money demande un numéro MTN ou Orange du Cameroun (+237 6…).')
+    }
 
     const created = await this.prisma.$transaction(async (tx) => {
       const plan = input.recurring
@@ -132,7 +143,7 @@ export class ContributionsService {
           userId: p.userId,
           amount: input.amount,
           fee,
-          net: input.amount, // les frais opérateur sont à la charge du fidèle, affichés avant paiement
+          net: input.amount, // corrigé à la confirmation avec le montant réellement versé par le prestataire
           totalCharged: input.amount + fee,
           channel: input.channel,
           payerPhone: input.payerPhone,
@@ -140,13 +151,13 @@ export class ContributionsService {
         },
       })
       const t = await tx.paymentTransaction.create({
-        data: { contributionId: contribution.id, provider: provider.channel, amount: input.amount + fee, fee, callbackTokenHash: sha256(callbackToken) },
+        data: { contributionId: contribution.id, provider: provider.channel, amount: input.amount + fee, fee },
       })
       return { contribution, tx: t }
     })
 
     try {
-      const redirectUrl = await this.initiate(created.contribution.id, created.tx.id, provider, { amount: input.amount + fee, fee, phone: input.payerPhone, label, callbackToken })
+      const redirectUrl = await this.initiate(created.contribution.id, created.tx.id, provider, { amount: input.amount + fee, fee, phone: input.payerPhone, medium: input.channel, userId: p.userId, label })
       return { id: created.contribution.id, redirectUrl }
     } catch (e) {
       // Première demande refusée : la contribution mensuelle n'est pas mise en place
@@ -162,11 +173,10 @@ export class ContributionsService {
     contributionId: string,
     txId: string,
     provider: PaymentProvider,
-    o: { amount: number; fee: number; phone: string; label: string; callbackToken: string },
+    o: { amount: number; fee: number; phone: string; medium: 'MTN_MOMO' | 'ORANGE_MONEY'; userId: string | null; label: string },
   ): Promise<string | null> {
-    const callbackUrl = `${env.PUBLIC_URL}/api/payments/webhooks/${provider.channel.toLowerCase()}/${txId}/${o.callbackToken}`
     try {
-      const r = await provider.initiate({ amount: o.amount, fee: o.fee, phone: o.phone, reference: contributionId, callbackUrl, label: `CEPCA · ${o.label}` })
+      const r = await provider.initiate({ ...o, reference: contributionId, label: `CEPCA · ${o.label}` })
       await this.prisma.paymentTransaction.update({ where: { id: txId }, data: { providerRef: r.providerRef, status: 'PENDING' } })
       return r.redirectUrl ?? null
     } catch (e) {
@@ -190,7 +200,7 @@ export class ContributionsService {
     if (claim.count !== 1 && !force) return
     let st: ProviderStatus
     try {
-      st = await this.providerByTxChannel(t.provider).fetchStatus(t.providerRef, { amount: t.amount, reference: t.contributionId })
+      st = await this.providerOfTx(t.provider).fetchStatus(t.providerRef)
     } catch (e) {
       this.log.warn(`Statut indisponible (${t.id}) : ${(e as Error).message}`)
       return
@@ -212,27 +222,24 @@ export class ContributionsService {
         data: { status: txStatus, providerStatus: st.raw, resolvedAt: new Date(), failureReason: st.reason ?? null },
       })
       if (moved.count !== 1) return
-      if (st.status === 'SUCCEEDED') await this.confirm(tx, t.contributionId)
+      if (st.status === 'SUCCEEDED') await this.confirm(tx, t.contributionId, st.received)
       else await this.fail(tx, t.contributionId, st.status === 'EXPIRED' ? 'CANCELLED' : 'FAILED', st.reason ?? 'Paiement non abouti')
     })
   }
 
-  private async confirm(tx: Tx, contributionId: string) {
+  private async confirm(tx: Tx, contributionId: string, received?: number) {
     const now = new Date()
-    const moved = await tx.contribution.updateMany({ where: { id: contributionId, status: 'PENDING' }, data: { status: 'SUCCEEDED', confirmedAt: now } })
+    const moved = await tx.contribution.updateMany({
+      where: { id: contributionId, status: 'PENDING' },
+      // net = ce que le prestataire verse réellement, après sa commission (données de rapprochement, §54)
+      data: { status: 'SUCCEEDED', confirmedAt: now, ...(received !== undefined ? { net: received } : {}) },
+    })
     if (moved.count !== 1) return
     const c = await tx.contribution.findUniqueOrThrow({
       where: { id: contributionId },
       include: { type: true, structure: { select: { name: true, path: true } }, project: { select: { title: true } }, user: { select: { fullName: true } } },
     })
-    const conf = await tx.confession.findUniqueOrThrow({ where: { id: c.confessionId }, select: { code: true } })
-    const year = Number(new Intl.DateTimeFormat('en', { year: 'numeric', timeZone: 'Africa/Douala' }).format(now))
-    // Séquence par confession et par année, sans trou ni doublon (verrou de ligne de l'UPSERT)
-    const [{ last }] = await tx.$queryRaw<{ last: number }[]>`
-      INSERT INTO "ReceiptSequence" ("confessionId", "year", "last") VALUES (${c.confessionId}, ${year}, 1)
-      ON CONFLICT ("confessionId", "year") DO UPDATE SET "last" = "ReceiptSequence"."last" + 1
-      RETURNING "last"`
-    const receiptNumber = `${conf.code}-${year}-${String(last).padStart(6, '0')}`
+    const receiptNumber = await nextReceiptNumber(tx, c.confessionId, now)
     await tx.contribution.update({ where: { id: c.id }, data: { receiptNumber } })
 
     if (c.projectId) {
@@ -304,19 +311,27 @@ export class ContributionsService {
     }
   }
 
-  /** Rappel d'un opérateur, authentifié par le jeton propre à la transaction. */
-  async webhook(providerSlug: string, txId: string, token: string, body: unknown) {
-    const t = await this.prisma.paymentTransaction.findUnique({ where: { id: txId } })
-    const expected = t?.callbackTokenHash
-    if (!t || !expected || t.provider.toLowerCase() !== providerSlug || sha256(token) !== expected) throw NotFound('Transaction')
-    const key = this.providerByTxChannel(t.provider).webhookKey(body) ?? `${txId}:${Date.now()}`
-    const first = await this.prisma.paymentWebhookEvent.createMany({ data: [{ provider: t.provider, eventKey: key }], skipDuplicates: true })
+  /**
+   * Webhook Fapshi : une seule adresse par service, authentifiée par l'en-tête x-wh-secret.
+   * Le contenu n'est jamais cru sur parole : il déclenche une relecture du statut chez Fapshi.
+   * Fapshi n'envoie qu'une fois et ne réessaie pas : la réconciliation périodique rattrape un webhook perdu.
+   */
+  async fapshiWebhook(secret: string | undefined, body: unknown) {
+    const expected = Buffer.from(env.FAPSHI_WEBHOOK_SECRET)
+    const given = Buffer.from(secret ?? '')
+    if (!expected.length || given.length !== expected.length || !timingSafeEqual(given, expected)) {
+      throw new AppError(401, 'UNAUTHENTICATED', 'Webhook non authentifié')
+    }
+    const b = (body ?? {}) as { transId?: unknown; status?: unknown }
+    if (typeof b.transId !== 'string' || !b.transId) return { ignored: true }
+    const t = await this.prisma.paymentTransaction.findUnique({ where: { provider_providerRef: { provider: 'FAPSHI', providerRef: b.transId.slice(0, 64) } } })
+    if (!t) return { ignored: true }
+    const key = `${b.transId}:${String(b.status ?? '')}`
+    const first = await this.prisma.paymentWebhookEvent.createMany({ data: [{ provider: 'FAPSHI', eventKey: key }], skipDuplicates: true })
     if (first.count === 0) return { duplicate: true }
     await this.refresh(t.id, true)
-    await this.prisma.paymentWebhookEvent.update({
-      where: { provider_eventKey: { provider: t.provider, eventKey: key } },
-      data: { processedAt: new Date(), outcome: (await this.prisma.paymentTransaction.findUnique({ where: { id: txId }, select: { status: true } }))?.status },
-    })
+    const after = await this.prisma.paymentTransaction.findUnique({ where: { id: t.id }, select: { status: true } })
+    await this.prisma.paymentWebhookEvent.update({ where: { provider_eventKey: { provider: 'FAPSHI', eventKey: key } }, data: { processedAt: new Date(), outcome: after?.status } })
     return { duplicate: false }
   }
 
@@ -366,7 +381,6 @@ export class ContributionsService {
     if (!type.active || !structure.confessionId) return
     const fee = operatorFee(plan.amount)
     const provider = this.providerFor(plan.channel)
-    const callbackToken = randomBytes(24).toString('base64url')
     const { contribution, t } = await this.prisma.$transaction(async (tx) => {
       const contribution = await tx.contribution.create({
         data: {
@@ -386,7 +400,7 @@ export class ContributionsService {
         },
       })
       const t = await tx.paymentTransaction.create({
-        data: { contributionId: contribution.id, provider: provider.channel, amount: plan.amount + fee, fee, callbackTokenHash: sha256(callbackToken) },
+        data: { contributionId: contribution.id, provider: provider.channel, amount: plan.amount + fee, fee },
       })
       await tx.notification.create({
         data: {
@@ -399,6 +413,6 @@ export class ContributionsService {
       })
       return { contribution, t }
     })
-    await this.initiate(contribution.id, t.id, provider, { amount: plan.amount + fee, fee, phone: plan.payerPhone, label: type.label, callbackToken }).catch(() => undefined)
+    await this.initiate(contribution.id, t.id, provider, { amount: plan.amount + fee, fee, phone: plan.payerPhone, medium: plan.channel as 'MTN_MOMO' | 'ORANGE_MONEY', userId: plan.userId, label: type.label }).catch(() => undefined)
   }
 }

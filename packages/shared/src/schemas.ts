@@ -12,23 +12,30 @@ export function toE164(cc: string, local: string): string | null {
 
 export const phoneE164 = z.string().regex(/^\+\d{9,15}$/, 'Numéro de téléphone invalide')
 
+/** Adresse e-mail, ramenée en minuscules : elle identifie le compte. */
+export const emailAddress = z.string().trim().toLowerCase().pipe(z.email('Adresse e-mail invalide').max(160))
+
 export const requestOtpSchema = z.strictObject({
-  phone: phoneE164,
+  email: emailAddress,
   purpose: z.enum(['SIGNUP', 'LOGIN']),
-  fullName: z.string().trim().min(2, 'Indiquez votre nom').max(120).optional(),
 })
 export type RequestOtpInput = z.infer<typeof requestOtpSchema>
 
+/** À l'inscription, le nom et le téléphone (paiement Mobile Money) sont obligatoires. */
 export const verifyOtpSchema = z.strictObject({
-  phone: phoneE164,
+  email: emailAddress,
   code: z.string().regex(/^\d{4}$/, 'Le code compte 4 chiffres'),
   fullName: z.string().trim().min(2).max(120).optional(),
+  phone: phoneE164.optional(),
 })
 export type VerifyOtpInput = z.infer<typeof verifyOtpSchema>
 
+/** Back-office : e-mail + mot de passe + mandat choisi (rôle et structure). */
 export const adminLoginSchema = z.strictObject({
-  phone: phoneE164,
+  email: emailAddress,
   password: z.string().min(8).max(200),
+  roleId: z.string().min(10).max(40),
+  structureId: z.string().min(10).max(40),
 })
 export const adminVerifySchema = z.strictObject({
   challengeId: z.string().min(10).max(40),
@@ -43,9 +50,9 @@ export const attachSchema = z.strictObject({
 })
 export type AttachInput = z.infer<typeof attachSchema>
 
+// L'e-mail n'est pas modifiable ici : il identifie le compte (connexion par code), une faute de frappe le rendrait inaccessible
 export const updateProfileSchema = z.strictObject({
   fullName: z.string().trim().min(2).max(120).optional(),
-  email: z.email().max(200).nullable().optional(),
   residence: z.enum(['CAMEROON', 'DIASPORA']).optional(),
   countryCode: z.string().length(2).nullable().optional(),
   city: z.string().max(80).nullable().optional(),

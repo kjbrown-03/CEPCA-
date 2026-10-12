@@ -23,6 +23,7 @@ export interface Principal {
   userId: string
   fullName: string
   phone: string
+  email: string | null
   assignments: Assignment[]
   /** Rattachement en cours (actif ou en attente) */
   membership: null | { status: string; structureId: string; path: string; confessionId: string }
@@ -54,6 +55,7 @@ export class AccessService {
         id: true,
         fullName: true,
         phone: true,
+        email: true,
         status: true,
         roleAssignments: {
           where: { revokedAt: null, startsAt: { lte: now }, OR: [{ endsAt: null }, { endsAt: { gt: now } }] },
@@ -77,6 +79,7 @@ export class AccessService {
       userId: user.id,
       fullName: user.fullName,
       phone: user.phone,
+      email: user.email,
       membership: m ? { status: m.status, structureId: m.structureId, path: m.structure.path, confessionId: m.confessionId } : null,
       assignments: user.roleAssignments
         .filter((a) => a.structure.status !== 'SUSPENDED')

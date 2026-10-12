@@ -233,11 +233,12 @@ enum OtpPurpose {
   SIGNUP
   LOGIN
   ADMIN_2FA
+  PASSWORD_RESET // définition ou oubli du mot de passe back-office
 }
 
 model OtpChallenge {
   id         String     @id @default(cuid())
-  phone      String
+  email      String // les codes partent par e-mail (aucun SMS)
   purpose    OtpPurpose
   codeHash   String
   attempts   Int        @default(0)
@@ -246,7 +247,7 @@ model OtpChallenge {
   createdAt  DateTime   @default(now())
   ip         String?
 
-  @@index([phone, createdAt])
+  @@index([email, createdAt])
 }
 
 model RefreshToken {
@@ -507,13 +508,13 @@ model NotificationCampaign {
   targetStructureId String
   groupId          String?
   title            String
-  message          String // ≤ 160 caractères si SMS
+  message          String
   channels         Channel[]
   scheduledAt      DateTime?
   sentAt           DateTime?
   recipients       Int            @default(0)
   opened           Int            @default(0)
-  smsCostFcfa      Int            @default(0)
+  smsCostFcfa      Int            @default(0) // historique : plus aucun SMS envoyé
   status           CampaignStatus @default(DRAFT)
   createdById      String
   createdAt        DateTime       @default(now())
@@ -714,7 +715,8 @@ enum PaymentChannel {
   CARD
   BANK
   CASH // saisie manuelle
-  SANDBOX
+  SANDBOX // simulateur local
+  FAPSHI // agrégateur MTN MoMo + Orange Money (prestataire des transactions, pas canal choisi par le fidèle)
 }
 
 enum ContributionStatus {
@@ -784,8 +786,6 @@ model PaymentTransaction {
   resolvedAt     DateTime?
   lastCheckedAt  DateTime?
   failureReason  String?
-  // Jeton secret de l'URL de rappel, haché : MTN ne signe pas ses rappels, le jeton authentifie l'appel
-  callbackTokenHash String?
 
   contribution Contribution @relation(fields: [contributionId], references: [id])
 

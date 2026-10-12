@@ -1,0 +1,44 @@
+{
+  "expo": {
+    "name": "CEPCA",
+    "slug": "cepca",
+    "scheme": "cepca",
+    "version": "1.0.0",
+    "orientation": "portrait",
+    "icon": "./assets/icon.png",
+    "userInterfaceStyle": "light",
+    "backgroundColor": "#f4efe6",
+    "ios": {
+      "supportsTablet": true,
+      "bundleIdentifier": "org.cepca.app"
+    },
+    "android": {
+      "package": "org.cepca.app",
+      "adaptiveIcon": {
+        "backgroundColor": "#1f5a36",
+        "foregroundImage": "./assets/android-icon-foreground.png",
+        "backgroundImage": "./assets/android-icon-background.png",
+        "monochromeImage": "./assets/android-icon-monochrome.png"
+      },
+      "predictiveBackGestureEnabled": false
+    },
+    "web": {
+      "bundler": "metro",
+      "favicon": "./assets/favicon.png"
+    },
+    "plugins": [
+      "expo-router",
+      "expo-secure-store",
+      "expo-audio",
+      "expo-video",
+      [
+        "expo-splash-screen",
+        {
+          "image": "./assets/splash-icon.png",
+          "imageWidth": 160,
+          "backgroundColor": "#102a1c"
+        }
+      ]
+    ]
+  }
+}

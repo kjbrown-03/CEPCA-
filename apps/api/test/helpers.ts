@@ -3,32 +3,45 @@ import type { NestExpressApplication } from '@nestjs/platform-express'
 import { randomBytes } from 'node:crypto'
 import { AppModule } from '../src/app.module'
 import { configureApp } from '../src/app.factory'
-import { ConsoleSmsGateway } from '../src/auth/otp.service'
+import { MailService, type Mail } from '../src/mail/mail.service'
 import { PrismaService } from '../src/prisma/prisma.service'
 import { TokensService } from '../src/auth/tokens.service'
 
-/** Passerelle SMS de test : garde le dernier code envoyé à chaque numéro. */
-export class CapturingSms {
+/** Boîte d'envoi de test : garde le dernier code envoyé à chaque adresse, et tous les messages. */
+export class CapturingMail {
   readonly codes = new Map<string, string>()
-  async send(phone: string, text: string) {
-    const m = /code est (\d+)/.exec(text)
-    if (m) this.codes.set(phone, m[1])
+  readonly sent: Mail[] = []
+  async send(mail: Mail) {
+    this.sent.push(mail)
+    const m = /code CEPCA est (\d+)/.exec(mail.text)
+    if (m) this.codes.set(mail.to, m[1])
+  }
+  async trySend(mail: Mail) {
+    await this.send(mail)
+    return true
   }
 }
 
 export async function bootApp() {
-  const sms = new CapturingSms()
-  const moduleRef = await Test.createTestingModule({ imports: [AppModule] }).overrideProvider(ConsoleSmsGateway).useValue(sms).compile()
+  const mail = new CapturingMail()
+  const moduleRef = await Test.createTestingModule({ imports: [AppModule] }).overrideProvider(MailService).useValue(mail).compile()
   const app = configureApp(moduleRef.createNestApplication<NestExpressApplication>({ bodyParser: false, logger: ['error'] }))
   await app.init()
-  return { app, sms, prisma: app.get(PrismaService), tokens: app.get(TokensService), server: app.getHttpServer() }
+  return { app, mail, prisma: app.get(PrismaService), tokens: app.get(TokensService), server: app.getHttpServer() }
 }
 
 let phoneSeq = 0
-/** Numéro unique par test (les plafonds OTP sont par numéro). */
+/** Numéro unique par test. */
 export function newPhone() {
   phoneSeq++
   return `+2376${String(Date.now()).slice(-6)}${String(phoneSeq).padStart(2, '0')}`
+}
+
+let emailSeq = 0
+/** Adresse unique par test (les plafonds de codes sont par adresse). */
+export function newEmail(prefix = 'test') {
+  emailSeq++
+  return `${prefix}.${Date.now().toString(36)}${emailSeq}@example.org`
 }
 
 export async function ensureRoot(prisma: PrismaService) {
@@ -56,7 +69,7 @@ export async function buildWorld(prisma: PrismaService) {
   for (const [position, [key, label, requiresProject]] of ([['offrande', 'Offrande', false], ['dime', 'Dîme', false], ['projet', 'Projet', true]] as const).entries()) {
     await prisma.contributionType.create({ data: { confessionId: c.id, key, label, requiresProject, position } })
   }
-  const member = await prisma.user.create({ data: { phone: newPhone(), fullName: 'Fidèle Test', consentAt: new Date() } })
+  const member = await prisma.user.create({ data: { phone: newPhone(), email: newEmail('fidele'), fullName: 'Fidèle Test', consentAt: new Date() } })
   await prisma.membership.create({ data: { userId: member.id, structureId: parish.id, confessionId: c.id, status: 'ACTIVE' } })
   const outsider = await prisma.user.create({ data: { phone: newPhone(), fullName: 'Autre Fidèle' } })
   await prisma.membership.create({ data: { userId: outsider.id, structureId: other.id, confessionId: c.id, status: 'ACTIVE' } })

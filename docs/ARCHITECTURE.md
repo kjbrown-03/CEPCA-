@@ -17,8 +17,8 @@ Document de conception. Il traduit le cahier des charges (`design_handoff_cepca/
                     │  auth · structures · droits · publications · agenda · contenus │
                     │  contributions · paiements · projets · rapports · audit        │
                     │                                                                 │
-                    │  ┌─ PaymentProvider ─┐  ┌─ SmsGateway ─┐  ┌─ PushSender ─┐       │
-                    │  │ MTN MoMo · Orange │  │ console/SMS  │  │ Expo push    │       │
+                    │  ┌─ PaymentProvider ─┐  ┌─ MailService ─┐ ┌─ PushSender ─┐       │
+                    │  │ MTN MoMo · Orange │  │ console/SMTP  │ │ Expo push    │       │
                     │  │ Money · Bac à sable│ └──────────────┘  └──────────────┘       │
                     │  └───────────────────┘   ┌─ Storage (S3) ─┐                     │
                     └──────────┬───────────────┴────────────────┴─────────────────────┘
@@ -54,6 +54,7 @@ CEPCA/
 | Icônes | Phosphor (`@phosphor-icons/react`, `phosphor-react-native`) | Celles des maquettes. |
 | Polices | Instrument Serif + Manrope (`next/font/google`, `@expo-google-fonts/*`) | Celles du README, embarquées (pas de dépendance réseau à l'exécution sur mobile). |
 | Données distantes | TanStack Query (web et mobile) | Cache, reprise, états chargement/erreur uniformes. |
+| Paiements | Fapshi (agrégateur MTN MoMo + Orange Money) | Un seul contrat et une seule API pour les deux opérateurs du Cameroun. |
 | Stockage fichiers | S3 compatible (MinIO en dev) | Médias servis **par l'API après contrôle des droits**, avec prise en charge des requêtes `Range` pour l'audio et la vidéo. |
 
 ## 3. Multi-confession et cloisonnement (§5, §68)
@@ -85,8 +86,13 @@ Les filtres de l'app (Paroisse / Confession / CEPCA) se traduisent en niveau du 
 
 | Public | Facteurs | Détail |
 |---|---|---|
-| Fidèle (mobile) | téléphone + code SMS à 4 chiffres | Conforme à la maquette. Code haché, valable 5 min, 5 essais, puis nouveau code. Limiteur dédié par numéro et par IP. |
-| Responsable (back-office, espaces responsables) | téléphone + mot de passe + code SMS à 6 chiffres | « Authentification forte pour les profils sensibles » (§42). |
+| Fidèle (mobile) | e-mail + code à 4 chiffres reçu par e-mail | Seul le fidèle s'inscrit : nom, e-mail et téléphone obligatoires (le téléphone sert au paiement Mobile Money). Code haché, valable 10 min, 5 essais, puis nouveau code. Limiteur dédié par adresse et par IP. |
+| Responsable (back-office, espaces responsables) | e-mail + mot de passe + mandat choisi (rôle, puis structure en cascade) + code à 6 chiffres reçu par e-mail | « Authentification forte pour les profils sensibles » (§42). Le serveur vérifie que la personne détient ce rôle sur cette structure ; ce mandat devient le mandat actif. |
+
+- **Aucun SMS** (coût par message) : codes, nominations et notifications partent par e-mail (nodemailer ; `MAIL_MODE=console` en dev, `smtp` en production) ou par notification push.
+- Connexion du back-office : le rôle choisi fixe le niveau de la cascade Confession → Synode → Consistoire → Paroisse → Chapelle (niveaux propres à chaque confession) ; les niveaux plus locaux que celui du rôle sont grisés. Les listes viennent de `GET /auth/admin/options` et `GET /auth/admin/structures?parentId=` (publics, sans donnée personnelle).
+- Un responsable peut détenir deux rôles : fidèle (rattachement à une paroisse) et un ou plusieurs mandats. L'app mobile lui proposera de passer de l'un à l'autre (parcours 4).
+- L'adresse e-mail identifie le compte : elle n'est pas modifiable depuis le profil (une faute de frappe le rendrait inaccessible).
 
 - Jeton d'accès JWT 15 min ; jeton de rafraîchissement 30 jours, **haché en base**, à rotation, révoqué à la déconnexion et à la suspension.
 - Mobile : jetons dans `expo-secure-store`. Web : cookies `httpOnly`, `Secure`, `SameSite=Lax` ; Next.js relaie `/api/*` vers l'API, d'où une seule origine et pas de CORS ouvert.
@@ -106,7 +112,7 @@ interface PaymentProvider {
 }
 ```
 
-Adaptateurs : `MtnMomoProvider` (Collection API, `requesttopay`), `OrangeMoneyProvider` (Web Payment / paiement marchand), `SandboxProvider` (dev et recette : l'issue dépend du montant saisi — terminé par 13, refus ; par 14, expiration ; sinon succès après `SANDBOX_CONFIRM_DELAY_MS`). Le doublon se teste par la clé d'idempotence.
+Adaptateurs : `FapshiProvider` (Fapshi `direct-pay` : la demande arrive sur le téléphone du fidèle, MTN MoMo ou Orange Money ; statut par `payment-status/:transId` ; webhook unique par service, authentifié par l'en-tête `x-wh-secret`, envoyé une seule fois sans réessai — la réconciliation périodique est donc indispensable), `SandboxProvider` (simulateur local hors ligne : l'issue dépend du montant saisi — terminé par 13, refus ; par 14, expiration ; sinon succès après `SANDBOX_CONFIRM_DELAY_MS`). Le doublon se teste par la clé d'idempotence. Fapshi n'accepte que les mobiles camerounais (+237 6…) : la diaspora devra payer par carte (prestataire à choisir). Le net enregistré est le montant réellement versé par Fapshi (`revenue`, après sa commission).
 
 **Machine d'états d'une contribution.**
 
@@ -148,7 +154,7 @@ Table `AuditLog` en **ajout seul** : un déclencheur PostgreSQL refuse `UPDATE` 
 
 ## 10. Notifications (§19)
 
-`Notification` (boîte de réception de l'app : lu/non lu, lien vers l'écran) + `NotificationCampaign` (envoi par un responsable : audience, canaux Push/SMS, 160 caractères, coût SMS estimé à 15 FCFA, programmation). Push via Expo Push. La passerelle SMS est une interface, avec une implémentation console en dev.
+`Notification` (boîte de réception de l'app : lu/non lu, lien vers l'écran) + `NotificationCampaign` (envoi par un responsable : audience, canaux Push/E-mail, programmation). Push via Expo Push, e-mail via `MailService` (console en dev). Plus aucun SMS : la colonne `smsCostFcfa` ne garde que l'historique.
 
 ## 11. Déploiement
 

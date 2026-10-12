@@ -1,4 +1,4 @@
-import { Body, Controller, Delete, Get, HttpCode, Param, Post, Put, Query, Req, Res } from '@nestjs/common'
+import { Body, Controller, Delete, Get, Headers, HttpCode, Param, Post, Query, Req, Res } from '@nestjs/common'
 import { Throttle } from '@nestjs/throttler'
 import type { Request, Response } from 'express'
 import {
@@ -18,6 +18,7 @@ import type { Principal } from '../access/access.service'
 import { contributionInclude, toContribution } from '../member/dto'
 import { ContributionsService } from './contributions.service'
 import { renderReceipt } from './receipt'
+import { effectiveSettings } from '../common/settings'
 
 const PAGE = 20
 
@@ -82,7 +83,7 @@ export class ContributionsController {
   async receipt(@CurrentUser() p: Principal, @Param('id') id: string, @Res() res: Response) {
     const c = await this.prisma.contribution.findFirst({
       where: { id, userId: p.userId },
-      include: { ...contributionInclude, user: { select: { fullName: true } }, transactions: { where: { status: 'SUCCEEDED' }, take: 1 } },
+      include: { ...contributionInclude, structure: { select: { name: true, path: true } }, user: { select: { fullName: true } }, transactions: { where: { status: 'SUCCEEDED' }, take: 1 } },
     })
     if (!c) throw NotFound('Contribution')
     if (!c.receiptNumber || !c.confirmedAt) throw new AppError(409, 'NO_RECEIPT', 'Le reçu sera disponible dès que l’opérateur aura confirmé le paiement.')
@@ -101,6 +102,7 @@ export class ContributionsController {
       providerRef: c.transactions[0]?.providerRef ?? null,
       confirmedAt: c.confirmedAt,
       refunded: c.status === 'REFUNDED',
+      note: (await effectiveSettings(this.prisma, c.structure.path)).receiptNote || undefined,
     })
     res.setHeader('Content-Type', 'application/pdf')
     res.setHeader('Content-Disposition', `attachment; filename="recu-${c.receiptNumber}.pdf"`)
@@ -146,24 +148,17 @@ export class RecurringController {
   }
 }
 
-/** Rappels des opérateurs. URL propre à chaque transaction, avec un jeton secret. */
+/** Webhook Fapshi : adresse à déclarer sur le tableau de bord du service, avec un secret (en-tête x-wh-secret). */
 @Controller('payments/webhooks')
 @Public()
 @Throttle({ default: { limit: 600, ttl: 60 * 1000 } })
 export class WebhooksController {
   constructor(private readonly service: ContributionsService) {}
 
-  @Post(':provider/:txId/:token')
+  @Post('fapshi')
   @HttpCode(200)
-  async receive(@Param('provider') provider: string, @Param('txId') txId: string, @Param('token') token: string, @Req() req: Request) {
-    await this.service.webhook(provider, txId.slice(0, 40), token.slice(0, 64), req.body)
+  async fapshi(@Headers('x-wh-secret') secret: string | undefined, @Req() req: Request) {
+    await this.service.fapshiWebhook(secret, req.body)
     return { ok: true }
-  }
-
-  /** MTN MoMo envoie ses rappels en PUT. */
-  @Put(':provider/:txId/:token')
-  @HttpCode(200)
-  async receivePut(@Param('provider') provider: string, @Param('txId') txId: string, @Param('token') token: string, @Req() req: Request) {
-    return this.receive(provider, txId, token, req)
   }
 }

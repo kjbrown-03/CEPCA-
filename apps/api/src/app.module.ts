@@ -10,7 +10,8 @@ import { StorageModule } from './storage/storage.service'
 import { AccessService } from './access/access.service'
 import { AuthController } from './auth/auth.controller'
 import { AuthGuard } from './auth/auth.guard'
-import { ConsoleSmsGateway, OtpService } from './auth/otp.service'
+import { OtpService } from './auth/otp.service'
+import { MailService } from './mail/mail.service'
 import { TokensService } from './auth/tokens.service'
 import { MemberContextService } from './member/member-context.service'
 import { FeedController, MemberActionsController } from './member/feed.controller'
@@ -18,8 +19,24 @@ import { DirectoryController, MeController } from './member/me.controller'
 import { FilesController } from './storage/files.controller'
 import { ContributionsService } from './payments/contributions.service'
 import { ContributionsController, RecurringController, WebhooksController } from './payments/contributions.controller'
-import { MtnMomoProvider, OrangeMoneyProvider, SandboxProvider } from './payments/providers'
+import { FapshiProvider, SandboxProvider } from './payments/providers'
 import { ContactController } from './public/contact.controller'
+import { PortalController } from './public/portal.controller'
+import { AdminScope, StaffGuard } from './admin/admin-common'
+import { AudienceService, PushService } from './admin/audience.service'
+import { ReportsService } from './admin/reports.service'
+import { AdminCampaignsController, CampaignsService } from './admin/campaigns.controller'
+import { AdminEventsController } from './admin/events.controller'
+import { AdminFinanceController } from './admin/finance.controller'
+import { AdminMediaController } from './admin/media.controller'
+import { AdminProjectsController } from './admin/projects.controller'
+import { AdminPublicationsController } from './admin/publications.controller'
+import { AdminRolesController } from './admin/roles.controller'
+import { AdminConfessionsController, AdminStructuresController } from './admin/structures.controller'
+import { AdminUsersController } from './admin/users.controller'
+import { AdminDashboardController } from './admin/dashboard.controller'
+import { AdminReportsController } from './admin/reports.controller'
+import { AdminSettingsController } from './admin/settings.controller'
 
 @Module({
   imports: [
@@ -42,17 +59,37 @@ import { ContactController } from './public/contact.controller'
     RecurringController,
     WebhooksController,
     ContactController,
+    PortalController,
+    // Back-office
+    AdminRolesController,
+    AdminDashboardController,
+    AdminStructuresController,
+    AdminConfessionsController,
+    AdminUsersController,
+    AdminPublicationsController,
+    AdminEventsController,
+    AdminMediaController,
+    AdminCampaignsController,
+    AdminProjectsController,
+    AdminFinanceController,
+    AdminReportsController,
+    AdminSettingsController,
   ],
   providers: [
     AccessService,
     TokensService,
     OtpService,
-    ConsoleSmsGateway,
+    MailService,
     MemberContextService,
     SandboxProvider,
-    MtnMomoProvider,
-    OrangeMoneyProvider,
+    FapshiProvider,
     ContributionsService,
+    StaffGuard,
+    AdminScope,
+    PushService,
+    AudienceService,
+    CampaignsService,
+    ReportsService,
     // Ordre : limiteur avant authentification, pour qu'une rafale coûte le moins possible
     { provide: APP_GUARD, useClass: ThrottlerGuard },
     { provide: APP_GUARD, useClass: AuthGuard },

@@ -15,6 +15,8 @@ export interface ReceiptData {
   providerRef: string | null
   confirmedAt: Date
   refunded: boolean
+  /** Mention propre à la confession (paramètres du back-office) */
+  note?: string
 }
 
 // Les polices standard du PDF sont en WinAnsi : l'espace fine insécable des milliers n'y existe pas.
@@ -62,6 +64,7 @@ export function renderReceipt(d: ReceiptData): Promise<Buffer> {
       y = Math.max(doc.y, y + 12) + 10
     }
 
+    if (d.note) doc.font('Helvetica-Oblique').fontSize(8.5).fillColor('#1c2a21').text(ascii(d.note), 40, doc.page.height - 112, { width: w, align: 'center' })
     doc.font('Helvetica').fontSize(8).fillColor(muted).text(
       'Ce reçu atteste un paiement confirmé par l’opérateur de Mobile Money. Il ne constitue pas une pièce comptable de la structure bénéficiaire.',
       40,

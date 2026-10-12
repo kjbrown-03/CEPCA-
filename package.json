@@ -6,6 +6,9 @@
     "packages/*"
   ],
   "scripts": {
+    "setup": "npm run build -w @cepca/tokens -w @cepca/shared && npm run prisma:generate -w @cepca/api && npm run prisma:deploy -w @cepca/api",
+    "dev": "npm run dev:api",
+    "seed": "npm run db:seed",
     "dev:db": "docker compose -f deploy/compose.dev.yml up -d",
     "dev:api": "npm run start:dev -w @cepca/api",
     "dev:web": "npm run dev -w @cepca/web",
@@ -22,5 +25,9 @@
     "@prisma/client@6.19.3": true,
     "@prisma/engines@6.19.3": true,
     "prisma@6.19.3": true
+  },
+  "overrides": {
+    "react": "19.2.3",
+    "react-dom": "19.2.3"
   }
 }

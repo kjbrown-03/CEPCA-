@@ -1,4 +1,5 @@
 import { NestFactory } from '@nestjs/core'
+import type { LogLevel } from '@nestjs/common'
 import type { NestExpressApplication } from '@nestjs/platform-express'
 import cookieParser from 'cookie-parser'
 import helmet from 'helmet'
@@ -21,6 +22,7 @@ export function configureApp(app: NestExpressApplication): NestExpressApplicatio
 }
 
 export async function createApp(): Promise<NestExpressApplication> {
-  const app = await NestFactory.create<NestExpressApplication>(AppModule, { logger: ['log', 'warn', 'error'], bodyParser: false })
+  const logger: LogLevel[] = env.NODE_ENV === 'production' ? ['warn', 'error'] : ['log', 'warn', 'error']
+  const app = await NestFactory.create<NestExpressApplication>(AppModule, { logger, bodyParser: false })
   return configureApp(app)
 }

@@ -199,21 +199,21 @@ async function main() {
   const hash = await bcrypt.hash(DEMO_PASSWORD, 12)
   const users: Record<string, string> = {}
   type Seat = { role: string; at: string; title?: string }
-  const PEOPLE: Array<{ key: string; name: string; phone: string; member?: [string, 'ACTIVE' | 'PENDING']; seats?: Seat[]; diaspora?: boolean; email?: string }> = [
-    { key: 'ngo', name: 'Samuel Ngo', phone: '+237699000001', seats: [{ role: 'cepca_admin', at: 'cepca', title: 'Pasteur, administrateur CEPCA' }] },
-    { key: 'ekwalla', name: 'Joseph Ekwalla', phone: '+237699001122', seats: [{ role: 'conf_admin', at: 'eec', title: 'Rév., administrateur EEC' }] },
-    { key: 'din', name: 'Alain Din', phone: '+237699314802', seats: [{ role: 'synod_lead', at: 'lit', title: 'Président du synode' }] },
-    { key: 'mbappe', name: 'François Mbappe', phone: '+237677901266', seats: [{ role: 'consistory_lead', at: 'dc', title: 'Responsable consistoire' }] },
+  const PEOPLE: Array<{ key: string; name: string; phone: string; email: string; member?: [string, 'ACTIVE' | 'PENDING']; seats?: Seat[]; diaspora?: boolean }> = [
+    { key: 'ngo', name: 'Samuel Ngo', phone: '+237699000001', email: 'samuel.ngo@example.org', seats: [{ role: 'cepca_admin', at: 'cepca', title: 'Pasteur, administrateur CEPCA' }] },
+    { key: 'ekwalla', name: 'Joseph Ekwalla', phone: '+237699001122', email: 'joseph.ekwalla@example.org', seats: [{ role: 'conf_admin', at: 'eec', title: 'Rév., administrateur EEC' }] },
+    { key: 'din', name: 'Alain Din', phone: '+237699314802', email: 'alain.din@example.org', seats: [{ role: 'synod_lead', at: 'lit', title: 'Président du synode' }] },
+    { key: 'mbappe', name: 'François Mbappe', phone: '+237677901266', email: 'francois.mbappe@example.org', seats: [{ role: 'consistory_lead', at: 'dc', title: 'Responsable consistoire' }] },
     { key: 'elise', name: 'Élise Moukoko', phone: '+237677123442', email: 'elise.moukoko@example.org', member: ['dei', 'ACTIVE'], seats: [{ role: 'pastor', at: 'dei', title: 'Pasteur' }] },
-    { key: 'grace', name: 'Grâce Ndjock', phone: '+237699451021', member: ['dei', 'ACTIVE'], seats: [{ role: 'finance', at: 'dei', title: 'Trésorière' }] },
-    { key: 'sandrine', name: 'Sandrine Njanga', phone: '+237655873209', member: ['dei', 'ACTIVE'], seats: [{ role: 'communication', at: 'dei' }] },
-    { key: 'joel', name: 'Joël Mbida', phone: '+237694582037', member: ['bon', 'ACTIVE'], seats: [{ role: 'youth', at: 'dei' }] },
-    { key: 'luc', name: 'Luc Njoh', phone: '+237670228134', member: ['bep', 'ACTIVE'], seats: [{ role: 'pastor', at: 'bep', title: 'Pasteur' }, { role: 'project', at: 'dei', title: 'Responsable projet' }] },
-    { key: 'thomas', name: 'Thomas Ekambi', phone: '+237691045570', member: ['bon', 'ACTIVE'], seats: [{ role: 'chapel_lead', at: 'bon', title: 'Ancien' }] },
-    { key: 'rose', name: 'Rose Mbella', phone: '+237678661345', member: ['ndo', 'ACTIVE'], seats: [{ role: 'chapel_lead', at: 'ndo', title: 'Ancien' }] },
-    { key: 'paul', name: 'Paul Ndoumbe', phone: '+33612457890', member: ['dei', 'ACTIVE'], diaspora: true },
-    { key: 'marie', name: 'Marie-Claire Essomba', phone: '+237650772118', member: ['bon', 'PENDING'] },
-    { key: 'kingue', name: 'Famille Kingue', phone: '+237677540981', member: ['nbl', 'PENDING'] },
+    { key: 'grace', name: 'Grâce Ndjock', phone: '+237699451021', email: 'grace.ndjock@example.org', member: ['dei', 'ACTIVE'], seats: [{ role: 'finance', at: 'dei', title: 'Trésorière' }] },
+    { key: 'sandrine', name: 'Sandrine Njanga', phone: '+237655873209', email: 'sandrine.njanga@example.org', member: ['dei', 'ACTIVE'], seats: [{ role: 'communication', at: 'dei' }] },
+    { key: 'joel', name: 'Joël Mbida', phone: '+237694582037', email: 'joel.mbida@example.org', member: ['bon', 'ACTIVE'], seats: [{ role: 'youth', at: 'dei' }] },
+    { key: 'luc', name: 'Luc Njoh', phone: '+237670228134', email: 'luc.njoh@example.org', member: ['bep', 'ACTIVE'], seats: [{ role: 'pastor', at: 'bep', title: 'Pasteur' }, { role: 'project', at: 'dei', title: 'Responsable projet' }] },
+    { key: 'thomas', name: 'Thomas Ekambi', phone: '+237691045570', email: 'thomas.ekambi@example.org', member: ['bon', 'ACTIVE'], seats: [{ role: 'chapel_lead', at: 'bon', title: 'Ancien' }] },
+    { key: 'rose', name: 'Rose Mbella', phone: '+237678661345', email: 'rose.mbella@example.org', member: ['ndo', 'ACTIVE'], seats: [{ role: 'chapel_lead', at: 'ndo', title: 'Ancien' }] },
+    { key: 'paul', name: 'Paul Ndoumbe', phone: '+33612457890', email: 'paul.ndoumbe@example.org', member: ['dei', 'ACTIVE'], diaspora: true },
+    { key: 'marie', name: 'Marie-Claire Essomba', phone: '+237650772118', email: 'marie.claire.essomba@example.org', member: ['bon', 'PENDING'] },
+    { key: 'kingue', name: 'Famille Kingue', phone: '+237677540981', email: 'famille.kingue@example.org', member: ['nbl', 'PENDING'] },
   ]
   for (const u of PEOPLE) {
     const created = await prisma.user.create({
@@ -241,7 +241,7 @@ async function main() {
     }
   }
   // Rattachement de l'EPC pour l'administrateur de cette confession
-  const abessolo = await prisma.user.create({ data: { phone: '+237677312210', fullName: 'Martin Abessolo', passwordHash: hash } })
+  const abessolo = await prisma.user.create({ data: { phone: '+237677312210', email: 'martin.abessolo@example.org', fullName: 'Martin Abessolo', passwordHash: hash } })
   await prisma.roleAssignment.create({ data: { userId: abessolo.id, roleId: role.conf_admin, structureId: conf.EPC.structureId, title: 'Rév., administrateur EPC' } })
 
   // ── Groupes de la paroisse ──
@@ -448,8 +448,7 @@ async function main() {
   })
 
   console.log('Jeu de démonstration chargé.')
-  console.log(`  Fidèle (app)      : +237 677 12 34 42 (Élise Moukoko) — code SMS affiché dans le terminal de l'API`)
-  console.log(`  Back-office       : même numéro, mot de passe ${DEMO_PASSWORD} (tous les comptes responsables)`)
+  console.log('  Comptes de démonstration créés. Les identifiants ne sont pas affichés dans les journaux.')
   console.log(`  Paiements         : bac à sable — un montant terminé par 13 échoue, par 14 expire`)
 }
 

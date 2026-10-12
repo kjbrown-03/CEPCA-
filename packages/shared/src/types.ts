@@ -163,7 +163,7 @@ export interface ContributionDto {
   amount: number
   fee: number
   totalCharged: number
-  channel: 'MTN_MOMO' | 'ORANGE_MONEY' | 'CARD' | 'BANK' | 'CASH' | 'SANDBOX'
+  channel: 'MTN_MOMO' | 'ORANGE_MONEY' | 'CARD' | 'BANK' | 'CASH' | 'SANDBOX' | 'FAPSHI'
   channelLabel: string
   status: 'PENDING' | 'SUCCEEDED' | 'FAILED' | 'CANCELLED' | 'REFUNDED'
   statusLabel: string
@@ -211,6 +211,7 @@ export const CHANNEL_LABEL: Record<string, string> = {
   BANK: 'Virement',
   CASH: 'Espèces',
   SANDBOX: 'Bac à sable',
+  FAPSHI: 'Fapshi',
 }
 
 export const CONTRIBUTION_STATUS_LABEL: Record<string, string> = {

@@ -60,6 +60,13 @@ export function maskPhone(e164: string): string {
   return `+${d.slice(0, 3)} ${d.slice(3, 4)}•• •• ${d.slice(-4, -2)} ${d.slice(-2)}`
 }
 
+/** Masque une adresse pour l'affichage et le journal : el•••@example.org */
+export function maskEmail(email: string): string {
+  const at = email.lastIndexOf('@')
+  if (at < 1) return '•••'
+  return `${email.slice(0, Math.min(2, at))}•••${email.slice(at)}`
+}
+
 /** +237677123442 → « +237 6 77 12 34 42 » */
 export function prettyPhone(e164: string): string {
   const m = /^\+(237|33|1)(\d+)$/.exec(e164)
@@ -68,4 +75,15 @@ export function prettyPhone(e164: string): string {
   if (cc === '237' && rest.length === 9) return `+237 ${rest[0]} ${rest.slice(1, 3)} ${rest.slice(3, 5)} ${rest.slice(5, 7)} ${rest.slice(7)}`
   if (cc === '33' && rest.length === 9) return `+33 ${rest[0]} ${rest.slice(1, 3)} ${rest.slice(3, 5)} ${rest.slice(5, 7)} ${rest.slice(7)}`
   return `+${cc} ${rest}`
+}
+
+const HONORIFICS = ['Pasteur', 'Pasteure', 'Rév.', 'Révérend', 'Ancien', 'Ancienne', 'Rt Rev.', 'Rev.', 'Diacre', 'Évangéliste']
+
+/**
+ * « Pasteur Élise Moukoko » : le titre d'un mandat n'est repris devant le nom que s'il s'agit d'un titre
+ * d'adresse (« Rév., administrateur EEC » → « Rév. Joseph Ekwalla » ; « Trésorière » → « Grâce Ndjock »).
+ */
+export function displayName(fullName: string, title?: string | null): string {
+  const h = title?.split(',')[0].trim()
+  return h && HONORIFICS.includes(h) ? `${h} ${fullName}` : fullName
 }

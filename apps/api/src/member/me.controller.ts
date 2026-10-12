@@ -57,10 +57,6 @@ export class MeController {
 
   @Patch('me')
   async update(@CurrentUser() p: Principal, @Body(new ZodPipe(updateProfileSchema)) body: z.infer<typeof updateProfileSchema>) {
-    if (body.email) {
-      const taken = await this.prisma.user.findFirst({ where: { email: body.email, NOT: { id: p.userId } }, select: { id: true } })
-      if (taken) throw new AppError(409, 'EMAIL_TAKEN', 'Cette adresse e-mail est déjà utilisée par un autre compte.')
-    }
     await this.prisma.user.update({ where: { id: p.userId }, data: body })
     return this.me(p)
   }

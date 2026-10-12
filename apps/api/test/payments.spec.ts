@@ -115,13 +115,48 @@ describe('Contributions et paiements (bac à sable)', () => {
     expect(lookup.status).toBe(404)
   })
 
-  it('un rappel opérateur sans le bon jeton est refusé', async () => {
-    const r = await give({ amount: 2500 })
-    const tx = await ctx.prisma.paymentTransaction.findFirstOrThrow({ where: { contributionId: r.body.contribution.id } })
-    const bad = await request(ctx.server).post(`/api/payments/webhooks/sandbox/${tx.id}/${'x'.repeat(32)}`).send({ status: 'SUCCESSFUL' })
-    expect(bad.status).toBe(404)
-    const c = await ctx.prisma.contribution.findUniqueOrThrow({ where: { id: r.body.contribution.id } })
-    expect(c.status).toBe('PENDING')
+  describe('webhook Fapshi', () => {
+    const SECRET = 'test-webhook-secret-0123456789' // .env.test
+    let fetchSpy: jest.SpyInstance
+
+    /** Transaction Fapshi en attente, posée directement en base (pas d'appel réseau en test). */
+    async function pendingFapshi(transId: string) {
+      const r = await give({ amount: 2500 })
+      const id = r.body.contribution.id
+      const tx = await ctx.prisma.paymentTransaction.findFirstOrThrow({ where: { contributionId: id } })
+      await ctx.prisma.paymentTransaction.update({ where: { id: tx.id }, data: { provider: 'FAPSHI', providerRef: transId } })
+      return id
+    }
+
+    beforeEach(() => {
+      // Fapshi répond « SUCCESSFUL » avec 3 % de commission, comme le bac à sable réel
+      fetchSpy = jest.spyOn(globalThis, 'fetch').mockResolvedValue(new Response(JSON.stringify({ status: 'SUCCESSFUL', revenue: 2462 }), { status: 200 }))
+    })
+    afterEach(() => fetchSpy.mockRestore())
+
+    it('refuse un webhook sans le bon secret, sans rien confirmer', async () => {
+      const id = await pendingFapshi('FAPbad' + idemKey().slice(0, 6))
+      const bad = await request(ctx.server).post('/api/payments/webhooks/fapshi').set('x-wh-secret', 'mauvais').send({ transId: 'x', status: 'SUCCESSFUL' })
+      expect(bad.status).toBe(401)
+      const none = await request(ctx.server).post('/api/payments/webhooks/fapshi').send({ transId: 'x', status: 'SUCCESSFUL' })
+      expect(none.status).toBe(401)
+      expect((await ctx.prisma.contribution.findUniqueOrThrow({ where: { id } })).status).toBe('PENDING')
+    })
+
+    it('un webhook authentifié relit le statut chez Fapshi et enregistre le net réellement versé', async () => {
+      const transId = 'FAPok' + idemKey().slice(0, 6)
+      const id = await pendingFapshi(transId)
+      // Le corps annonce un échec : seul compte le statut relu chez Fapshi
+      const r = await request(ctx.server).post('/api/payments/webhooks/fapshi').set('x-wh-secret', SECRET).send({ transId, status: 'FAILED' })
+      expect(r.status).toBe(200)
+      expect(String(fetchSpy.mock.calls[0][0])).toContain(`/payment-status/${transId}`)
+      const c = await ctx.prisma.contribution.findUniqueOrThrow({ where: { id } })
+      expect(c.status).toBe('SUCCEEDED')
+      expect(c.net).toBe(2462)
+      // Le même événement renvoyé n'est traité qu'une fois
+      await request(ctx.server).post('/api/payments/webhooks/fapshi').set('x-wh-secret', SECRET).send({ transId, status: 'FAILED' })
+      expect(fetchSpy).toHaveBeenCalledTimes(1)
+    })
   })
 
   it('l’historique ne totalise que les paiements réussis', async () => {

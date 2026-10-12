@@ -1,5 +1,6 @@
 import { Global, Injectable, Logger, Module, OnModuleInit } from '@nestjs/common'
-import { CreateBucketCommand, GetObjectCommand, HeadBucketCommand, HeadObjectCommand, PutObjectCommand, S3Client } from '@aws-sdk/client-s3'
+import { CreateBucketCommand, DeleteObjectCommand, GetObjectCommand, HeadBucketCommand, HeadObjectCommand, PutObjectCommand, S3Client } from '@aws-sdk/client-s3'
+import { createReadStream } from 'node:fs'
 import type { Readable } from 'node:stream'
 import { env } from '../config/env'
 
@@ -33,6 +34,15 @@ export class StorageService implements OnModuleInit {
 
   async put(key: string, body: Buffer, contentType: string) {
     await this.s3.send(new PutObjectCommand({ Bucket: env.S3_BUCKET, Key: key, Body: body, ContentType: contentType }))
+  }
+
+  /** Dépôt d'un gros fichier (audio, vidéo) depuis le disque, sans le charger en mémoire. */
+  async putFile(key: string, path: string, size: number, contentType: string) {
+    await this.s3.send(new PutObjectCommand({ Bucket: env.S3_BUCKET, Key: key, Body: createReadStream(path), ContentLength: size, ContentType: contentType }))
+  }
+
+  async remove(key: string) {
+    await this.s3.send(new DeleteObjectCommand({ Bucket: env.S3_BUCKET, Key: key }))
   }
 
   async head(key: string) {

@@ -30,18 +30,22 @@ const schema = z.object({
   S3_BUCKET: z.string().default('cepca-media'),
   S3_ACCESS_KEY: z.string().default(''),
   S3_SECRET_KEY: z.string().default(''),
-  PAYMENT_MODE: z.enum(['SANDBOX', 'LIVE']).default('SANDBOX'),
+  // simulator : paiements simulés en local, sans réseau. fapshi : MTN MoMo et Orange Money via Fapshi.
+  PAYMENT_PROVIDER: z.enum(['simulator', 'fapshi']).default('simulator'),
   SANDBOX_CONFIRM_DELAY_MS: z.coerce.number().int().default(2500),
-  MTN_MOMO_BASE_URL: z.string().default('https://sandbox.momodeveloper.mtn.com'),
-  MTN_MOMO_SUBSCRIPTION_KEY: z.string().default(''),
-  MTN_MOMO_API_USER: z.string().default(''),
-  MTN_MOMO_API_KEY: z.string().default(''),
-  MTN_MOMO_TARGET_ENV: z.string().default('sandbox'),
-  ORANGE_MONEY_BASE_URL: z.string().default(''),
-  ORANGE_MONEY_CLIENT_ID: z.string().default(''),
-  ORANGE_MONEY_CLIENT_SECRET: z.string().default(''),
-  ORANGE_MONEY_MERCHANT_KEY: z.string().default(''),
-  SMS_MODE: z.enum(['console', 'gateway']).default('console'),
+  FAPSHI_BASE_URL: z.string().default('https://sandbox.fapshi.com'),
+  FAPSHI_API_USER: z.string().default(''),
+  FAPSHI_API_KEY: z.string().default(''),
+  FAPSHI_WEBHOOK_SECRET: z.string().default(''),
+  // console : e-mails affichés dans le terminal ; smtp : envoi réel par nodemailer
+  MAIL_MODE: z.enum(['console', 'smtp']).default('console'),
+  SMTP_HOST: z.string().default(''),
+  SMTP_PORT: z.coerce.number().int().default(587),
+  SMTP_USER: z.string().default(''),
+  SMTP_PASS: z.string().default(''),
+  MAIL_FROM: z.string().default('CEPCA <no-reply@cepca.org>'),
+  // 1 : notifications push envoyées par Expo Push ; sinon affichées dans le terminal
+  EXPO_PUSH: z.enum(['0', '1']).default('0'),
 })
 
 export type Env = z.infer<typeof schema> & { trustProxy: boolean | string }
@@ -59,11 +63,22 @@ function load(): Env {
     if (e.JWT_ACCESS_SECRET.length < 32 || /change-me/.test(e.JWT_ACCESS_SECRET)) weak.push('JWT_ACCESS_SECRET')
     if (e.OTP_PEPPER.length < 32 || /change-me/.test(e.OTP_PEPPER)) weak.push('OTP_PEPPER')
     if (e.JWT_ACCESS_SECRET === e.OTP_PEPPER) weak.push('JWT_ACCESS_SECRET = OTP_PEPPER')
-    if (e.PAYMENT_MODE === 'SANDBOX') weak.push('PAYMENT_MODE=SANDBOX en production')
+    if (e.PAYMENT_PROVIDER !== 'fapshi') weak.push('PAYMENT_PROVIDER=simulator en production')
+    if (/sandbox/.test(e.FAPSHI_BASE_URL) || /^FAK_TEST/.test(e.FAPSHI_API_KEY)) weak.push('Fapshi en bac à sable')
+    if (e.FAPSHI_WEBHOOK_SECRET.length < 16) weak.push('FAPSHI_WEBHOOK_SECRET')
+    if (e.MAIL_MODE !== 'smtp') weak.push('MAIL_MODE=console en production (aucun e-mail ne partirait)')
     if (weak.length) {
       console.error('Refus de démarrer en production — secrets absents, faibles ou mode bac à sable :', weak.join(', '))
       process.exit(1)
     }
+  }
+  if (e.PAYMENT_PROVIDER === 'fapshi' && (!e.FAPSHI_API_USER || !e.FAPSHI_API_KEY)) {
+    console.error('PAYMENT_PROVIDER=fapshi : FAPSHI_API_USER et FAPSHI_API_KEY sont obligatoires.')
+    process.exit(1)
+  }
+  if (e.MAIL_MODE === 'smtp' && !e.SMTP_HOST) {
+    console.error('MAIL_MODE=smtp : SMTP_HOST est obligatoire.')
+    process.exit(1)
   }
   // false en dev (IP de la socket), 'loopback' en production derrière nginx. Jamais une constante en dur.
   const trustProxy = e.TRUST_PROXY === 'false' ? false : e.TRUST_PROXY === 'true' ? true : e.TRUST_PROXY

@@ -1,5 +1,5 @@
 import request from 'supertest'
-import { bootApp, bearer, buildWorld, newPhone } from './helpers'
+import { bootApp, bearer, buildWorld, newEmail, newPhone } from './helpers'
 
 describe('Authentification', () => {
   let ctx: Awaited<ReturnType<typeof bootApp>>
@@ -8,49 +8,76 @@ describe('Authentification', () => {
   })
   afterAll(() => ctx.app.close())
 
-  it('inscription par code SMS : le compte est créé à la première vérification', async () => {
+  it('inscription par code e-mail : le compte est créé à la première vérification, avec nom et téléphone', async () => {
+    const email = newEmail('inscription')
     const phone = newPhone()
-    const a = await request(ctx.server).post('/api/auth/otp/request').send({ phone, purpose: 'SIGNUP', fullName: 'Nouvelle Fidèle' })
+    const a = await request(ctx.server).post('/api/auth/otp/request').send({ email, purpose: 'SIGNUP' })
     expect(a.status).toBe(200)
-    expect(a.body.sentTo).not.toContain(phone.slice(-6, -2)) // numéro masqué
-    const code = ctx.sms.codes.get(phone)!
+    expect(a.body.sentTo).not.toContain(email.split('@')[0]) // adresse masquée
+    const code = ctx.mail.codes.get(email)!
     expect(code).toMatch(/^\d{4}$/)
-    const v = await request(ctx.server).post('/api/auth/otp/verify').send({ phone, code, fullName: 'Nouvelle Fidèle' })
+    // Sans téléphone : refusé avant de consommer un essai
+    const noPhone = await request(ctx.server).post('/api/auth/otp/verify').send({ email, code, fullName: 'Nouvelle Fidèle' })
+    expect(noPhone.body.code).toBe('PHONE_REQUIRED')
+    const v = await request(ctx.server).post('/api/auth/otp/verify').send({ email, code, fullName: 'Nouvelle Fidèle', phone })
     expect(v.status).toBe(200)
     expect(v.body.created).toBe(true)
     const me = await request(ctx.server).get('/api/me').set({ Authorization: `Bearer ${v.body.accessToken}` })
     expect(me.body.fullName).toBe('Nouvelle Fidèle')
+    expect(me.body.phone).toBe(phone)
     expect(me.body.membership).toBeNull()
   })
 
+  it('un numéro déjà pris par un autre compte est refusé à l’inscription', async () => {
+    const w = await buildWorld(ctx.prisma)
+    const email = newEmail('doublon')
+    await request(ctx.server).post('/api/auth/otp/request').send({ email, purpose: 'SIGNUP' })
+    const r = await request(ctx.server).post('/api/auth/otp/verify').send({ email, code: ctx.mail.codes.get(email), fullName: 'Doublon', phone: w.member.phone })
+    expect(r.status).toBe(409)
+    expect(r.body.code).toBe('PHONE_TAKEN')
+  })
+
   it('un code faux décompte les essais, puis bloque', async () => {
+    const email = newEmail()
     const phone = newPhone()
-    await request(ctx.server).post('/api/auth/otp/request').send({ phone, purpose: 'SIGNUP' })
-    const good = ctx.sms.codes.get(phone)!
+    await request(ctx.server).post('/api/auth/otp/request').send({ email, purpose: 'SIGNUP' })
+    const good = ctx.mail.codes.get(email)!
     const wrong = good === '0000' ? '1111' : '0000'
-    const first = await request(ctx.server).post('/api/auth/otp/verify').send({ phone, code: wrong, fullName: 'X Y' })
+    const first = await request(ctx.server).post('/api/auth/otp/verify').send({ email, code: wrong, fullName: 'X Y', phone })
     expect(first.body.code).toBe('OTP_INVALID')
     expect(first.body.message).toContain('4 essais')
-    for (let i = 0; i < 4; i++) await request(ctx.server).post('/api/auth/otp/verify').send({ phone, code: wrong, fullName: 'X Y' })
-    const locked = await request(ctx.server).post('/api/auth/otp/verify').send({ phone, code: good, fullName: 'X Y' })
+    for (let i = 0; i < 4; i++) await request(ctx.server).post('/api/auth/otp/verify').send({ email, code: wrong, fullName: 'X Y', phone })
+    const locked = await request(ctx.server).post('/api/auth/otp/verify').send({ email, code: good, fullName: 'X Y', phone })
     expect(locked.body.code).toBe('OTP_LOCKED')
   })
 
   it('un code ne sert qu’une fois', async () => {
-    const phone = newPhone()
-    await request(ctx.server).post('/api/auth/otp/request').send({ phone, purpose: 'SIGNUP' })
-    const code = ctx.sms.codes.get(phone)!
+    const email = newEmail()
+    await request(ctx.server).post('/api/auth/otp/request').send({ email, purpose: 'SIGNUP' })
+    const code = ctx.mail.codes.get(email)!
+    const w = await buildWorld(ctx.prisma)
+    // Compte existant : connexion simple, deux vérifications simultanées
+    await ctx.prisma.user.update({ where: { id: w.member.id }, data: { email } })
     const [a, b] = await Promise.all([
-      request(ctx.server).post('/api/auth/otp/verify').send({ phone, code, fullName: 'A B' }),
-      request(ctx.server).post('/api/auth/otp/verify').send({ phone, code, fullName: 'A B' }),
+      request(ctx.server).post('/api/auth/otp/verify').send({ email, code }),
+      request(ctx.server).post('/api/auth/otp/verify').send({ email, code }),
     ])
     expect([a.status, b.status].sort()).toEqual([200, 400])
   })
 
-  it('connexion sur un numéro inconnu : invitation à créer un compte', async () => {
-    const r = await request(ctx.server).post('/api/auth/otp/request').send({ phone: newPhone(), purpose: 'LOGIN' })
+  it('connexion sur une adresse inconnue : invitation à créer un compte', async () => {
+    const r = await request(ctx.server).post('/api/auth/otp/request').send({ email: newEmail('inconnu'), purpose: 'LOGIN' })
     expect(r.status).toBe(404)
     expect(r.body.code).toBe('NO_ACCOUNT')
+  })
+
+  it('connexion d’un fidèle existant par e-mail', async () => {
+    const w = await buildWorld(ctx.prisma)
+    const email = w.member.email!
+    await request(ctx.server).post('/api/auth/otp/request').send({ email, purpose: 'LOGIN' }).expect(200)
+    const v = await request(ctx.server).post('/api/auth/otp/verify').send({ email, code: ctx.mail.codes.get(email) })
+    expect(v.status).toBe(200)
+    expect(v.body.created).toBe(false)
   })
 
   it('un compte suspendu perd l’accès immédiatement, sans attendre l’expiration du jeton', async () => {
