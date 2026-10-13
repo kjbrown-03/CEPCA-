@@ -38,6 +38,7 @@ import { AdminUsersController } from './admin/users.controller'
 import { AdminDashboardController } from './admin/dashboard.controller'
 import { AdminReportsController } from './admin/reports.controller'
 import { AdminSettingsController } from './admin/settings.controller'
+import { AdminImportsController } from './admin/imports.controller'
 
 @Module({
   imports: [
@@ -76,6 +77,7 @@ import { AdminSettingsController } from './admin/settings.controller'
     AdminFinanceController,
     AdminReportsController,
     AdminSettingsController,
+    AdminImportsController,
   ],
   providers: [
     AccessService,

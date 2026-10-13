@@ -7,13 +7,18 @@ import { AppError, NotFound } from '../common/http'
 import { PrismaService } from '../prisma/prisma.service'
 import type { AuditEntry } from '../audit/audit.service'
 
-/** Le back-office est réservé aux comptes qui ont au moins une affectation en cours. */
+/**
+ * Le back-office et les espaces responsables sont réservés aux comptes qui ont au moins une affectation en cours,
+ * connectés par la double authentification (mot de passe + code e-mail, §42). Une session ouverte par le seul
+ * code du fidèle ne suffit pas, même pour un responsable.
+ */
 @Injectable()
 export class StaffGuard implements CanActivate {
   canActivate(ctx: ExecutionContext): boolean {
     const p = ctx.switchToHttp().getRequest<Request>().principal
     if (!p) throw new AppError(401, 'UNAUTHENTICATED', 'Connectez-vous pour continuer.')
     if (p.assignments.length === 0) throw new AppError(403, 'NOT_STAFF', 'Cet espace est réservé aux responsables.')
+    if (!p.mfa) throw new AppError(403, 'MFA_REQUIRED', 'Confirmez votre identité (mot de passe et code reçu par e-mail) pour ouvrir l’espace responsable.')
     return true
   }
 }

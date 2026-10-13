@@ -13,14 +13,16 @@ const sha256 = (s: string) => createHash('sha256').update(s).digest('hex')
 export interface AccessPayload {
   sub: string
   typ: 'access'
+  /** Double authentification faite (mot de passe + code e-mail) : requise pour les fonctions des responsables */
+  mfa?: boolean
 }
 
 @Injectable()
 export class TokensService {
   constructor(private readonly prisma: PrismaService) {}
 
-  signAccess(userId: string): string {
-    return jwt.sign({ sub: userId, typ: 'access' } satisfies AccessPayload, env.JWT_ACCESS_SECRET, {
+  signAccess(userId: string, mfa = false): string {
+    return jwt.sign({ sub: userId, typ: 'access', ...(mfa ? { mfa: true } : {}) } satisfies AccessPayload, env.JWT_ACCESS_SECRET, {
       algorithm: 'HS256',
       expiresIn: ACCESS_TTL_SEC,
       issuer: 'cepca-api',
@@ -37,19 +39,22 @@ export class TokensService {
     }
   }
 
-  async issue(userId: string, meta: { ip?: string | null; userAgent?: string | null }, family?: string) {
+  /** `mfa` : session ouverte par la double authentification ; elle le reste à chaque rotation. */
+  async issue(userId: string, meta: { ip?: string | null; userAgent?: string | null }, opts: { family?: string; mfa?: boolean } = {}) {
     const raw = randomBytes(32).toString('base64url')
+    const mfa = opts.mfa === true
     await this.prisma.refreshToken.create({
       data: {
         userId,
         tokenHash: sha256(raw),
-        family: family ?? randomBytes(12).toString('hex'),
+        family: opts.family ?? randomBytes(12).toString('hex'),
+        mfa,
         expiresAt: new Date(Date.now() + REFRESH_TTL_MS),
         ip: meta.ip ?? null,
         userAgent: meta.userAgent?.slice(0, 200) ?? null,
       },
     })
-    return { accessToken: this.signAccess(userId), refreshToken: raw, expiresIn: ACCESS_TTL_SEC }
+    return { accessToken: this.signAccess(userId, mfa), refreshToken: raw, expiresIn: ACCESS_TTL_SEC }
   }
 
   /**
@@ -67,7 +72,7 @@ export class TokensService {
     if (found.expiresAt < new Date() || found.user.status !== 'ACTIVE') throw invalid
     const res = await this.prisma.refreshToken.updateMany({ where: { id: found.id, revokedAt: null }, data: { revokedAt: new Date() } })
     if (res.count !== 1) throw invalid // rotation concurrente
-    return { userId: found.userId, tokens: await this.issue(found.userId, meta, found.family) }
+    return { userId: found.userId, tokens: await this.issue(found.userId, meta, { family: found.family, mfa: found.mfa }) }
   }
 
   async revoke(raw: string) {

@@ -7,6 +7,8 @@ const config: NextConfig = {
   reactStrictMode: true,
   poweredByHeader: false,
   transpilePackages: ['@cepca/shared', '@cepca/tokens'],
+  // Développement seulement : tester la PWA sur un téléphone via un tunnel Cloudflare (HTTPS obligatoire)
+  allowedDevOrigins: ['*.trycloudflare.com'],
   async rewrites() {
     return [{ source: '/api/:path*', destination: `${API_URL}/api/:path*` }]
   },

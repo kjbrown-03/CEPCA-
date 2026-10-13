@@ -25,6 +25,8 @@ export interface Principal {
   phone: string
   email: string | null
   assignments: Assignment[]
+  /** Session ouverte par la double authentification (posé par le garde d'authentification) */
+  mfa: boolean
   /** Rattachement en cours (actif ou en attente) */
   membership: null | { status: string; structureId: string; path: string; confessionId: string }
 }
@@ -81,6 +83,7 @@ export class AccessService {
       phone: user.phone,
       email: user.email,
       membership: m ? { status: m.status, structureId: m.structureId, path: m.structure.path, confessionId: m.confessionId } : null,
+      mfa: false,
       assignments: user.roleAssignments
         .filter((a) => a.structure.status !== 'SUSPENDED')
         .map((a) => ({

@@ -39,6 +39,9 @@ export const adminLoginSchema = z.strictObject({
   roleId: z.string().min(10).max(40),
   structureId: z.string().min(10).max(40),
 })
+/** Application : un responsable déjà connecté confirme son mot de passe pour ouvrir son espace. */
+export const staffPasswordSchema = z.strictObject({ password: z.string().min(8).max(200) })
+
 export const adminVerifySchema = z.strictObject({
   challengeId: z.string().min(10).max(40),
   code: z.string().regex(/^\d{6}$/, 'Le code compte 6 chiffres'),

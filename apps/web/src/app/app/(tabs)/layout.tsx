@@ -9,7 +9,7 @@ import { useMe } from '../_lib/queries'
 import { ErrorState, Loading, Screen } from '../_components/ui'
 
 const TABS: Array<{ href: string; label: string; icon: Icon; match: (p: string) => boolean }> = [
-  { href: '/app', label: 'Accueil', icon: House, match: (p) => p === '/app' || /^\/app\/(notifications|documents|projets|predications)/.test(p) },
+  { href: '/app', label: 'Accueil', icon: House, match: (p) => p === '/app' || /^\/app\/(notifications|documents|projets|predications|espace)/.test(p) },
   { href: '/app/actualites', label: 'Actualités', icon: Newspaper, match: (p) => p.startsWith('/app/actualites') },
   { href: '/app/contribuer', label: 'Contribuer', icon: HandHeart, match: (p) => p.startsWith('/app/contribuer') },
   { href: '/app/agenda', label: 'Agenda', icon: CalendarBlank, match: (p) => p.startsWith('/app/agenda') },

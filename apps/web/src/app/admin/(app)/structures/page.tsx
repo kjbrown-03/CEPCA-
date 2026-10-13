@@ -3,7 +3,7 @@
 import { Suspense, useEffect, useMemo, useState } from 'react'
 import { useSearchParams } from 'next/navigation'
 import { useQuery } from '@tanstack/react-query'
-import { CaretDown, CaretRight, CaretRight as Chevron, DotOutline, PencilSimple, Plus, Trash } from '@phosphor-icons/react'
+import { CaretDown, CaretRight, CaretRight as Chevron, DotOutline, FileArrowUp, PencilSimple, Plus, Trash } from '@phosphor-icons/react'
 import { fmtInt, type StructureNodeDto } from '@cepca/shared'
 import { api } from '@/lib/api'
 import { useAct } from '@/lib/hooks'
@@ -11,6 +11,7 @@ import { useSeatSubtree, useSession } from '@/lib/session'
 import type { StructureDetail } from '@/lib/types'
 import { ErrorBox, Field, Loading, PageHead, Pill, Skeleton } from '@/components/ui'
 import { depthIcon } from '../../nav'
+import { ImportStructuresPanel } from './import-panel'
 
 const STATUS: Record<string, string> = { ACTIVE: 'Actif', CONFIGURATION: 'Configuration', VACANT: 'À pourvoir', SUSPENDED: 'Suspendu' }
 const PH: Record<string, string> = { Chapelle: 'Ex. Chapelle de Makepe', Paroisse: 'Ex. Paroisse de Logbaba', Consistoire: 'Ex. Consistoire de Douala-Est', Synode: 'Ex. Synode du Nord' }
@@ -29,6 +30,7 @@ function Structures() {
   const { nodes, isPending, isError, error, refetch } = useSeatSubtree()
   const [open, setOpen] = useState<Set<string>>(new Set())
   const [selId, setSelId] = useState<string | null>(null)
+  const [importing, setImporting] = useState(false)
   const [panel, setPanel] = useState<'none' | 'add' | 'edit' | 'confession'>(params.get('nouveau') === 'confession' ? 'confession' : params.get('ajout') ? 'add' : 'none')
 
   // Ouverture initiale : la racine du mandat et le niveau suivant
@@ -57,6 +59,7 @@ function Structures() {
   const atRoot = sel?.depth === 0
   const canAdd = !!sel && can('STRUCTURES', 'write') && !!sel.childLevel
   const canConfession = atRoot && can('STRUCTURES', 'validate')
+  const canImport = can('STRUCTURES', 'write')
   const select = (id: string) => {
     setSelId(id)
     setPanel('none')
@@ -65,6 +68,12 @@ function Structures() {
   return (
     <>
       <PageHead eyebrow={`${seat.roleLabel} · ${seat.structure.level}`} title="Structures" note="Créez et organisez les structures de votre périmètre. Chaque niveau hérite de son parent.">
+        {canImport ? (
+          <button type="button" className="btn-ghost" onClick={() => setImporting((on) => !on)}>
+            <FileArrowUp size={16} />
+            Importer des structures
+          </button>
+        ) : null}
         {canConfession ? (
           <button type="button" className="btn" onClick={() => setPanel('confession')}>
             <Plus size={16} weight="bold" />
@@ -78,6 +87,7 @@ function Structures() {
         ) : null}
       </PageHead>
 
+      {importing && canImport ? <ImportStructuresPanel onClose={() => setImporting(false)} /> : null}
       {isError ? <ErrorBox error={error} onRetry={() => refetch()} /> : null}
       <div className="split">
         <section className="card tight main" style={{ gap: 2 }}>

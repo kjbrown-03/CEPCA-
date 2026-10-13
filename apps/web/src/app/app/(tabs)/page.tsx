@@ -6,6 +6,7 @@ import { agendaParts, countdown, dayMonth, doualaParis, fmtMillions, fmtPct, ini
 import { useHome, useMe } from '../_lib/queries'
 import { useNow } from '../_lib/device'
 import { InstallBanner } from '../_components/install'
+import { StaffEntry } from '../_components/staff-entry'
 import { ErrorState, ListRow, Loading, Overline, Photo, Progress, Screen, Txt, color } from '../_components/ui'
 
 export default function Home() {
@@ -42,6 +43,8 @@ export default function Home() {
           ) : null}
         </Link>
       </header>
+
+      {me.data?.roles.length ? <StaffEntry roles={me.data.roles} /> : null}
 
       <InstallBanner />
 

@@ -10,18 +10,20 @@ import {
   maskEmail,
   passwordResetRequestSchema,
   passwordResetSchema,
+  staffPasswordSchema,
   requestOtpSchema,
   verifyOtpSchema,
   type RequestOtpInput,
   type VerifyOtpInput,
 } from '@cepca/shared'
-import { AppError, Public, ZodPipe } from '../common/http'
+import { AppError, OptionalAuth, Public, ZodPipe } from '../common/http'
 import { PrismaService } from '../prisma/prisma.service'
 import { AuditService } from '../audit/audit.service'
 import { env } from '../config/env'
 import { OtpService } from './otp.service'
 import { TokensService } from './tokens.service'
-import { ACCESS_COOKIE, REFRESH_COOKIE } from './auth.guard'
+import { ACCESS_COOKIE, MaybeUser, REFRESH_COOKIE } from './auth.guard'
+import type { Principal } from '../access/access.service'
 
 const AUTH_LIMIT = { default: { limit: 20, ttl: 10 * 60 * 1000 } }
 const refreshSchema = z.strictObject({ refreshToken: z.string().min(20).max(200).optional() })
@@ -172,9 +174,53 @@ export class AuthController {
       throw e
     }
     if (!user || user.status !== 'ACTIVE') throw new AppError(403, 'ACCOUNT_DISABLED', 'Ce compte est suspendu.')
-    const tokens = await this.tokens.issue(user.id, this.meta(req))
+    const tokens = await this.tokens.issue(user.id, this.meta(req), { mfa: true })
     await this.prisma.user.update({ where: { id: user.id }, data: { lastLoginAt: new Date() } })
     await this.audit.record({ actorId: user.id, actorLabel: user.fullName, category: 'CONNEXION', action: 'Connexion au back-office', ip: req.ip })
+    this.setCookies(res, tokens)
+    return { ok: true }
+  }
+
+  /**
+   * Application des fidèles : un responsable déjà connecté (code e-mail) ouvre son espace responsable.
+   * Double authentification comme au back-office (§42) : mot de passe, puis code à 6 chiffres par e-mail.
+   */
+  @Post('staff/request')
+  @HttpCode(200)
+  @OptionalAuth()
+  async staffRequest(@MaybeUser() p: Principal | null, @Body(new ZodPipe(staffPasswordSchema)) body: z.infer<typeof staffPasswordSchema>, @Req() req: Request) {
+    if (!p) throw new AppError(401, 'UNAUTHENTICATED', 'Connectez-vous pour continuer.')
+    if (p.assignments.length === 0) throw new AppError(403, 'NOT_STAFF', 'Cet espace est réservé aux responsables.')
+    const user = await this.prisma.user.findUniqueOrThrow({ where: { id: p.userId }, select: { id: true, email: true, fullName: true, passwordHash: true } })
+    if (!user.passwordHash) throw new AppError(403, 'NO_PASSWORD', 'Définissez d’abord votre mot de passe de responsable.')
+    if (!user.email) throw new AppError(403, 'NO_EMAIL', 'Votre compte n’a pas d’adresse e-mail pour recevoir le code.')
+    if (!(await bcrypt.compare(body.password, user.passwordHash))) {
+      await this.audit.record({ actorId: user.id, actorLabel: user.fullName, category: 'CONNEXION', action: 'Échec d’ouverture de l’espace responsable (mot de passe)', ip: req.ip, success: false })
+      throw new AppError(401, 'BAD_CREDENTIALS', 'Mot de passe incorrect.')
+    }
+    return this.otp.issue(user.email, 'ADMIN_2FA', req.ip ?? null, 6)
+  }
+
+  /** Code juste : la session courante est remplacée par une session « double authentification » (cookies httpOnly). */
+  @Post('staff/verify')
+  @HttpCode(200)
+  @OptionalAuth()
+  async staffVerify(@MaybeUser() p: Principal | null, @Body(new ZodPipe(adminVerifySchema)) body: z.infer<typeof adminVerifySchema>, @Req() req: Request, @Res({ passthrough: true }) res: Response) {
+    if (!p) throw new AppError(401, 'UNAUTHENTICATED', 'Connectez-vous pour continuer.')
+    const user = await this.prisma.user.findUniqueOrThrow({ where: { id: p.userId }, select: { id: true, email: true, fullName: true } })
+    const ch = await this.prisma.otpChallenge.findUnique({ where: { id: body.challengeId } })
+    // Le code doit avoir été envoyé à ce compte-ci
+    if (!ch || ch.purpose !== 'ADMIN_2FA' || !user.email || ch.email !== user.email) throw new AppError(400, 'OTP_EXPIRED', 'Ce code a expiré. Demandez-en un nouveau.')
+    try {
+      await this.otp.verify(ch.email, body.code, ['ADMIN_2FA'], ch.id)
+    } catch (e) {
+      await this.audit.record({ actorId: user.id, actorLabel: user.fullName, category: 'CONNEXION', action: 'Échec d’ouverture de l’espace responsable (code e-mail)', ip: req.ip, success: false })
+      throw e
+    }
+    const old = (req as Request & { cookies?: Record<string, string> }).cookies?.[REFRESH_COOKIE]
+    if (old) await this.tokens.revoke(old)
+    const tokens = await this.tokens.issue(user.id, this.meta(req), { mfa: true })
+    await this.audit.record({ actorId: user.id, actorLabel: user.fullName, category: 'CONNEXION', action: 'Ouverture de l’espace responsable (application)', ip: req.ip })
     this.setCookies(res, tokens)
     return { ok: true }
   }

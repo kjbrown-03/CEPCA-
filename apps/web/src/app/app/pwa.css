@@ -179,6 +179,20 @@
   color: var(--c-text);
   outline: none;
 }
+.pwa-textarea {
+  width: 100%;
+  min-height: 140px;
+  border-radius: 14px;
+  border: 0;
+  background: var(--c-surface);
+  box-shadow: inset 0 0 0 1px var(--c-border-green-2);
+  padding: 14px 16px;
+  font: 500 16px/1.55 var(--font-sans), sans-serif;
+  color: var(--c-text);
+  outline: none;
+  resize: vertical;
+}
+.pwa-textarea:focus,
 .pwa-input:focus {
   box-shadow: inset 0 0 0 1.5px var(--c-primary);
 }
@@ -369,7 +383,9 @@
   transform: translateX(-50%);
   bottom: calc(max(18px, env(safe-area-inset-bottom, 0px)) + 96px);
   z-index: 50;
-  max-width: calc(100% - 48px);
+  /* Largeur du texte, sans être bornée par le décalage de centrage (left: 50 %) */
+  width: max-content;
+  max-width: min(472px, calc(100vw - 48px));
   display: flex;
   align-items: center;
   gap: 10px;

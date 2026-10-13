@@ -15,7 +15,7 @@ const seat = (path: string, perms: Record<string, Partial<{ read: boolean; write
   perms: new Map(Object.entries(perms).map(([m, p]) => [m as never, { read: false, write: false, validate: false, aggregateOnly: false, ...p }])),
 })
 
-const principal = (...assignments: Assignment[]): Principal => ({ userId: 'u', fullName: 'U', phone: '+237', email: null, assignments, membership: null })
+const principal = (...assignments: Assignment[]): Principal => ({ userId: 'u', fullName: 'U', phone: '+237', email: null, mfa: true, assignments, membership: null })
 
 describe('Périmètre des droits', () => {
   const access = new AccessService(null as never)

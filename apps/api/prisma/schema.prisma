@@ -255,6 +255,8 @@ model RefreshToken {
   userId     String
   tokenHash  String    @unique
   family     String // rotation : la réutilisation d'un jeton déjà tourné révoque toute la famille
+  // Double authentification faite (mot de passe + code e-mail) : ouvre le back-office et les espaces responsables
+  mfa        Boolean   @default(false)
   expiresAt  DateTime
   revokedAt  DateTime?
   createdAt  DateTime  @default(now())

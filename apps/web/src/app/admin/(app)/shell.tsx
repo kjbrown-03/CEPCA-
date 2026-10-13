@@ -37,6 +37,11 @@ export function AdminShell({ children }: { children: ReactNode }) {
   const me = useMe()
   if (me.isPending) return <ShellSkeleton />
   if (me.isError) {
+    // Session ouverte dans l'application des fidèles (code e-mail seul) : le back-office exige la double authentification
+    if (me.error instanceof ApiError && me.error.code === 'MFA_REQUIRED') {
+      if (typeof window !== 'undefined') window.location.replace(`/admin/connexion?next=${encodeURIComponent(window.location.pathname + window.location.search)}`)
+      return <ShellSkeleton />
+    }
     const notStaff = me.error instanceof ApiError && me.error.code === 'NOT_STAFF'
     return (
       <div style={{ minHeight: '100vh', display: 'grid', placeItems: 'center', padding: 24 }}>

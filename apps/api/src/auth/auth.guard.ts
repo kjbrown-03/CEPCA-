@@ -48,7 +48,7 @@ export class AuthGuard implements CanActivate {
       if (optional) return true
       throw new AppError(403, 'ACCOUNT_DISABLED', 'Ce compte est suspendu. Contactez votre paroisse.')
     }
-    req.principal = principal
+    req.principal = { ...principal, mfa: payload.mfa === true }
     return true
   }
 }

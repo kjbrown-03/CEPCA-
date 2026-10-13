@@ -79,8 +79,9 @@ export async function buildWorld(prisma: PrismaService) {
   return { confession: c, confNode, parish, other, chapel, member, outsider, project }
 }
 
-export function bearer(tokens: TokensService, userId: string) {
-  return { Authorization: `Bearer ${tokens.signAccess(userId)}` }
+/** Session de test : double authentification faite (les fonctions des responsables l'exigent). */
+export function bearer(tokens: TokensService, userId: string, mfa = true) {
+  return { Authorization: `Bearer ${tokens.signAccess(userId, mfa)}` }
 }
 
 export const idemKey = () => randomBytes(12).toString('hex')
