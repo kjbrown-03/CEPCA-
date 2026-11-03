@@ -22,3 +22,6 @@ apps/mobile/ios/
 apps/mobile/android/
 *.tsbuildinfo
 .DS_Store
+
+# Fichiers temporaires d’Office (classeur ou document ouvert)
+~$*

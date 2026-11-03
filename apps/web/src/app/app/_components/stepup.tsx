@@ -71,7 +71,9 @@ export function StepUp({ roleLabel }: { roleLabel?: string }) {
               Étape 2 sur 2 : saisissez le code à 6 chiffres envoyé à <strong style={{ color: color.text }}>{ch.sentTo}</strong>.
             </>
           ) : (
-            <>Étape 1 sur 2 : votre mot de passe de responsable{roleLabel ? ` (${roleLabel})` : ''}. Un code vous sera ensuite envoyé par e-mail.</>
+            <>
+              Étape 1 sur 2 : le mot de passe de votre compte de responsable{roleLabel ? ` (${roleLabel})` : ''}, le même que pour le back-office. Un code vous sera ensuite envoyé par e-mail.
+            </>
           )}
         </Txt>
       </div>

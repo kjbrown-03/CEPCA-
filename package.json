@@ -6,6 +6,7 @@
     "packages/*"
   ],
   "scripts": {
+    "mail:test": "npm run mail:test -w @cepca/api --",
     "setup": "npm run build -w @cepca/tokens -w @cepca/shared && npm run prisma:generate -w @cepca/api && npm run prisma:deploy -w @cepca/api",
     "dev": "npm run dev:api",
     "seed": "npm run db:seed",
