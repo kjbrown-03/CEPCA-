@@ -14,6 +14,10 @@ Deux autres documents font autorité :
 `design_handoff_cepca/cahier-des-charges-CEPCA.txt` pour les règles,
 `design_handoff_cepca/designs/` pour l'interface.
 
+Les notes accumulees au fil des sessions sont dans **`docs/memoire-projet/`**.
+Elles ne sont pas chargees automatiquement, et l'essentiel de leur contenu est
+deja resume ici.
+
 ---
 
 ## Les trois applications
