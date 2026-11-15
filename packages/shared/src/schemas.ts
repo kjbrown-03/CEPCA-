@@ -65,6 +65,46 @@ export const updateProfileSchema = z.strictObject({
   timezone: z.enum(['Africa/Douala', 'Europe/Paris', 'America/Toronto', 'America/New_York']).optional(),
 })
 
+// ── « Je participe » (§27) ──
+// Listes fermées : le profil sert à rapprocher des besoins, une saisie libre ne se rapprocherait de rien.
+export const VOLUNTEER_SKILLS = [
+  ['chant', 'Chant'],
+  ['batiment', 'Bâtiment'],
+  ['sante', 'Santé'],
+  ['enseignement', 'Enseignement'],
+  ['photo', 'Photo/vidéo'],
+  ['comptabilite', 'Comptabilité'],
+  ['transport', 'Transport'],
+  ['cuisine', 'Cuisine'],
+] as const
+export type VolunteerSkill = (typeof VOLUNTEER_SKILLS)[number][0]
+export const WEEK_DAYS = [
+  ['lun', 'Lun'],
+  ['mar', 'Mar'],
+  ['mer', 'Mer'],
+  ['jeu', 'Jeu'],
+  ['ven', 'Ven'],
+  ['sam', 'Sam'],
+  ['dim', 'Dim'],
+] as const
+export type WeekDay = (typeof WEEK_DAYS)[number][0]
+
+const skillKeys = VOLUNTEER_SKILLS.map((s) => s[0]) as [VolunteerSkill, ...VolunteerSkill[]]
+const dayKeys = WEEK_DAYS.map((d) => d[0]) as [WeekDay, ...WeekDay[]]
+export const volunteerSchema = z.strictObject({
+  skills: z.array(z.enum(skillKeys)).max(skillKeys.length),
+  days: z.array(z.enum(dayKeys)).max(dayKeys.length),
+})
+export type VolunteerInput = z.infer<typeof volunteerSchema>
+
+/** Recherche globale de l'app : au moins 2 caractères, sinon tout correspond. */
+export const SEARCH_CATEGORIES = ['SERMON', 'STRUCTURE', 'PROJECT', 'EVENT', 'DOCUMENT'] as const
+export type SearchCategory = (typeof SEARCH_CATEGORIES)[number]
+export const searchSchema = z.strictObject({
+  q: z.string().trim().min(2, 'Saisissez au moins 2 caractères').max(80),
+  cat: z.enum(SEARCH_CATEGORIES).optional(),
+})
+
 export const MIN_CONTRIBUTION = 100
 export const MAX_CONTRIBUTION = 10_000_000
 

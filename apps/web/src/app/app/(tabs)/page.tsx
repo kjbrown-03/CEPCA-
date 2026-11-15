@@ -1,7 +1,7 @@
 'use client'
 
 import Link from 'next/link'
-import { Bell, Buildings, FolderSimple, HandHeart, MicrophoneStage, Play, type Icon } from '@phosphor-icons/react'
+import { Bell, Buildings, MagnifyingGlass, FolderSimple, HandHeart, MicrophoneStage, Play, type Icon } from '@phosphor-icons/react'
 import { agendaParts, countdown, dayMonth, doualaParis, fmtMillions, fmtPct, initials, pct, type HomeDto } from '@cepca/shared'
 import { useHome, useMe } from '../_lib/queries'
 import { useNow } from '../_lib/device'
@@ -29,6 +29,9 @@ export default function Home() {
             {me.data?.membership?.structure.name ?? 'CEPCA'}
           </Txt>
         </div>
+        <Link href="/app/recherche" className="pwa-round" aria-label="Rechercher" style={{ width: 44, height: 44 }}>
+          <MagnifyingGlass size={20} aria-hidden />
+        </Link>
         <Link
           href="/app/notifications"
           className="pwa-round"

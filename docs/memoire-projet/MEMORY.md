@@ -14,4 +14,4 @@ demonstration qui y figure est celui du jeu d'essai, deja present dans
 
 ---
 
-- [Avancement CEPCA](cepca-build-progress.md) — livré : API, mobile MVP, apps/web (back-office + portail) ; prochaine étape : parcours 3 (compléments app fidèle)
+- [Avancement CEPCA](cepca-build-progress.md) — livré : API, mobile MVP, apps/web (back-office + portail) ; parcours 3 et 4 livrés (PWA) ; reste mise en ligne, suppression de compte, pages légales

@@ -246,8 +246,17 @@ async function main() {
 
   // ── Groupes de la paroisse ──
   const groups: Record<string, string> = {}
-  for (const [k, name, kind] of [['jeunesse', 'Jeunesse', 'youth'], ['chorale', 'Chorale', 'choir'], ['femmes', 'Femmes', 'women']] as const) {
-    groups[k] = (await prisma.group.create({ data: { structureId: nodes.dei.id, confessionId: eec.id, name, kind } })).id
+  // Maquette 3 (« Groupes ») : la description porte le rythme des rencontres, affiché sous le nom
+  const GROUPS = [
+    ['jeunesse', 'Jeunesse', 'youth', 'Vendredi 17:30 · salle paroissiale', true],
+    ['chorale', 'Chorale', 'choir', 'Répétition mercredi 18:00', true],
+    ['femmes', 'Femmes', 'women', 'Réunion le 1er samedi du mois', true],
+    ['hommes', 'Union des hommes', 'men', 'Le 2e dimanche après le culte', true],
+    // Les moniteurs sont désignés par le pasteur : pas de demande depuis l'app
+    ['ecole', 'École du dimanche', 'other', 'Moniteurs · dimanche 9:00', false],
+  ] as const
+  for (const [k, name, kind, description, openToJoin] of GROUPS) {
+    groups[k] = (await prisma.group.create({ data: { structureId: nodes.dei.id, confessionId: eec.id, name, kind, description, openToJoin } })).id
   }
   await prisma.groupMember.createMany({
     data: [
@@ -360,6 +369,23 @@ async function main() {
       durationSec: 120, status: 'PUBLISHED', publishedAt: dla('2026-10-02T06:00:00'), createdById: users.elise,
     },
   })
+  // « Lire et méditer » (maquette 3) : étude, messages pastoraux
+  const text = (d: { structureId: string; kind: 'ETUDE_BIBLIQUE' | 'MESSAGE_PASTORAL'; title: string; speaker: string; scriptureRef?: string; body: string; min: number; date: string; by: string }) =>
+    prisma.spiritualContent.create({
+      data: { confessionId: eec.id, structureId: d.structureId, kind: d.kind, mediaType: 'TEXT', title: d.title, speaker: d.speaker, scriptureRef: d.scriptureRef, body: d.body, durationSec: d.min * 60, status: 'PUBLISHED', publishedAt: dla(d.date), createdById: d.by },
+    })
+  await text({
+    structureId: nodes.dei.id, kind: 'MESSAGE_PASTORAL', title: '« Veillez et priez » : préparons ensemble la semaine de prière', speaker: 'Pasteur Élise Moukoko', scriptureRef: 'Matthieu 26, 41', min: 3, date: '2026-09-30T08:00:00', by: users.elise,
+    body: 'Chers frères et sœurs, du 5 au 9 octobre, nous nous retrouverons chaque soir à 18:30 au temple de Deïdo.\n\nChaque soirée sera conduite par un groupe de la paroisse. Venez avec vos sujets de prière : ils seront déposés au pied de la croix le vendredi.\n\nQue le Seigneur nous garde dans la persévérance.',
+  })
+  await text({
+    structureId: nodes.lit.id, kind: 'MESSAGE_PASTORAL', title: 'Message du Synode du Littoral', speaker: 'Rév. Alain Din', min: 4, date: '2026-09-02T08:00:00', by: users.sandrine,
+    body: 'À toutes les paroisses du Synode, en ce début d’année pastorale : merci pour votre fidélité.\n\nLe Synode accompagnera cette année les projets de construction et l’accueil des familles déplacées.',
+  })
+  await text({
+    structureId: nodes.dei.id, kind: 'ETUDE_BIBLIQUE', title: 'Étude biblique : l’Évangile de Marc (1/6)', speaker: 'Pasteur Élise Moukoko', scriptureRef: 'Marc 1, 1-20', min: 6, date: '2026-09-24T08:00:00', by: users.elise,
+    body: 'Commencement de l’Évangile de Jésus-Christ, Fils de Dieu.\n\nQuestions pour le groupe : que signifie « commencement » pour Marc ? Qui sont les premiers appelés, et que laissent-ils derrière eux ?',
+  })
 
   // ── Documents (maquette MVP, DO) ──
   const DOCS: Array<[string, string, string, 'PUBLIC' | 'MEMBERS', string]> = [
@@ -401,6 +427,12 @@ async function main() {
     { kind: 'SOCIAL', title: 'Soutien aux familles déplacées', description: 'Vivres, fournitures scolaires et loyers pour les familles accueillies par la paroisse.', goalAmount: 3e6, raisedAmount: 2_160_000, contributorCount: 205, endLabel: 'campagne permanente', imageKey: IMG.fam2, collectOpen: true, status: 'FUNDING' },
     [],
     [['2026-09-25', '48 familles aidées ce trimestre']],
+  )
+  await proj(
+    'CEPCA-CONF01-PAR015-PROJ0010',
+    { kind: 'SOCIAL', title: "Fournitures pour l'école de Bonamoussadi", description: 'Cahiers, stylos et sacs pour les 180 élèves de l’école primaire du quartier, distribués à la rentrée.', location: 'Bonamoussadi, Douala', goalAmount: 1e6, raisedAmount: 450_000, contributorCount: 61, endsAt: dla('2026-12-15T12:00:00'), imageKey: IMG.vl, collectOpen: true, status: 'FUNDING' },
+    [],
+    [],
   )
   await proj(
     'CEPCA-CONF01-PAR015-PROJ0006',
@@ -446,6 +478,12 @@ async function main() {
       { userId: users.elise, kind: 'LIVE', title: 'Le culte commence dans 1 h', body: 'Culte dominical · Temple de Deïdo', link: { screen: 'evt', id: culte.id }, createdAt: dla('2026-10-02T09:00:00') },
     ],
   })
+
+  // ── Engagement d'Élise (maquette 3, « Je participe » et « Mon engagement ») ──
+  await prisma.volunteerProfile.create({ data: { userId: users.elise, skills: ['chant', 'enseignement'], availability: { days: ['mer', 'sam', 'dim'] } } })
+  await prisma.projectVolunteer.create({ data: { projectId: bepanda.id, userId: users.elise } })
+  // Une demande d'adhésion en attente, pour la liste « à traiter » du pasteur
+  await prisma.groupMember.create({ data: { groupId: groups.hommes, userId: users.joel, status: 'PENDING' } })
 
   console.log('Jeu de démonstration chargé.')
   console.log('  Comptes de démonstration créés. Les identifiants ne sont pas affichés dans les journaux.')

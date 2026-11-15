@@ -55,6 +55,16 @@ npm run typecheck
 npm run mail:test   # vérifier l'envoi des courriels
 ```
 
+**Piège Prisma** : `prisma migrate dev` propose de supprimer les index par
+préfixe de chemin (`text_pattern_ops`) écrits à la main dans la migration
+init. Retirer ces `DROP INDEX` de toute nouvelle migration générée.
+
+**Réseau lent** : si Next.js n'arrive pas à télécharger les polices Google
+(erreur `@vercel/turbopack-next/internal/font/google/font`), lancer le web
+avec `npx next dev --webpack` depuis `apps/web` : webpack passe à une police
+de secours au lieu de bloquer. Le service worker de la PWA garde les fichiers
+`/_next/static` : vider le cache du navigateur pour voir une modification.
+
 **Docker Desktop doit tourner** avant `dev:db`, et il s'arrête souvent sur
 cette machine. Les tests de l'API utilisent une base `cepca_test` distincte,
 créée par `deploy/init-test-db.sql` ; leur `globalSetup` applique les
@@ -114,15 +124,28 @@ réelles.
   (`/`, `/actualites`, `/actualites/[id]`) en rendu serveur, thème sombre par
   cookie `cepca_theme`.
 - Application des fidèles en PWA sous `/app`, avec notifications Web Push.
-- Double authentification et parcours des rôles de responsables.
+- **Parcours 4** — espaces responsables dans la PWA (`/app/espace/[id]`),
+  avec double authentification (livré le 13 octobre 2026, avant le 3).
+- **Parcours 3** — compléments de l'app fidèle (maquette 3), livré le
+  15 novembre 2026 : onglet « Mon Église » (`/app/mon-eglise`, il remplace
+  « Actualités » dans la barre d'onglets), groupes avec validation par le
+  responsable (file « À traiter » du tableau de bord), « Je participe »,
+  « Lire et méditer », espace jeunes et actions sociales (« Je donne du
+  temps » = table `ProjectVolunteer`), « Mon engagement », recherche
+  (`/app/recherche`, sans tenir compte des accents grâce à `unaccent`).
+  API : `apps/api/src/member/engagement.controller.ts`,
+  `admin/groups.controller.ts` ; tests `test/engagement.spec.ts`.
 
 **Pas encore commencé :**
 
-- **Parcours 3** — compléments de l'app fidèle (maquette 3). C'est la
-  prochaine étape.
-- **Parcours 4** — espaces responsables mobiles (maquette 4).
+- Les six parcours de `docs/ARCHITECTURE.md` §12 sont livrés. Prochaines
+  étapes possibles, à décider avec l'utilisateur : mise en ligne (HTTPS),
+  suppression de compte dans l'app, pages légales.
 
 **Manques connus :**
+
+- Les données de démonstration sont datées de septembre et octobre 2026 :
+  passé cette période, l'agenda et l'espace jeunes s'affichent vides.
 
 - Pages **Mentions légales** et **Confidentialité** du portail : le contenu
   est à fournir par l'utilisateur, pas à inventer.

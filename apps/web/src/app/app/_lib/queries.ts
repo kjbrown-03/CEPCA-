@@ -2,17 +2,24 @@
 
 import { useInfiniteQuery, useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import type {
+  ChurchDto,
   ContributionDto,
   ContributionHistoryDto,
   ContributionTypeDto,
   DocumentDto,
+  EngagementDto,
   EventDto,
+  GroupDto,
   HomeDto,
   MeDto,
   NotificationDto,
   ProjectDto,
   PublicationDto,
+  SearchCategory,
+  SearchResultDto,
   SermonDto,
+  VolunteerDto,
+  VolunteerInput,
 } from '@cepca/shared'
 import { api } from '@/lib/api'
 
@@ -34,6 +41,13 @@ export const qk = {
   history: ['app', 'contributions'] as const,
   contribution: (id: string) => ['app', 'contribution', id] as const,
   registrations: ['app', 'registrations'] as const,
+  church: ['app', 'church'] as const,
+  groups: ['app', 'groups'] as const,
+  volunteer: ['app', 'volunteer'] as const,
+  volunteering: ['app', 'volunteering'] as const,
+  engagement: ['app', 'engagement'] as const,
+  readings: (kind: string) => ['app', 'readings', kind] as const,
+  search: (q: string, cat?: string) => ['app', 'search', q, cat ?? 'ALL'] as const,
 }
 
 const enc = encodeURIComponent
@@ -103,6 +117,59 @@ export function useMarkRead() {
       void qc.invalidateQueries({ queryKey: qk.notifications })
       void qc.invalidateQueries({ queryKey: qk.home })
       void qc.invalidateQueries({ queryKey: qk.me })
+    },
+  })
+}
+
+// ── Parcours 3 ──
+
+export const useChurch = () => useQuery({ queryKey: qk.church, queryFn: () => api.get<ChurchDto>('/me/church') })
+export const useGroups = () => useQuery({ queryKey: qk.groups, queryFn: () => api.get<GroupDto[]>('/groups') })
+export const useVolunteer = () => useQuery({ queryKey: qk.volunteer, queryFn: () => api.get<VolunteerDto>('/me/volunteer') })
+export const useVolunteering = () => useQuery({ queryKey: qk.volunteering, queryFn: () => api.get<string[]>('/me/volunteering') })
+export const useEngagement = () => useQuery({ queryKey: qk.engagement, queryFn: () => api.get<EngagementDto>('/me/engagement') })
+
+/** Textes et enregistrements d'un type (méditation, étude biblique, message pastoral). */
+export const useReadings = (kind: 'MEDITATION' | 'ETUDE_BIBLIQUE' | 'MESSAGE_PASTORAL') =>
+  useQuery({ queryKey: qk.readings(kind), queryFn: () => api.get<SermonDto[]>('/feed/sermons', { kind }) })
+
+/** Recherche : rien n'est demandé sous 2 caractères ; l'ancienne liste reste affichée pendant la frappe. */
+export const useSearch = (q: string, cat?: SearchCategory) =>
+  useQuery({
+    queryKey: qk.search(q, cat),
+    queryFn: () => api.get<SearchResultDto[]>('/feed/search', { q, cat }),
+    enabled: q.length >= 2,
+    placeholderData: (prev) => prev,
+    staleTime: 30_000,
+  })
+
+export function useToggleGroup(id: string) {
+  const qc = useQueryClient()
+  return useMutation({
+    mutationFn: (join: boolean) => (join ? api.post<{ myStatus: GroupDto['myStatus'] }>(`/groups/${enc(id)}/join`) : api.del<{ myStatus: null }>(`/groups/${enc(id)}/membership`)),
+    onSuccess: ({ myStatus }) => {
+      qc.setQueryData<GroupDto[]>(qk.groups, (xs) =>
+        xs?.map((g) => (g.id === id ? { ...g, myStatus, memberCount: g.memberCount + (g.myStatus === 'ACTIVE' && !myStatus ? -1 : 0) } : g)),
+      )
+    },
+  })
+}
+
+export function useSaveVolunteer() {
+  const qc = useQueryClient()
+  return useMutation({
+    mutationFn: (body: VolunteerInput) => api.put<VolunteerDto>('/me/volunteer', body),
+    onSuccess: (d) => qc.setQueryData(qk.volunteer, d),
+  })
+}
+
+export function useToggleVolunteering(projectId: string) {
+  const qc = useQueryClient()
+  return useMutation({
+    mutationFn: (on: boolean) => (on ? api.post<{ volunteer: boolean }>(`/projects/${enc(projectId)}/volunteer`) : api.del<{ volunteer: boolean }>(`/projects/${enc(projectId)}/volunteer`)),
+    onSuccess: ({ volunteer }) => {
+      qc.setQueryData<string[]>(qk.volunteering, (xs) => (volunteer ? [...new Set([...(xs ?? []), projectId])] : (xs ?? []).filter((x) => x !== projectId)))
+      void qc.invalidateQueries({ queryKey: qk.engagement })
     },
   })
 }

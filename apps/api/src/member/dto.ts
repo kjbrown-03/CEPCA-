@@ -83,6 +83,7 @@ export function toSermon(s: Prisma.SpiritualContentGetPayload<object>): SermonDt
     externalUrl: s.externalUrl,
     imageUrl: mediaUrl('img', s.imageKey),
     offlineAllowed: s.offlineAllowed,
+    body: s.body,
     publishedAt: (s.publishedAt ?? s.createdAt).toISOString(),
   }
 }
@@ -97,6 +98,7 @@ export function toProject(p: Prisma.ProjectGetPayload<{ include: typeof projectI
   return {
     id: p.id,
     code: p.code,
+    kind: p.kind,
     title: p.title,
     description: p.description,
     location: p.location,

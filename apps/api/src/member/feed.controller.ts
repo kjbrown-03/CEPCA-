@@ -9,6 +9,8 @@ import { MemberContextService, type MemberContext } from './member-context.servi
 import { eventInclude, projectInclude, publicationInclude, toEvent, toProject, toPublication, toSermon } from './dto'
 import { mediaUrl } from '../storage/storage.service'
 
+const SPIRITUAL_KINDS = new Set<string>(['PREDICATION', 'MEDITATION', 'ETUDE_BIBLIQUE', 'ENSEIGNEMENT', 'MESSAGE_PASTORAL', 'CONFERENCE'])
+
 const SCOPE_FILTER: Record<string, Prisma.StructureWhereInput> = {
   CEPCA: { levelType: { rank: 0 } },
   CONFESSION: { levelType: { rank: { gte: 1 }, isMembership: false } },
@@ -111,7 +113,8 @@ export class FeedController {
         structure: { path: { in: c.visiblePaths } },
         ...(c.status !== 'ACTIVE' ? { isPublic: true } : {}),
         ...(mediaType ? { mediaType } : {}),
-        ...(kind ? { kind: kind as Prisma.EnumSpiritualKindFilter['equals'] } : { kind: 'PREDICATION' }),
+        // Un type inconnu ne doit pas remonter en erreur 500 de Prisma : il ne correspond simplement à rien
+        kind: kind ? (SPIRITUAL_KINDS.has(kind) ? (kind as Prisma.EnumSpiritualKindFilter['equals']) : { in: [] }) : 'PREDICATION',
       },
       orderBy: { publishedAt: 'desc' },
       take: 50,

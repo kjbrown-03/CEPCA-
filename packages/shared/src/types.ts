@@ -116,6 +116,8 @@ export interface SermonDto {
   externalUrl: string | null
   imageUrl: string | null
   offlineAllowed: boolean
+  /** Texte des méditations et messages pastoraux ; null pour un enregistrement */
+  body: string | null
   publishedAt: string
 }
 
@@ -132,6 +134,8 @@ export interface DocumentDto {
 export interface ProjectDto {
   id: string
   code: string
+  /** SOCIAL : action sociale (espace jeunes et actions sociales) */
+  kind: 'PROJECT' | 'SOCIAL'
   title: string
   description: string
   location: string | null
@@ -232,4 +236,51 @@ export const PUBLICATION_KIND_LABEL: Record<string, string> = {
 export interface Paginated<T> {
   items: T[]
   nextCursor: string | null
+}
+
+// ── Parcours 3 : compléments de l'app des fidèles ──
+
+/** « Ma chapelle » : la structure de rattachement et ce qu'il faut pour s'y rendre. */
+export interface ChurchDto {
+  status: 'PENDING' | 'ACTIVE' | 'TO_VERIFY'
+  hierarchy: StructureRef[]
+  structure: StructureRef & { address: string | null; city: string | null; phone: string | null; serviceSchedule: string | null }
+  /** Responsables en mandat sur la structure : « Ancien Thomas Ekambi », « Responsable de la chapelle » */
+  leaders: Array<{ name: string; title: string }>
+}
+
+export interface GroupDto {
+  id: string
+  name: string
+  kind: string
+  description: string | null
+  structure: string
+  memberCount: number
+  openToJoin: boolean
+  /** null : pas membre ; PENDING : demande envoyée, le responsable valide */
+  myStatus: 'PENDING' | 'ACTIVE' | null
+}
+
+export interface VolunteerDto {
+  skills: string[]
+  days: string[]
+  updatedAt: string | null
+  /** Activités ouvertes aux inscriptions dans les 7 jours, un jour où le fidèle est disponible */
+  openActivities: number
+}
+
+export interface EngagementDto {
+  year: number
+  /** Dons réussis aux projets et actions sociales sur l'année, en FCFA */
+  givenThisYear: number
+  projects: Array<{ project: ProjectDto; given: number; volunteer: boolean }>
+}
+
+export interface SearchResultDto {
+  category: 'SERMON' | 'STRUCTURE' | 'PROJECT' | 'EVENT' | 'DOCUMENT'
+  id: string
+  title: string
+  meta: string
+  /** Écran de l'app à ouvrir ; null pour une structure (pas de fiche dédiée) */
+  href: string | null
 }

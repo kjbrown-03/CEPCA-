@@ -3,7 +3,7 @@
 import Link from 'next/link'
 import { useState } from 'react'
 import { useMutation, useQueryClient } from '@tanstack/react-query'
-import { ArrowCounterClockwise, Buildings, Check, DownloadSimple, MicrophoneStage, Newspaper, Plus, Receipt, UserPlus, Warning, X, type Icon } from '@phosphor-icons/react'
+import { ArrowCounterClockwise, Buildings, Check, DownloadSimple, MicrophoneStage, Newspaper, Plus, Receipt, UserPlus, UsersThree, Warning, X, type Icon } from '@phosphor-icons/react'
 import { MODULE_LABEL, type ModuleKey, type QueueItemDto } from '@cepca/shared'
 import { api, errorMessage } from '@/lib/api'
 import { useSession } from '@/lib/session'
@@ -13,6 +13,7 @@ import { useDashboard } from './shell'
 
 const KIND_ICON: Record<QueueItemDto['kind'], Icon> = {
   MEMBERSHIP: UserPlus,
+  GROUP: UsersThree,
   PUBLICATION: Newspaper,
   SERMON: MicrophoneStage,
   PROJECT: Buildings,
@@ -23,6 +24,7 @@ const KIND_ICON: Record<QueueItemDto['kind'], Icon> = {
 
 const OPEN_HREF: Record<QueueItemDto['kind'], (id: string) => string> = {
   MEMBERSHIP: () => '/admin/utilisateurs?filtre=PENDING',
+  GROUP: () => '/admin',
   PUBLICATION: (id) => `/admin/publications?id=${id}`,
   SERMON: (id) => `/admin/predications?id=${id}`,
   PROJECT: (id) => `/admin/projets?id=${id}`,
@@ -36,6 +38,9 @@ function decide(item: QueueItemDto, ok: boolean): Promise<unknown> {
   switch (item.kind) {
     case 'MEMBERSHIP':
       return api.post(`/admin/memberships/${item.id}/${ok ? 'approve' : 'reject'}`)
+    case 'GROUP':
+      // « groupId:userId » : une adhésion n'a pas d'identifiant propre
+      return api.post(`/admin/group-requests/${item.id.split(':').map(encodeURIComponent).join('/')}/${ok ? 'approve' : 'reject'}`)
     case 'REFUND':
       return api.post(`/admin/refunds/${item.id}/${ok ? 'validate' : 'reject'}`)
     case 'PUBLICATION':
@@ -51,6 +56,7 @@ function decide(item: QueueItemDto, ok: boolean): Promise<unknown> {
 
 const OK_TOAST: Partial<Record<QueueItemDto['kind'], string>> = {
   MEMBERSHIP: 'Inscription validée',
+  GROUP: 'Adhésion acceptée',
   REFUND: 'Remboursement validé',
   PUBLICATION: 'Publication en ligne',
   SERMON: 'Prédication publiée',

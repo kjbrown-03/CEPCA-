@@ -3,14 +3,15 @@
 import Link from 'next/link'
 import { usePathname } from 'next/navigation'
 import type { ReactNode } from 'react'
-import { CalendarBlank, HandHeart, House, Newspaper, User, type Icon } from '@phosphor-icons/react'
+import { CalendarBlank, Church, HandHeart, House, User, type Icon } from '@phosphor-icons/react'
 import { ApiError } from '@/lib/api'
 import { useMe } from '../_lib/queries'
 import { ErrorState, Loading, Screen } from '../_components/ui'
 
 const TABS: Array<{ href: string; label: string; icon: Icon; match: (p: string) => boolean }> = [
-  { href: '/app', label: 'Accueil', icon: House, match: (p) => p === '/app' || /^\/app\/(notifications|documents|projets|predications|espace)/.test(p) },
-  { href: '/app/actualites', label: 'Actualités', icon: Newspaper, match: (p) => p.startsWith('/app/actualites') },
+  { href: '/app', label: 'Accueil', icon: House, match: (p) => p === '/app' || /^\/app\/(notifications|documents|projets|predications|espace|recherche)/.test(p) },
+  // Maquette 3 : « Mon Église » prend la place d'« Actualités », qui reste à un geste (accueil « Tout voir », Mon Église)
+  { href: '/app/mon-eglise', label: 'Mon Église', icon: Church, match: (p) => p.startsWith('/app/mon-eglise') || p.startsWith('/app/actualites') },
   { href: '/app/contribuer', label: 'Contribuer', icon: HandHeart, match: (p) => p.startsWith('/app/contribuer') },
   { href: '/app/agenda', label: 'Agenda', icon: CalendarBlank, match: (p) => p.startsWith('/app/agenda') },
   { href: '/app/moi', label: 'Moi', icon: User, match: (p) => p.startsWith('/app/moi') },

@@ -364,7 +364,8 @@ export interface KpiDto {
 }
 
 export interface QueueItemDto {
-  kind: 'MEMBERSHIP' | 'PUBLICATION' | 'REFUND' | 'PAYMENT' | 'PROJECT' | 'CLOSING' | 'SERMON'
+  kind: 'MEMBERSHIP' | 'GROUP' | 'PUBLICATION' | 'REFUND' | 'PAYMENT' | 'PROJECT' | 'CLOSING' | 'SERMON'
+  /** GROUP : « groupId:userId » (une adhésion n'a pas d'identifiant propre) */
   id: string
   title: string
   meta: string

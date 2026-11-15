@@ -22,7 +22,37 @@ export default function SermonPage({ params }: { params: Promise<{ id: string }>
         {q.isPending ? <Loading /> : <ErrorState error={q.error} onRetry={() => q.refetch()} />}
       </Screen>
     )
-  return <Sermon s={q.data} />
+  return q.data.mediaType === 'TEXT' ? <Reading s={q.data} /> : <Sermon s={q.data} />
+}
+
+/** Méditations, études et messages pastoraux : un texte à lire, sans lecteur (maquette 3, « Lire et méditer »). */
+function Reading({ s }: { s: SermonDto }) {
+  const paragraphs = (s.body ?? s.summary ?? '').split(/\n\s*\n/).map((t) => t.trim()).filter(Boolean)
+  return (
+    <Screen gap={14}>
+      <BackHeader title={s.kind === 'MESSAGE_PASTORAL' ? 'Message pastoral' : s.kind === 'ETUDE_BIBLIQUE' ? 'Étude biblique' : 'Méditation'} fallback="/app/mon-eglise/mediter" />
+      <div>
+        {s.scriptureRef ? (
+          <Txt size={12} weight={700} color={color.primary}>
+            {s.scriptureRef}
+          </Txt>
+        ) : null}
+        <Txt as="h2" serif size={30} lh={1.1} style={{ marginTop: 4 }}>
+          {s.title}
+        </Txt>
+        <Txt size={13} color={color.textMuted} style={{ marginTop: 4 }}>
+          {[s.speaker, dayMonth(s.publishedAt)].filter(Boolean).join(' · ')}
+        </Txt>
+      </div>
+      <article style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
+        {paragraphs.map((t, i) => (
+          <Txt key={i} as="p" size={16} lh={1.65} style={{ margin: 0 }}>
+            {t}
+          </Txt>
+        ))}
+      </article>
+    </Screen>
+  )
 }
 
 /** Lecteur commun audio et vidéo : la balise média du navigateur, avec les commandes de la maquette. */

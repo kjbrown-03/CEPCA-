@@ -334,6 +334,14 @@ export class AdminDashboardController {
             for (const m of rows) q.push({ kind: 'MEMBERSHIP', id: m.id, title: `Inscription : ${m.user.fullName}`, meta: `${m.user.residence === 'DIASPORA' ? 'Diaspora' : m.structure.name} · ${dayFmt.format(m.requestedAt)}`, actions: ['approve', 'reject'] })
           }),
       )
+      // Demandes d'adhésion aux groupes envoyées depuis l'app (parcours 3)
+      tasks.push(
+        this.prisma.groupMember
+          .findMany({ where: { status: 'PENDING', group: { structure: under } }, select: { groupId: true, userId: true, joinedAt: true, group: { select: { name: true } }, user: { select: { fullName: true } } }, orderBy: { joinedAt: 'asc' }, take })
+          .then((rows) => {
+            for (const g of rows) q.push({ kind: 'GROUP', id: `${g.groupId}:${g.userId}`, title: `Groupe ${g.group.name} : ${g.user.fullName}`, meta: `Demande d'adhésion · ${dayFmt.format(g.joinedAt)}`, actions: ['approve', 'reject'] })
+          }),
+      )
     }
     if (has(a, 'NEWS', 'validate')) {
       tasks.push(
@@ -395,7 +403,7 @@ export class AdminDashboardController {
       )
     }
     await Promise.all(tasks)
-    const order: QueueItemDto['kind'][] = ['PAYMENT', 'REFUND', 'CLOSING', 'MEMBERSHIP', 'PUBLICATION', 'SERMON', 'PROJECT']
+    const order: QueueItemDto['kind'][] = ['PAYMENT', 'REFUND', 'CLOSING', 'MEMBERSHIP', 'GROUP', 'PUBLICATION', 'SERMON', 'PROJECT']
     return q.sort((x, y) => order.indexOf(x.kind) - order.indexOf(y.kind)).slice(0, QUEUE_MAX)
   }
 

@@ -19,8 +19,12 @@ export function notificationTarget(link: NotificationDto['link']): string | null
       return '/app/contribuer/historique'
     case 'docs':
       return '/app/documents'
+    // « me » : validation du rattachement (API, back-office) ; « prof » : nom de l'écran dans la maquette
     case 'prof':
+    case 'me':
       return '/app/moi'
+    case 'groups':
+      return '/app/mon-eglise/groupes'
     default:
       return null
   }

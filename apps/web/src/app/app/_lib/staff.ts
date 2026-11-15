@@ -59,7 +59,13 @@ export const BACK_OFFICE: QuickAction = { icon: Browsers, label: 'Ouvrir le back
 /** L'élément se règle-t-il en un geste depuis l'application ? (sans rien envoyer) */
 export function oneTap(item: QueueItemDto): boolean {
   if (item.kind === 'PUBLICATION') return item.actions.includes('approve')
-  return ['MEMBERSHIP', 'REFUND', 'SERMON', 'PROJECT', 'PAYMENT'].includes(item.kind)
+  return ['MEMBERSHIP', 'GROUP', 'REFUND', 'SERMON', 'PROJECT', 'PAYMENT'].includes(item.kind)
+}
+
+/** Une demande d'adhésion est désignée par « groupId:userId » dans la file. */
+export function groupRequestPath(id: string, ok: boolean): string {
+  const [groupId, userId] = id.split(':')
+  return `/admin/group-requests/${encodeURIComponent(groupId)}/${encodeURIComponent(userId)}/${ok ? 'approve' : 'reject'}`
 }
 
 /** Décision en un geste depuis la liste « à traiter » (mêmes routes que le tableau de bord du back-office). */
@@ -67,6 +73,8 @@ export function decide(item: QueueItemDto, ok: boolean): Promise<unknown> | null
   switch (item.kind) {
     case 'MEMBERSHIP':
       return api.post(`/admin/memberships/${encodeURIComponent(item.id)}/${ok ? 'approve' : 'reject'}`)
+    case 'GROUP':
+      return api.post(groupRequestPath(item.id, ok))
     case 'REFUND':
       return api.post(`/admin/refunds/${encodeURIComponent(item.id)}/${ok ? 'validate' : 'reject'}`)
     case 'PUBLICATION':
@@ -86,6 +94,7 @@ export function decide(item: QueueItemDto, ok: boolean): Promise<unknown> | null
 /** Libellés du bouton en un geste et du résultat, selon la nature de l'élément (maquette : Valider / Régler…). */
 export const CTA: Record<QueueItemDto['kind'], { cta: string; done: string }> = {
   MEMBERSHIP: { cta: 'Valider', done: 'Validé' },
+  GROUP: { cta: 'Accepter', done: 'Accepté' },
   PUBLICATION: { cta: 'Publier', done: 'Publié' },
   SERMON: { cta: 'Publier', done: 'Publiée' },
   PROJECT: { cta: 'Valider', done: 'Validé' },
@@ -97,6 +106,7 @@ export const CTA: Record<QueueItemDto['kind'], { cta: string; done: string }> = 
 /** Page du back-office qui traite un élément quand il ne se règle pas en un geste. */
 export const OPEN_HREF: Record<QueueItemDto['kind'], (id: string) => string> = {
   MEMBERSHIP: () => '/admin/utilisateurs?filtre=PENDING',
+  GROUP: () => '/admin',
   PUBLICATION: (id) => `/admin/publications?id=${id}`,
   SERMON: (id) => `/admin/predications?id=${id}`,
   PROJECT: (id) => `/admin/projets?id=${id}`,

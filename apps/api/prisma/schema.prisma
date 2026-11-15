@@ -149,6 +149,7 @@ model User {
   projectsLed        Project[]
   readPubs           PublicationRead[]
   skills             VolunteerProfile?
+  volunteering       ProjectVolunteer[]
 }
 
 enum MembershipStatus {
@@ -669,8 +670,23 @@ model Project {
   steps         ProjectStep[]
   updates       ProjectUpdate[]
   contributions Contribution[]
+  volunteers    ProjectVolunteer[]
 
   @@index([structureId, status])
+}
+
+// « Je donne du temps » (maquette 3) : un fidèle se propose comme bénévole sur un projet ou une action sociale.
+// Le retrait efface la ligne : seul l'engagement en cours compte, l'historique n'est pas demandé.
+model ProjectVolunteer {
+  projectId String
+  userId    String
+  createdAt DateTime @default(now())
+
+  project Project @relation(fields: [projectId], references: [id], onDelete: Cascade)
+  user    User    @relation(fields: [userId], references: [id])
+
+  @@id([projectId, userId])
+  @@index([userId])
 }
 
 model ProjectStep {

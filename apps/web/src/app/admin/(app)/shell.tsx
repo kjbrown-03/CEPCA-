@@ -16,6 +16,7 @@ import { NAV, navKeyFor, roleIcon } from '../nav'
 /** Pastilles du menu : ce qui attend dans la file « À valider », rangé par module. */
 const BADGE_OF: Record<QueueItemDto['kind'], string> = {
   MEMBERSHIP: 'users',
+  GROUP: 'users',
   PUBLICATION: 'news',
   SERMON: 'sermons',
   PROJECT: 'proj',

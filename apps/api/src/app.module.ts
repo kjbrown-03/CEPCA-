@@ -15,6 +15,7 @@ import { MailService } from './mail/mail.service'
 import { TokensService } from './auth/tokens.service'
 import { MemberContextService } from './member/member-context.service'
 import { FeedController, MemberActionsController } from './member/feed.controller'
+import { EngagementController, SearchController } from './member/engagement.controller'
 import { DirectoryController, MeController } from './member/me.controller'
 import { FilesController } from './storage/files.controller'
 import { ContributionsService } from './payments/contributions.service'
@@ -35,6 +36,7 @@ import { AdminPublicationsController } from './admin/publications.controller'
 import { AdminRolesController } from './admin/roles.controller'
 import { AdminConfessionsController, AdminStructuresController } from './admin/structures.controller'
 import { AdminUsersController } from './admin/users.controller'
+import { AdminGroupsController } from './admin/groups.controller'
 import { AdminDashboardController } from './admin/dashboard.controller'
 import { AdminReportsController } from './admin/reports.controller'
 import { AdminSettingsController } from './admin/settings.controller'
@@ -54,8 +56,10 @@ import { AdminImportsController } from './admin/imports.controller'
     AuthController,
     MeController,
     DirectoryController,
+    SearchController,
     FeedController,
     MemberActionsController,
+    EngagementController,
     FilesController,
     ContributionsController,
     RecurringController,
@@ -69,6 +73,7 @@ import { AdminImportsController } from './admin/imports.controller'
     AdminStructuresController,
     AdminConfessionsController,
     AdminUsersController,
+    AdminGroupsController,
     AdminPublicationsController,
     AdminEventsController,
     AdminMediaController,
