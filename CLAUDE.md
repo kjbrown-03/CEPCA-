@@ -136,11 +136,19 @@ réelles.
   API : `apps/api/src/member/engagement.controller.ts`,
   `admin/groups.controller.ts` ; tests `test/engagement.spec.ts`.
 
+**En cours — hébergement d'essai gratuit** (préparé le 21 novembre 2026) :
+Vercel (web) + Render (API) + Supabase (base et fichiers) + Brevo (courriels).
+Pas à pas : `docs/DEPLOIEMENT-ESSAI.md`. `DEPLOIEMENT=essai` autorise les
+paiements simulés en production et affiche un bandeau ; `MAIL_MODE=brevo`
+envoie par API HTTPS, car Render gratuit bloque le SMTP. Reste à faire par
+l'utilisateur : pousser `main`, créer les comptes, suivre le guide.
+
 **Pas encore commencé :**
 
 - Les six parcours de `docs/ARCHITECTURE.md` §12 sont livrés. Prochaines
-  étapes possibles, à décider avec l'utilisateur : mise en ligne (HTTPS),
-  suppression de compte dans l'app, pages légales.
+  étapes possibles, à décider avec l'utilisateur : mise en ligne réelle
+  (hébergeur payant, Fapshi live), suppression de compte dans l'app, pages
+  légales.
 
 **Manques connus :**
 
@@ -171,5 +179,6 @@ qui dépend du chemin de la machine.
 Un défaut corrigé mérite une phrase sur ce qu'il cassait.
 
 **Rien n'est déployé en production à ce jour.** Le dépôt distant est
-`github.com/kjbrown-03/CEPCA-`, et `deploy/` ne contient que la composition de
-développement.
+`github.com/kjbrown-03/CEPCA-`. `deploy/` ne contient que la composition de
+développement ; l'hébergement d'essai est décrit par `render.yaml` et
+`apps/web/vercel.json`.

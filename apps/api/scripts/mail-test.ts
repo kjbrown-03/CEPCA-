@@ -5,6 +5,7 @@
  */
 import nodemailer from 'nodemailer'
 import { env } from '../src/config/env'
+import { MailService } from '../src/mail/mail.service'
 
 async function main() {
   const to = process.argv[2]
@@ -12,10 +13,22 @@ async function main() {
     console.error('Indiquez l’adresse de destination : npm run mail:test -- vous@exemple.com')
     process.exit(1)
   }
-  if (env.MAIL_MODE !== 'smtp') {
+  if (env.MAIL_MODE === 'console') {
     console.error('MAIL_MODE=console dans apps/api/.env : les e-mails ne partent pas, ils s’affichent dans le terminal de l’API.')
     console.error('Renseignez MAIL_MODE=smtp, SMTP_HOST, SMTP_PORT, SMTP_USER, SMTP_PASS et MAIL_FROM, puis relancez cette commande.')
     process.exit(1)
+  }
+  if (env.MAIL_MODE === 'brevo') {
+    // Même chemin que l'API en ligne : une réussite ici vaut pour les codes de connexion.
+    try {
+      await new MailService().send({ to, subject: 'CEPCA · E-mail de test', text: 'Bonjour,\n\nSi vous lisez ce message, l’envoi des e-mails de CEPCA par Brevo fonctionne.\n\nL’équipe CEPCA' })
+      console.log(`E-mail envoyé à ${to} par Brevo (expéditeur ${env.MAIL_FROM}). Regardez aussi dans les courriers indésirables.`)
+    } catch (e) {
+      console.error(`Échec : ${(e as Error).message}`)
+      console.error('Vérifiez BREVO_API_KEY et que l’adresse de MAIL_FROM est un expéditeur validé dans Brevo (Senders).')
+      process.exit(1)
+    }
+    return
   }
   console.log(`Serveur : ${env.SMTP_HOST}:${env.SMTP_PORT} · compte : ${env.SMTP_USER || '(aucun)'} · expéditeur : ${env.MAIL_FROM}`)
   const transport = nodemailer.createTransport({

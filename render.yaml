@@ -1,0 +1,67 @@
+# Hébergement d'essai de l'API sur Render (offre gratuite). Le web est sur Vercel, la base et les fichiers sur Supabase.
+# Pas à pas complet : docs/DEPLOIEMENT-ESSAI.md
+services:
+  - type: web
+    name: cepca-api
+    runtime: node
+    plan: free
+    region: frankfurt
+    # --include=dev : NODE_ENV=production ferait sauter Nest CLI, TypeScript et Prisma, nécessaires au build.
+    # Seuls l'API et le code partagé sont installés : l'app Expo gelée alourdirait chaque build pour rien.
+    buildCommand: >-
+      npm ci --include=dev -w @cepca/api -w @cepca/shared &&
+      npm run build -w @cepca/shared &&
+      npm run prisma:generate -w @cepca/api &&
+      npm run build -w @cepca/api
+    # Les migrations passent au démarrage : la base Supabase n'est joignable qu'une fois le service lancé.
+    startCommand: npm run prisma:deploy -w @cepca/api && npm run start -w @cepca/api
+    healthCheckPath: /api/public/confessions
+    envVars:
+      - key: NODE_VERSION
+        value: "22"
+      - key: NODE_ENV
+        value: production
+      - key: DEPLOIEMENT
+        value: essai
+      - key: HOST
+        value: 0.0.0.0
+      # Render fournit PORT lui-même.
+      # Les requêtes arrivent par le relais Vercel puis le proxy de Render : sans cela, req.ip serait celle du proxy
+      # et la limite de débit compterait tous les fidèles comme une seule personne.
+      - key: TRUST_PROXY
+        value: "true"
+      - key: PAYMENT_PROVIDER
+        value: simulator
+      - key: MAIL_MODE
+        value: brevo
+      - key: JWT_ACCESS_SECRET
+        generateValue: true
+      - key: OTP_PEPPER
+        generateValue: true
+      # À renseigner dans le tableau de bord Render (sync: false = jamais écrit dans le dépôt)
+      - key: DATABASE_URL
+        sync: false
+      - key: CORS_ORIGIN
+        sync: false
+      - key: PUBLIC_URL
+        sync: false
+      - key: S3_ENDPOINT
+        sync: false
+      - key: S3_REGION
+        sync: false
+      - key: S3_BUCKET
+        value: cepca-media
+      - key: S3_ACCESS_KEY
+        sync: false
+      - key: S3_SECRET_KEY
+        sync: false
+      - key: BREVO_API_KEY
+        sync: false
+      - key: MAIL_FROM
+        sync: false
+      - key: VAPID_PUBLIC_KEY
+        sync: false
+      - key: VAPID_PRIVATE_KEY
+        sync: false
+      - key: VAPID_SUBJECT
+        sync: false

@@ -17,6 +17,9 @@ for (const f of process.env.NODE_ENV === 'test' ? ['.env.test', '.env'] : ['.env
 
 const schema = z.object({
   NODE_ENV: z.enum(['development', 'test', 'production']).default('development'),
+  // essai : hébergement de démonstration en ligne (HTTPS, vrais e-mails) où les paiements restent simulés
+  // ou en bac à sable Fapshi. Vide : mise en ligne réelle, tous les contrôles de production s'appliquent.
+  DEPLOIEMENT: z.enum(['', 'essai']).default(''),
   PORT: z.coerce.number().int().default(4000),
   HOST: z.string().default('127.0.0.1'),
   DATABASE_URL: z.string().min(1),
@@ -37,8 +40,10 @@ const schema = z.object({
   FAPSHI_API_USER: z.string().default(''),
   FAPSHI_API_KEY: z.string().default(''),
   FAPSHI_WEBHOOK_SECRET: z.string().default(''),
-  // console : e-mails affichés dans le terminal ; smtp : envoi réel par nodemailer
-  MAIL_MODE: z.enum(['console', 'smtp']).default('console'),
+  // console : e-mails affichés dans le terminal ; smtp : envoi réel par nodemailer ;
+  // brevo : envoi par l'API HTTP de Brevo, pour les hébergeurs qui bloquent le SMTP sortant (Render gratuit)
+  MAIL_MODE: z.enum(['console', 'smtp', 'brevo']).default('console'),
+  BREVO_API_KEY: z.string().default(''),
   SMTP_HOST: z.string().default(''),
   SMTP_PORT: z.coerce.number().int().default(587),
   SMTP_USER: z.string().default(''),
@@ -67,10 +72,13 @@ function load(): Env {
     if (e.JWT_ACCESS_SECRET.length < 32 || /change-me/.test(e.JWT_ACCESS_SECRET)) weak.push('JWT_ACCESS_SECRET')
     if (e.OTP_PEPPER.length < 32 || /change-me/.test(e.OTP_PEPPER)) weak.push('OTP_PEPPER')
     if (e.JWT_ACCESS_SECRET === e.OTP_PEPPER) weak.push('JWT_ACCESS_SECRET = OTP_PEPPER')
-    if (e.PAYMENT_PROVIDER !== 'fapshi') weak.push('PAYMENT_PROVIDER=simulator en production')
-    if (/sandbox/.test(e.FAPSHI_BASE_URL) || /^FAK_TEST/.test(e.FAPSHI_API_KEY)) weak.push('Fapshi en bac à sable')
-    if (e.FAPSHI_WEBHOOK_SECRET.length < 16) weak.push('FAPSHI_WEBHOOK_SECRET')
-    if (e.MAIL_MODE !== 'smtp') weak.push('MAIL_MODE=console en production (aucun e-mail ne partirait)')
+    // En essai, aucun argent réel ne circule : simulateur et bac à sable sont admis, le reste ne change pas.
+    if (e.DEPLOIEMENT !== 'essai') {
+      if (e.PAYMENT_PROVIDER !== 'fapshi') weak.push('PAYMENT_PROVIDER=simulator en production')
+      if (/sandbox/.test(e.FAPSHI_BASE_URL) || /^FAK_TEST/.test(e.FAPSHI_API_KEY)) weak.push('Fapshi en bac à sable')
+    }
+    if (e.PAYMENT_PROVIDER === 'fapshi' && e.FAPSHI_WEBHOOK_SECRET.length < 16) weak.push('FAPSHI_WEBHOOK_SECRET')
+    if (e.MAIL_MODE === 'console') weak.push('MAIL_MODE=console en production (aucun e-mail ne partirait)')
     if (!e.VAPID_PUBLIC_KEY || !e.VAPID_PRIVATE_KEY) weak.push('VAPID_PUBLIC_KEY / VAPID_PRIVATE_KEY (notifications push de l’application)')
     if (weak.length) {
       console.error('Refus de démarrer en production — secrets absents, faibles ou mode bac à sable :', weak.join(', '))
@@ -79,6 +87,10 @@ function load(): Env {
   }
   if (e.PAYMENT_PROVIDER === 'fapshi' && (!e.FAPSHI_API_USER || !e.FAPSHI_API_KEY)) {
     console.error('PAYMENT_PROVIDER=fapshi : FAPSHI_API_USER et FAPSHI_API_KEY sont obligatoires.')
+    process.exit(1)
+  }
+  if (e.MAIL_MODE === 'brevo' && !e.BREVO_API_KEY) {
+    console.error('MAIL_MODE=brevo : BREVO_API_KEY est obligatoire.')
     process.exit(1)
   }
   if (e.MAIL_MODE === 'smtp' && !e.SMTP_HOST) {
